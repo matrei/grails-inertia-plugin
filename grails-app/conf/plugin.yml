@@ -1,0 +1,3 @@
+inertia:
+  manifest:
+    location: 'classpath:public/dist/manifest.json'
