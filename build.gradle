@@ -131,13 +131,9 @@ ext.isReleaseVersion = !project.version.endsWith('-SNAPSHOT')
 
 afterEvaluate {
     signing {
-        required { isReleaseVersion && gradle.taskGraph.hasTask('publish') }
+        required { isReleaseVersion }
         sign publishing.publications.maven
     }
-}
-
-tasks.withType(Sign) {
-    onlyIf { isReleaseVersion }
 }
 
 nexusPublishing {
@@ -158,8 +154,8 @@ nexusPublishing {
 task snapshotVersion {
     doLast {
         if (!project.version.endsWith('-SNAPSHOT')) {
-            ant.propertyfile(file: "gradle.properties") {
-                entry(key: "version", value: "${project.version}-SNAPSHOT")
+            ant.propertyfile(file: 'gradle.properties') {
+                entry(key: 'version', value: "${project.version}-SNAPSHOT")
             }
         }
     }
