@@ -134,12 +134,6 @@ afterEvaluate {
     }
 }
 
-tasks.withType(Sign) {
-    onlyIf {
-        project.hasProperty('release')
-    }
-}
-
 nexusPublishing {
     repositories {
         sonatype {
