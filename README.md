@@ -20,7 +20,7 @@ Add the plugin dependency to the project:
 
 dependencies {
     //...
-    implementation "io.github.matrei:grails-inertia-plugin:1.0"
+    implementation "io.github.matrei:grails-inertia-plugin:1.0.0"
     //...
 }
 ```
