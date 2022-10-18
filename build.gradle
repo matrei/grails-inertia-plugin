@@ -39,6 +39,9 @@ java {
     withJavadocJar()
 }
 
+bootJar.enabled = false
+jar.enabled = true
+
 dependencies {
     developmentOnly 'org.springframework.boot:spring-boot-devtools'
     compileOnly 'io.micronaut:micronaut-inject-groovy'
@@ -86,7 +89,7 @@ publishing {
             artifactId = 'grails-inertia-plugin'
             version = project.version
 
-            from components.java
+            artifact jar
             artifact sourcesJar
             artifact javadocJar
 
@@ -151,7 +154,7 @@ nexusPublishing {
 
 task snapshotVersion {
     doLast {
-        if(isReleaseVersion) {
+        if (!project.version.endsWith('-SNAPSHOT')) {
             ant.propertyfile(file: "gradle.properties") {
                 entry(key: "version", value: "${project.version}-SNAPSHOT")
             }
