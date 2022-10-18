@@ -34,6 +34,11 @@ configurations {
     }
 }
 
+java {
+    withSourcesJar()
+    withJavadocJar()
+}
+
 dependencies {
     developmentOnly 'org.springframework.boot:spring-boot-devtools'
     compileOnly 'io.micronaut:micronaut-inject-groovy'
@@ -73,9 +78,6 @@ tasks.withType(GroovyCompile) {
 tasks.withType(Test) {
     useJUnitPlatform()
 }
-
-// enable if you wish to package this plugin as a standalone application
-bootJar.enabled = false
 
 publishing {
     publications {
