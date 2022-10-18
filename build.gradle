@@ -40,7 +40,10 @@ java {
 }
 
 bootJar.enabled = false
-jar.enabled = true
+jar {
+    enabled = true
+    classifier = ''
+}
 
 dependencies {
     developmentOnly 'org.springframework.boot:spring-boot-devtools'
