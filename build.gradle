@@ -1,19 +1,27 @@
 buildscript {
     repositories {
         maven { url 'https://repo.grails.org/grails/core' }
+        maven { url "https://plugins.gradle.org/m2" }
     }
     dependencies {
         classpath "org.grails:grails-gradle-plugin:$grailsGradlePluginVersion"
+        classpath "io.github.gradle-nexus:publish-plugin:1.1.0"
     }
 }
 
-version "$projectVersion"
+version "$version"
 group 'io.github.matrei'
 
 apply plugin: 'eclipse'
 apply plugin: 'idea'
 apply plugin: 'org.grails.grails-plugin'
 apply plugin: 'org.grails.grails-gsp'
+apply plugin: 'maven-publish'
+apply plugin: 'signing'
+apply plugin: 'io.github.gradle-nexus.publish-plugin'
+
+sourceCompatibility = "1.8"
+targetCompatibility = "1.8"
 
 repositories {
     maven { url "https://repo.grails.org/grails/core" }
@@ -68,3 +76,83 @@ tasks.withType(Test) {
 
 // enable if you wish to package this plugin as a standalone application
 bootJar.enabled = false
+
+publishing {
+    publications {
+        maven(MavenPublication) {
+            groupId = project.group
+            artifactId = 'grails-inertia-plugin'
+            version = project.version
+
+            from components.java
+            artifact sourcesJar
+            artifact javadocJar
+
+            pom {
+                name = 'Grails Adapter for Inertia.js'
+                description = 'Grails plugin with server-side adapter for Inertia.js'
+                url = 'https://github.com/matrei/grails-inertia-plugin'
+                licenses {
+                    license {
+                        name = 'The Apache License, Version 2.0'
+                        url = 'https://www.apache.org/licenses/LICENSE-2.0.txt'
+                    }
+                }
+                developers {
+                    developer {
+                        id = 'matrei'
+                        name = 'Mattias Reichel'
+                        email = 'mattias.reichel@gmail.com'
+                    }
+                }
+                scm {
+                    connection = 'scm:git:git://github.com/matrei/grails-inertia-plugin.git'
+                    developerConnection = 'scm:git:ssh://github.com:matrei/grails-inertia-plugin.git'
+                    url = 'https://github.com/matrei/grails-inertia-plugin'
+                }
+            }
+        }
+    }
+}
+
+ext."signing.keyId" = project.findProperty('signing.keyId') ?: System.getenv('SIGNING_KEY_ID')
+ext."signing.password" = project.findProperty('signing.password') ?: System.getenv('SIGNING_PASSPHRASE')
+ext."signing.secretKeyRingFile" = project.findProperty('signing.secretKeyRingFile') ?: (System.getenv('GITHUB_WORKSPACE') ? "${System.getenv('GITHUB_WORKSPACE')}/secring.gpg" : "${System.getProperty('user.home')}/.gnupg/secring.gpg")
+
+ext.isReleaseVersion = !version.endsWith("SNAPSHOT")
+
+afterEvaluate {
+    signing {
+        required { isReleaseVersion && gradle.taskGraph.hasTask('publish') }
+        sign publishing.publications.maven
+    }
+}
+
+tasks.withType(Sign) {
+    onlyIf { isReleaseVersion }
+}
+
+nexusPublishing {
+    repositories {
+        sonatype {
+            def ossUser = System.getenv("SONATYPE_USERNAME") ?: project.findProperty('sonatypeOssUsername') ?: ''
+            def ossPass = System.getenv("SONATYPE_PASSWORD") ?: project.findProperty("sonatypeOssPassword") ?: ''
+            def ossStagingProfileId = System.getenv("SONATYPE_STAGING_PROFILE_ID") ?: project.findProperty("sonatypeOssStagingProfileIdInertia") ?: ''
+            nexusUrl = uri("https://s01.oss.sonatype.org/service/local/")
+            snapshotRepositoryUrl = uri("https://s01.oss.sonatype.org/content/repositories/snapshots/")
+            username = ossUser
+            password = ossPass
+            stagingProfileId = ossStagingProfileId
+        }
+    }
+}
+
+task snapshotVersion {
+    doLast {
+        if(isReleaseVersion) {
+            ant.propertyfile(file: "gradle.properties") {
+                entry(key: "version", value: "${project.version}-SNAPSHOT")
+            }
+        }
+    }
+}
