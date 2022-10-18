@@ -92,7 +92,7 @@ publishing {
             artifactId = 'grails-inertia-plugin'
             version = project.version
 
-            artifact jar
+            from components.java
             artifact sourcesJar
             artifact javadocJar
 
