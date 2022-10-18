@@ -87,9 +87,6 @@ publishing {
             version = project.version
 
             from components.java
-            artifact sourcesJar
-            artifact javadocJar
-
             pom {
                 name = 'Grails Adapter for Inertia.js'
                 description = 'Grails plugin with server-side adapter for Inertia.js'
