@@ -72,12 +72,6 @@ tasks.withType(Test) {
     useJUnitPlatform()
 }
 
-bootJar.enabled = false
-jar {
-    enabled = true
-    classifier = ''
-}
-
 java {
     withSourcesJar()
     withJavadocJar()
@@ -88,8 +82,6 @@ publishing {
         maven(MavenPublication) {
 
             from components.java
-            artifact sourcesJar
-            artifact javadocJar
 
             // The generateMetadataFileForMavenPublication fails without the following versionMapping block
             versionMapping {
