@@ -34,6 +34,9 @@ configurations {
 }
 
 dependencies {
+
+    implementation(platform("org.grails:grails-bom:$grailsVersion"))
+
     developmentOnly 'org.springframework.boot:spring-boot-devtools'
     compileOnly 'io.micronaut:micronaut-inject-groovy'
     console 'org.grails:grails-console'
@@ -88,16 +91,6 @@ publishing {
         maven(MavenPublication) {
 
             from components.java
-
-            // The generateMetadataFileForMavenPublication fails without the following versionMapping block
-            versionMapping {
-                usage('java-api') {
-                    fromResolutionOf('runtimeClasspath')
-                }
-                usage('java-runtime') {
-                    fromResolutionResult()
-                }
-            }
 
             pom {
                 name = 'Grails Adapter for Inertia.js'
