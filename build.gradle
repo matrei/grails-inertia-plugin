@@ -72,6 +72,12 @@ tasks.withType(Test) {
     useJUnitPlatform()
 }
 
+bootJar.enabled = false
+jar {
+    enabled = true
+    classifier = ''
+}
+
 java {
     withSourcesJar()
     withJavadocJar()
@@ -131,10 +137,6 @@ afterEvaluate {
         required { isReleaseVersion && gradle.taskGraph.hasTask('publish') }
         sign publishing.publications.maven
     }
-}
-
-tasks.withType(Sign) {
-    onlyIf { isReleaseVersion }
 }
 
 nexusPublishing {
