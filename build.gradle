@@ -9,7 +9,6 @@ buildscript {
     }
 }
 
-version "$version"
 group 'io.github.matrei'
 
 apply plugin: 'eclipse'
@@ -32,17 +31,6 @@ configurations {
     runtimeClasspath {
         extendsFrom developmentOnly
     }
-}
-
-java {
-    withSourcesJar()
-    withJavadocJar()
-}
-
-bootJar.enabled = false
-jar {
-    enabled = true
-    classifier = ''
 }
 
 dependencies {
@@ -72,7 +60,6 @@ dependencies {
     testImplementation 'org.grails:grails-gorm-testing-support'
     testImplementation 'org.mockito:mockito-core'
     testImplementation 'org.grails:grails-web-testing-support'
-
 }
 
 tasks.withType(GroovyCompile) {
@@ -85,16 +72,34 @@ tasks.withType(Test) {
     useJUnitPlatform()
 }
 
+bootJar.enabled = false
+jar {
+    enabled = true
+    classifier = ''
+}
+
+java {
+    withSourcesJar()
+    withJavadocJar()
+}
+
 publishing {
     publications {
         maven(MavenPublication) {
-            groupId = project.group
-            artifactId = 'grails-inertia-plugin'
-            version = project.version
 
             from components.java
             artifact sourcesJar
             artifact javadocJar
+
+            // The generateMetadataFileForMavenPublication fails without the following versionMapping block
+            versionMapping {
+                usage('java-api') {
+                    fromResolutionOf('runtimeClasspath')
+                }
+                usage('java-runtime') {
+                    fromResolutionResult()
+                }
+            }
 
             pom {
                 name = 'Grails Adapter for Inertia.js'
@@ -127,11 +132,17 @@ ext."signing.keyId" = System.getenv('SIGNING_KEY_ID') ?: project.findProperty('s
 ext."signing.password" = System.getenv('SIGNING_PASSPHRASE') ?: project.findProperty('signing.password')
 ext."signing.secretKeyRingFile" = project.findProperty('signing.secretKeyRingFile') ?: (System.getenv('GITHUB_WORKSPACE') ? "${System.getenv('GITHUB_WORKSPACE')}/secring.gpg" : "${System.getProperty('user.home')}/.gnupg/secring.gpg")
 
+ext.isReleaseVersion = !version.endsWith('-SNAPSHOT')
+
 afterEvaluate {
     signing {
-        required { project.hasProperty('release') && gradle.taskGraph.hasTask('publish') }
+        required { isReleaseVersion && gradle.taskGraph.hasTask('publish') }
         sign publishing.publications.maven
     }
+}
+
+tasks.withType(Sign) {
+    onlyIf { isReleaseVersion }
 }
 
 nexusPublishing {
@@ -151,7 +162,7 @@ nexusPublishing {
 
 task snapshotVersion {
     doLast {
-        if (!project.version.endsWith('-SNAPSHOT')) {
+        if (isReleaseVersion) {
             ant.propertyfile(file: 'gradle.properties') {
                 entry(key: 'version', value: "${project.version}-SNAPSHOT")
             }
