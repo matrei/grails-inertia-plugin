@@ -1,5 +1,7 @@
 grails:
     profile: web-plugin
+    codegen:
+        defaultPackage: grails.plugin.inertia
 info:
     app:
         name: '@info.app.name@'
