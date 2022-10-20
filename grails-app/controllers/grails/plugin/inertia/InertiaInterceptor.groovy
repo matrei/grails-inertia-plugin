@@ -67,7 +67,7 @@ class InertiaInterceptor implements GrailsConfigurationAware {
             synchronized(this) {
                 if(manifestObject == null) {
                     def manifestResource= Holders.grailsApplication.mainContext.getResource manifestLocation
-                    manifestObject = new JsonSlurper().parse manifestResource.file
+                    manifestObject = new JsonSlurper().parse manifestResource.inputStream
                     manifestHash = Objects.hashCode(manifestObject) as String
                 }
             }
