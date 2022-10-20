@@ -20,7 +20,8 @@ Add the plugin dependency to the project:
 
 dependencies {
     //...
-    implementation "io.github.matrei:grails-inertia-plugin:1.0.0"
+    // Replace $inertiaPluginVersion with a suitable release version for your project, or define it in ~/myapp/gradle.properties
+    implementation "io.github.matrei:grails-inertia-plugin:$inertiaPluginVersion"
     //...
 }
 ```
