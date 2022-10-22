@@ -8,6 +8,9 @@ Inertia.js lets you, in its own words, *“quickly build modern single-page Reac
 
 Using Inertia.js allows using your favorite MVC server-side framework (Grails obviously) with your favorite client-side SPA framework - no need to build a separate API.
 
+## Demo
+[A port (using this plugin)](https://github.com/matrei/pingcrm-grails) of the [original Laravel/PHP Inertia.js Ping CRM demo](https://github.com/inertiajs/pingcrm) is available. 
+
 ## Installation
 If you don't have an application already:
 ```shell
