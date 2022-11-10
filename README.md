@@ -14,12 +14,13 @@ Using Inertia.js allows using your favorite MVC server-side framework (Grails ob
 ## Installation
 If you don't have an application already:
 ```shell
-me@my:~$ grails create-app myapp
+$ grails create-app myapp
+$ cd myapp
 ```
 
 Add the plugin dependency to the project:
 ```groovy
-// ~/myapp/build.gradle
+// myapp/build.gradle
 
 dependencies {
     //...
@@ -30,7 +31,7 @@ dependencies {
 ```
 To add the client dependencies and workflow to a Grails project, create the following files **(Vue 3 example)**:
 ```javascript
-// ~/myapp/package.json (versions @ 2022-10-11) 
+// myapp/package.json (versions @ 2022-10-11) 
 ```
 ```json
 {
@@ -53,7 +54,7 @@ To add the client dependencies and workflow to a Grails project, create the foll
 }
 ```
 ```javascript
-// ~/myapp/vite.config.js
+// myapp/vite.config.js
 
 import { fileURLToPath, URL } from 'node:url'
 
@@ -86,7 +87,7 @@ export default defineConfig(({ command }) => ({
 }))
 ```
 ```javascript
-// ~/myapp/src/main/javascript/main.js
+// myapp/src/main/javascript/main.js
 
 import { createApp, h } from 'vue'
 import { createInertiaApp } from '@inertiajs/inertia-vue3'
@@ -105,20 +106,20 @@ createInertiaApp({
 ```
 It can be a good idea to add the following entries to your .gitignore
 ```gitignore
-# ~/myapp/.gitignore
+# myapp/.gitignore
 # ...
 node_modules
 src/main/resources/public/dist
 ```
 And run:
 ```shell
-me@my:~/myapp$ npm install
+myapp/ $ npm install
 ```
 
 ## Usage
 In your controllers, you can now select which JavaScript Page Component to render and pass the values of the props to it.
 ```groovy
-// grails-app/controllers/myapp/BookController.groovy
+// myapp/grails-app/controllers/myapp/BookController.groovy
 
 package myapp
 
@@ -134,7 +135,7 @@ class BookController {
 ```
 Here is an example Vue 3 Single File Component to that will render the books as a list.
 ```vue
-<!-- src/main/javascript/Pages/Books/Index.vue -->
+<!-- myapp/src/main/javascript/Pages/Books/Index.vue -->
 
 <script setup>
 const props = defineProps({
@@ -149,17 +150,17 @@ const props = defineProps({
 ```
 For development with [Hot Module Replacement](https://vitejs.dev/guide/features.html#hot-module-replacement) of the application run: (in separate terminals)
 ```shell
-me@my:~/myapp$ npm run serve
+myapp/ $ npm run serve
 ```
 ```shell
-me@my:~/myapp$ ./gradlew bootRun
+myapp/ $ ./gradlew bootRun
 ```
 For production or test, first build production version of JavaScript app:
 ```shell
-me@my:~/myapp$ npm run build
+myapp/ $ npm run build
 ```
 and then run whatever you want to do:
 ```shell
-me@my:~/myapp$ ./gradlew integrationTest
-me@my:~/myapp$ ./gradlew bootJar
+myapp/ $ ./gradlew integrationTest
+myapp/ $ ./gradlew bootJar
 ```
