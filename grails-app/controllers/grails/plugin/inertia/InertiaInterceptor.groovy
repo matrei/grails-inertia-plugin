@@ -79,12 +79,8 @@ class InertiaInterceptor implements GrailsConfigurationAware {
         loadManifest()
     }
 
-    private static boolean isDevelopmentMode() {
-        !(Environment.current == Environment.PRODUCTION || Environment.current == Environment.TEST)
-    }
-
     private static boolean getManifestShouldBeUsed() {
-        !developmentMode
+        Environment.current != Environment.DEVELOPMENT
     }
 
     private static boolean isGetRequest() {
