@@ -36,7 +36,7 @@ class InertiaInterceptorSpec extends Specification implements InterceptorUnitTes
         when: 'an inertia request with an outdated asset version is handled'
         request.method = method
         request.addHeader INERTIA_HEADER_NAME, INERTIA_HEADER_VALUE
-        request.addHeader INERTIA_HEADER_VERSION, '-1'
+        request.addHeader INERTIA_HEADER_VERSION, 'a value that is certain to be deemed as stale'
         request.setForwardURI location
         withInterceptors(controller: 'test') { controller[action]() }
 

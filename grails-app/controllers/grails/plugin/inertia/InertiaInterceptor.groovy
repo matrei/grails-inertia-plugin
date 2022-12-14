@@ -21,7 +21,7 @@ import static Inertia.staleAssetsResponse
 class InertiaInterceptor implements GrailsConfigurationAware {
 
     String manifestLocation
-    String manifestHash = '0'
+    String manifestHash = 'not yet calculated'
     private volatile Object manifestObject
 
     InertiaInterceptor() {
