@@ -13,9 +13,9 @@ import static org.grails.web.util.WebUtils.retrieveGrailsWebRequest as webReques
 @CompileStatic
 class Inertia {
 
-    static final String INERTIA_SHARED_DATA = 'se.originalab.grails.inertia.InertiaSharedData'
-    static final String INERTIA_ATTRIBUTE_NAME = 'se.originalab.grails.inertia.InertiaRequest'
-    static final String INERTIA_ATTRIBUTE_VERSION = 'se.originalab.grails.inertia.InertiaManifestVersion'
+    static final String INERTIA_SHARED_DATA = 'grails.plugin.inertia.InertiaSharedData'
+    static final String INERTIA_ATTRIBUTE_NAME = 'grails.plugin.inertia.InertiaRequest'
+    static final String INERTIA_ATTRIBUTE_VERSION = 'grails.plugin.inertia.InertiaManifestVersion'
     static final String INERTIA_ATTRIBUTE_MANIFEST = 'inertiaManifest'
     static final String INERTIA_HEADER_NAME = 'X-Inertia'
     static final String INERTIA_HEADER_VALUE = 'true'
