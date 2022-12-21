@@ -17,7 +17,6 @@
         <script type="module" src="http://localhost:3000/src/main/javascript/main.js"></script>
     </g:else>
 </head>
-
 <body>
 <inertia:app>${inertiaPage}</inertia:app>
 </body>

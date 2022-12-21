@@ -1,0 +1,9 @@
+import grails.plugin.inertia.InertiaPage
+
+model { InertiaPage inertiaPage }
+json {
+    component inertiaPage.component
+    props inertiaPage.props
+    url inertiaPage.url
+    version inertiaPage.version
+}
