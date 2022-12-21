@@ -1,17 +1,11 @@
 package grails.plugin.inertia
 
+import grails.plugin.inertia.controllers.TestController
 import grails.testing.web.interceptor.InterceptorUnitTest
 import spock.lang.Specification
-import grails.plugin.inertia.controllers.TestController
-
-import static grails.plugin.inertia.Inertia.INERTIA_HEADER_NAME
-import static grails.plugin.inertia.Inertia.INERTIA_HEADER_LOCATION
-import static grails.plugin.inertia.Inertia.INERTIA_HEADER_VALUE
-import static grails.plugin.inertia.Inertia.INERTIA_HEADER_VERSION
 
 import static javax.servlet.http.HttpServletResponse.SC_CONFLICT
 import static javax.servlet.http.HttpServletResponse.SC_OK
-
 
 class InertiaInterceptorSpec extends Specification implements InterceptorUnitTest<InertiaInterceptor> {
 
@@ -35,13 +29,13 @@ class InertiaInterceptorSpec extends Specification implements InterceptorUnitTes
 
         when: 'an inertia request with an outdated asset version is handled'
         request.method = method
-        request.addHeader INERTIA_HEADER_NAME, INERTIA_HEADER_VALUE
-        request.addHeader INERTIA_HEADER_VERSION, 'a value that is certain to be deemed as stale'
+        request.addHeader 'X-Inertia', true
+        request.addHeader 'X-Inertia-Version', 'a value that is certain to be deemed as stale'
         request.setForwardURI location
         withInterceptors(controller: 'test') { controller[action]() }
 
         then: 'the interceptor handles the request appropriately'
-        response.getHeader(INERTIA_HEADER_LOCATION) == location
+        response.getHeader('X-Inertia-Location') == location
         response.status == status
 
         where:
@@ -56,5 +50,34 @@ class InertiaInterceptorSpec extends Specification implements InterceptorUnitTes
         'index'   | 'OPTIONS' | null       | SC_OK
         'index'   | 'TRACE'   | null       | SC_OK
         'index'   | 'PATCH'   | null       | SC_OK
+    }
+
+    void 'the http headers are correct for html responses'() {
+
+        given: 'a controller'
+        def controller = (TestController) mockController(TestController)
+
+        when: 'a request for html is processed'
+        request.method = 'GET'
+        withInterceptors(controller: 'test') { controller.index() }
+
+        then: 'X-Inertia is one of the Vary header values'
+        'text/html;charset=UTF-8'.equalsIgnoreCase response.contentType
+        'X-Inertia' in response.getHeaders('Vary')
+    }
+
+    def 'the http headers are correct for json responses'() {
+        given: 'a controller'
+        def controller = (TestController) mockController(TestController)
+
+        when: 'a request for json is processed'
+        request.method = 'GET'
+        request.addHeader 'X-Inertia', true
+        request.addHeader 'X-Inertia-Version', '0'
+        withInterceptors(controller: 'test') { controller.index() }
+
+        then: 'X-Inertia is one of the Vary header values'
+        'application/json;charset=UTF-8'.equalsIgnoreCase response.contentType
+        'X-Inertia' in response.getHeaders('Vary')
     }
 }

@@ -7,6 +7,8 @@ import grails.util.Holders
 import groovy.json.JsonSlurper
 import groovy.transform.CompileStatic
 
+import static grails.web.http.HttpHeaders.VARY
+import static javax.servlet.http.HttpServletResponse.SC_CONFLICT
 import static javax.servlet.http.HttpServletResponse.SC_MOVED_TEMPORARILY
 import static javax.servlet.http.HttpServletResponse.SC_SEE_OTHER
 import static org.grails.web.util.WebUtils.retrieveGrailsWebRequest as webRequest
@@ -24,13 +26,22 @@ class InertiaInterceptor implements GrailsConfigurationAware {
     String manifestHash = 'not yet calculated'
     private volatile Object manifestObject
 
-    InertiaInterceptor() {
-        matchAll()
-    }
+    static final String INERTIA_HEADER_VERSION = 'X-Inertia-Version'
+    static final String INERTIA_HEADER_NAME = 'X-Inertia'
+    static final String INERTIA_HEADER_VALUE = 'true'
+
+    private static final String CONTENT_TYPE_JSON = 'application/json;charset=utf-8'
+    private static final String CONTENT_TYPE_HTML = 'text/html;charset=utf-8'
+    private static final String GET = 'GET'
+
+    InertiaInterceptor() { matchAll() }
 
     boolean before() {
 
         request.setAttribute INERTIA_ATTRIBUTE_VERSION, manifestHash
+
+        setContentType()
+        setHeaders()
 
         // Check for asset version changes on GET requests
         if(inertiaRequest && getRequest && manifestShouldBeUsed && assetsOutOfDate) {
@@ -59,6 +70,13 @@ class InertiaInterceptor implements GrailsConfigurationAware {
         }
 
         true
+    }
+
+
+    private void setContentType() { response.contentType = isInertiaRequest ? CONTENT_TYPE_JSON : CONTENT_TYPE_HTML }
+    private void setHeaders() {
+        if(isInertiaRequest) header INERTIA_HEADER_NAME, INERTIA_HEADER_VALUE
+        response.addHeader VARY, INERTIA_HEADER_NAME
     }
 
     private Object loadManifest() {
