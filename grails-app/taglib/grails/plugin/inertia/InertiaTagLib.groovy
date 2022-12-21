@@ -1,6 +1,6 @@
 package grails.plugin.inertia
 
-import grails.web.mapping.UrlMapping
+//import grails.web.mapping.UrlMapping
 
 class InertiaTagLib {
 
@@ -14,6 +14,7 @@ class InertiaTagLib {
         out << "<$tagName id=\"$id\" data-page=\"${body()}\"></$tagName>"
     }
 
+/*
     def routes = { attrs, body ->
         //grailsApplication.controllerClasses
         out << '''
@@ -22,4 +23,5 @@ class InertiaTagLib {
        </script>
         '''
     }
+*/
 }
