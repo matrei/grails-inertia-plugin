@@ -6,9 +6,7 @@ import grails.plugins.Plugin
 class InertiaGrailsPlugin extends Plugin {
 
     def grailsVersion = "5.0.1 > *"
-    def pluginExcludes = [
-        '**/testing/**'
-    ]
+    def pluginExcludes = []
     def title = "Grails Adapter for Inertia.js"
     def author = "Mattias Reichel"
     def authorEmail = "mattias.reichel@gmail.com"
