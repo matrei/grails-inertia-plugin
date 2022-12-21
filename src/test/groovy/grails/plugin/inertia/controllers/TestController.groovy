@@ -6,10 +6,10 @@ import grails.artefact.Artefact
 class TestController {
 
     def index() {
-        render 'index'
+        renderInertia 'index', [hello: 'world']
     }
 
     def testing() {
-        render 'testing'
+        renderInertia 'testing'
     }
 }
