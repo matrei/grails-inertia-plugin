@@ -1,7 +1,7 @@
 buildscript {
     repositories {
-        maven { url 'https://repo.grails.org/grails/core' }
         maven { url "https://plugins.gradle.org/m2" }
+        maven { url 'https://repo.grails.org/grails/core' }
     }
     dependencies {
         classpath "org.grails:grails-gradle-plugin:$grailsGradlePluginVersion"
@@ -82,7 +82,7 @@ compileGsonViews {
 bootJar.enabled = false
 jar {
     enabled = true
-    archiveClassifier = ''
+    archiveClassifier.set('')
 }
 
 java {
