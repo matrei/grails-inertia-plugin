@@ -6,6 +6,7 @@ buildscript {
     dependencies {
         classpath "org.grails:grails-gradle-plugin:$grailsGradlePluginVersion"
         classpath "io.github.gradle-nexus:publish-plugin:1.1.0"
+        classpath "org.grails.plugins:views-gradle:2.3.2"
     }
 }
 
@@ -15,6 +16,7 @@ apply plugin: 'eclipse'
 apply plugin: 'idea'
 apply plugin: 'org.grails.grails-plugin'
 apply plugin: 'org.grails.grails-gsp'
+apply plugin: 'org.grails.plugins.views-json'
 apply plugin: 'maven-publish'
 apply plugin: 'signing'
 
@@ -54,6 +56,7 @@ dependencies {
     implementation 'org.grails.plugins:async'
     implementation 'org.grails.plugins:scaffolding'
     implementation 'org.grails.plugins:gsp'
+    implementation 'org.grails.plugins:views-json'
     profile 'org.grails.profiles:web-plugin'
     testImplementation 'io.micronaut:micronaut-inject-groovy'
     testImplementation 'org.grails:grails-gorm-testing-support'
@@ -71,10 +74,15 @@ tasks.withType(Test) {
     useJUnitPlatform()
 }
 
+compileGsonViews {
+    // This is needed for the gson view to be resolved from plugin
+    packageName = 'inertia'
+}
+
 bootJar.enabled = false
 jar {
     enabled = true
-    classifier = ''
+    archiveClassifier = ''
 }
 
 java {
