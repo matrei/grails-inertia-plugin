@@ -28,7 +28,7 @@ class InertiaInterceptor implements GrailsConfigurationAware {
     private static final String CONTENT_TYPE_JSON = 'application/json;charset=utf-8'
     private static final String CONTENT_TYPE_HTML = 'text/html;charset=utf-8'
 
-    InertiaInterceptor() { matchAll() }
+    InertiaInterceptor() { match controller: '*' }
 
     boolean before() {
 

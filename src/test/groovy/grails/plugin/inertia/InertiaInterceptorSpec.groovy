@@ -13,13 +13,22 @@ class InertiaInterceptorSpec extends Specification implements InterceptorUnitTes
         { it.inertia.manifest.location = 'classpath:location/of/the/manifest.json' } as Closure
     }
 
-    void 'the inertia interceptor matches all requests'() {
+    void 'the inertia interceptor matches all controller requests'() {
 
         when: 'a request comes in for any controller action'
         withRequest controller: 'any'
 
         then: 'the interceptor does match'
         interceptor.doesMatch()
+    }
+
+    void 'the inertia interceptor does not match requests for assets'() {
+
+        when: 'a request comes in for an asset'
+        withRequest uri: '/static/dist/main.js'
+
+        then: 'the interceptor does not match'
+        !interceptor.doesMatch()
     }
 
     void 'inertia #method requests from stale assets returns appropriately'(String action, String method, String location, int status) {
