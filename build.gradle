@@ -52,6 +52,9 @@ compileGsonViews {
     // This is needed for the gson view to be resolved from plugin
     packageName = 'inertia'
 }
+tasks.withType(Groovydoc).configureEach {
+    dependsOn compileGsonViews
+}
 
 bootJar.enabled = false
 jar {
