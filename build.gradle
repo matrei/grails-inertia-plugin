@@ -20,57 +20,31 @@ apply plugin: 'org.grails.plugins.views-json'
 apply plugin: 'maven-publish'
 apply plugin: 'signing'
 
-sourceCompatibility = "1.8"
-targetCompatibility = "1.8"
+sourceCompatibility = JavaVersion.toVersion 8
+targetCompatibility = JavaVersion.toVersion 8
 
 repositories {
     maven { url "https://repo.grails.org/grails/core" }
 }
 
-configurations {
-    developmentOnly
-    runtimeClasspath {
-        extendsFrom developmentOnly
-    }
-}
-
 dependencies {
-    developmentOnly 'org.springframework.boot:spring-boot-devtools'
     compileOnly 'io.micronaut:micronaut-inject-groovy'
-    console 'org.grails:grails-console'
-    implementation 'org.springframework.boot:spring-boot-starter-logging'
-    implementation 'org.springframework.boot:spring-boot-starter-validation'
-    implementation 'org.springframework.boot:spring-boot-autoconfigure'
-    implementation 'org.grails:grails-core'
-    implementation 'org.springframework.boot:spring-boot-starter-actuator'
-    implementation 'org.springframework.boot:spring-boot-starter-tomcat'
-    implementation 'org.grails:grails-web-boot'
     implementation 'org.grails:grails-logging'
-    implementation 'org.grails:grails-plugin-rest'
-    implementation 'org.grails:grails-plugin-databinding'
-    implementation 'org.grails:grails-plugin-i18n'
-    implementation 'org.grails:grails-plugin-services'
-    implementation 'org.grails:grails-plugin-url-mappings'
     implementation 'org.grails:grails-plugin-interceptors'
-    implementation 'org.grails.plugins:cache'
-    implementation 'org.grails.plugins:async'
-    implementation 'org.grails.plugins:scaffolding'
     implementation 'org.grails.plugins:gsp'
     implementation 'org.grails.plugins:views-json'
     profile 'org.grails.profiles:web-plugin'
     testImplementation 'io.micronaut:micronaut-inject-groovy'
-    testImplementation 'org.grails:grails-gorm-testing-support'
-    testImplementation 'org.mockito:mockito-core'
     testImplementation 'org.grails:grails-web-testing-support'
 }
 
-tasks.withType(GroovyCompile) {
+tasks.withType(GroovyCompile).configureEach {
     configure(groovyOptions) {
         forkOptions.jvmArgs = ['-Xmx1024m']
     }
 }
 
-tasks.withType(Test) {
+tasks.withType(Test).configureEach {
     useJUnitPlatform()
 }
 
@@ -164,7 +138,7 @@ if(project.hasProperty('release')) {
     }
 }
 
-task snapshotVersion {
+tasks.register('snapshotVersion') {
     doLast {
         if (isReleaseVersion) {
             ant.propertyfile(file: 'gradle.properties') {
