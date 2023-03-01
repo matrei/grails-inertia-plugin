@@ -21,7 +21,6 @@ cd myapp
 Add the plugin dependency to the project:
 ```groovy
 // myapp/build.gradle
-
 dependencies {
     //...
     // Replace $inertiaPluginVersion with a suitable release version for your project, or define it in ~/myapp/gradle.properties
@@ -31,7 +30,7 @@ dependencies {
 ```
 To add the client dependencies and workflow to a Grails project, create the following files **(Vue 3 example)**:
 ```javascript
-// myapp/package.json (versions @ 2022-10-11) 
+// myapp/package.json (versions @ 2023-03-01) 
 ```
 ```json
 {
@@ -43,21 +42,18 @@ To add the client dependencies and workflow to a Grails project, create the foll
     "build": "vite build"
   },
   "dependencies": {
-    "@inertiajs/inertia": "^0.11.0",
-    "@inertiajs/inertia-vue3": "^0.6.0",
-    "vue": "^3.2.40"
+    "@inertiajs/vue3": "^1.0.2",
+    "vue": "^3.2.47"
   },
   "devDependencies": {
-    "@vitejs/plugin-vue": "^3.1.2",
-    "vite": "^3.1.7"
+    "@vitejs/plugin-vue": "^4.0.0",
+    "vite": "^4.1.4"
   }
 }
 ```
 ```javascript
 // myapp/vite.config.js
-
 import { fileURLToPath, URL } from 'node:url'
-
 import { defineConfig } from 'vite'
 import vue from '@vitejs/plugin-vue'
 
@@ -88,9 +84,8 @@ export default defineConfig(({ command }) => ({
 ```
 ```javascript
 // myapp/src/main/javascript/main.js
-
 import { createApp, h } from 'vue'
-import { createInertiaApp } from '@inertiajs/inertia-vue3'
+import { createInertiaApp } from '@inertiajs/vue3'
 
 createInertiaApp({
   resolve: async (name) => {
@@ -120,7 +115,6 @@ npm install
 In your controllers, you can now select which JavaScript Page Component to render and pass the values of the props to it.
 ```groovy
 // myapp/grails-app/controllers/myapp/BookController.groovy
-
 package myapp
 
 class BookController {
@@ -136,11 +130,8 @@ class BookController {
 Here is an example Vue 3 Single File Component to that will render the books as a list.
 ```vue
 <!-- myapp/src/main/javascript/Pages/Books/Index.vue -->
-
 <script setup>
-const props = defineProps({
-  books: Array
-})
+defineProps({ books: Array })
 </script>
 <template>
   <ul>
