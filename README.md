@@ -14,8 +14,8 @@ Using Inertia.js allows using your favorite MVC server-side framework (Grails ob
 ## Installation
 If you don't have an application already:
 ```shell
-$ grails create-app myapp
-$ cd myapp
+grails create-app myapp
+cd myapp
 ```
 
 Add the plugin dependency to the project:
@@ -113,7 +113,7 @@ src/main/resources/public/dist
 ```
 And run:
 ```shell
-myapp/ $ npm install
+npm install
 ```
 
 ## Usage
@@ -150,17 +150,17 @@ const props = defineProps({
 ```
 For development with [Hot Module Replacement](https://vitejs.dev/guide/features.html#hot-module-replacement) of the application run: (in separate terminals)
 ```shell
-myapp/ $ npm run serve
+npm run serve
 ```
 ```shell
-myapp/ $ ./gradlew bootRun
+./gradlew bootRun
 ```
 For production or test, first build production version of JavaScript app:
 ```shell
-myapp/ $ npm run build
+npm run build
 ```
 and then run whatever you want to do:
 ```shell
-myapp/ $ ./gradlew integrationTest
-myapp/ $ ./gradlew bootJar
+./gradlew integrationTest
+./gradlew bootJar
 ```
