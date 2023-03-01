@@ -1,8 +1,10 @@
 package grails.plugin.inertia
 
 import grails.plugins.Plugin
+import groovy.transform.CompileStatic
 
 @SuppressWarnings("unused")
+@CompileStatic
 class InertiaGrailsPlugin extends Plugin {
 
     def grailsVersion = "5.0.1 > *"

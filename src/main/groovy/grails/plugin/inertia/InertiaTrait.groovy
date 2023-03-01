@@ -1,9 +1,11 @@
 package grails.plugin.inertia
 
 import grails.artefact.Enhances
+import groovy.transform.CompileStatic
 import org.springframework.web.servlet.ModelAndView
 
 @SuppressWarnings('unused')
+@CompileStatic
 @Enhances(['Controller','Interceptor'])
 trait InertiaTrait {
 
