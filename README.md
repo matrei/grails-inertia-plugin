@@ -42,12 +42,12 @@ To add the client dependencies and workflow to a Grails project, create the foll
     "build": "vite build"
   },
   "dependencies": {
-    "@inertiajs/vue3": "^1.0.2",
-    "vue": "^3.2.47"
+    "@inertiajs/vue3": "^1.0.9",
+    "vue": "^3.3.4"
   },
   "devDependencies": {
-    "@vitejs/plugin-vue": "^4.0.0",
-    "vite": "^4.1.4"
+    "@vitejs/plugin-vue": "^4.2.3",
+    "vite": "^4.3.9"
   }
 }
 ```
