@@ -7,7 +7,6 @@ plugins {
     id 'org.grails.grails-plugin'
     id 'maven-publish'
     id 'signing'
-    id 'application'
     id 'eclipse'
 }
 
