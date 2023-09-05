@@ -1,6 +1,7 @@
 import grails.plugin.inertia.InertiaPage
+import groovy.transform.Field
 
-model { InertiaPage inertiaPage }
+@Field InertiaPage inertiaPage
 json {
     component inertiaPage.component
     props inertiaPage.props

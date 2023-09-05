@@ -43,7 +43,7 @@ trait InertiaTrait {
      *
      * This will generate a 409 Conflict response, which includes the destination
      * URL in the X-Inertia-Location header. Client-side, Inertia will detect this
-     * response and automatically dow a window.location = url visit.
+     * response and automatically do a "window.location = url" visit.
      *
      * @param url The url to redirect to
      */
