@@ -15,7 +15,8 @@
  */
 package grails.plugin.inertia
 
-//import grails.web.mapping.UrlMapping
+import groovy.transform.CompileStatic
+import org.grails.encoder.CodecLookup
 
 /**
  * Taglib for including Inertia.js in a page.
@@ -23,16 +24,38 @@ package grails.plugin.inertia
  * @author Mattias Reichel
  * @since 1.0.0
  */
+@CompileStatic
 class InertiaTagLib {
 
+    CodecLookup codecLookup
 
-//    static defaultEncodeAs = [taglib:'text']
-    static namespace = 'inertia'
+    final static String namespace = 'inertia'
 
-    def app = { attrs, body ->
-        String tagName = attrs.tagName ?: 'div'
-        String id = attrs.id ?: 'app'
-        out << "<$tagName id=\"$id\" data-page=\"${body()}\"></$tagName>"
+    Closure app = { Map<String,Object> attrs, Closure body ->
+        if(ssrResponse) {
+            out << ssrResponse.body
+        } else {
+            String tagName = attrs.tagName ?: 'div'
+            String id = attrs.id ?: 'app'
+            def htmlEncoder = codecLookup.lookupEncoder('HTML')
+            out << "<$tagName id=\"$id\" data-page=\"${htmlEncoder.encode(page)}\"></$tagName>"
+        }
+    }
+
+    Closure head = { Map<String,Object> attrs, Closure body ->
+        if(ssrResponse) {
+            ssrResponse.head.each { headElement ->
+                out << headElement
+            }
+        }
+    }
+
+    private String getPage() {
+        request.getAttribute(Inertia.INERTIA_ATTRIBUTE_PAGE) as String
+    }
+
+    private Map<String,Object> getSsrResponse() {
+        request.getAttribute(Inertia.INERTIA_ATTRIBUTE_SSR_RESPONSE) as Map<String,Object>
     }
 
 /*
