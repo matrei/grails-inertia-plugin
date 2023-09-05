@@ -16,11 +16,7 @@
 package grails.plugin.inertia
 
 import grails.config.Config
-import grails.core.GrailsApplication
-import grails.core.support.GrailsApplicationAware
 import grails.core.support.GrailsConfigurationAware
-import grails.plugin.inertia.annotation.AnnotationExcluder
-import grails.plugin.inertia.annotation.SkipInertia
 import grails.util.Environment
 import grails.util.Holders
 import groovy.json.JsonSlurper
@@ -55,15 +51,17 @@ class InertiaInterceptor implements GrailsConfigurationAware, GrailsApplicationA
         match controller: '*'
     }
 
-    @Override
-    void setGrailsApplication(GrailsApplication grailsApplication) {
-        AnnotationExcluder.excludeAnnotations(this, grailsApplication, SkipInertia)
-    }
-
     boolean before() {
 
         // Set the assets version so the client can check if it has an old version loaded
         request.setAttribute INERTIA_ATTRIBUTE_VERSION, manifestHash
+
+        true // Continue to process the request
+    }
+
+    boolean after() {
+
+        if (inertiaResponseCanceled) return true
 
         setContentType()
         setHeaders()
@@ -119,6 +117,7 @@ class InertiaInterceptor implements GrailsConfigurationAware, GrailsApplicationA
     boolean getMethodNotAllowedShouldBePrevented() { isInertiaRequest && response.status == HttpStatus.FOUND.code && request.method in ['PUT', 'PATCH', 'DELETE'] }
     boolean getIsInertiaHtmlView() { modelAndView?.viewName == Inertia.INERTIA_VIEW_HTML }
     boolean getIsInertiaRequest() { request.getHeader(INERTIA_HEADER_NAME) == INERTIA_HEADER_VALUE }
+    boolean isInertiaResponseCanceled() { request.getAttribute(INERTIA_ATTRIBUTE_CANCEL_INERTIA) }
     boolean getIsAssetsCurrent() {
         def currentVersion = request.getAttribute(INERTIA_ATTRIBUTE_VERSION) as String
         def requestedVersion = request.getHeader(INERTIA_HEADER_VERSION) as String
