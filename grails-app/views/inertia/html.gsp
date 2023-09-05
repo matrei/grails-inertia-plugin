@@ -16,8 +16,9 @@
         <script type="module" src="http://localhost:3000/@vite/client"></script>
         <script type="module" src="http://localhost:3000/src/main/javascript/main.js"></script>
     </g:else>
+    <inertia:head/>
 </head>
 <body>
-<inertia:app>${inertiaPage}</inertia:app>
+<inertia:app/>
 </body>
 </html>

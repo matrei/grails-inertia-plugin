@@ -39,15 +39,16 @@ To add the client dependencies and workflow to a Grails project, create the foll
   "private": true,
   "scripts": {
     "serve": "vite --port 3000",
-    "build": "vite build"
+    "build": "vite build && vite build --outDir src/main/resources/ssr --ssr src/main/javascript/ssr.js"
   },
   "dependencies": {
-    "@inertiajs/vue3": "^1.0.9",
-    "vue": "^3.3.4"
+    "@inertiajs/vue3": "^1.0.11",
+    "vue": "^3.3.4",
+    "@vue/server-renderer": "^3.3.4"
   },
   "devDependencies": {
-    "@vitejs/plugin-vue": "^4.2.3",
-    "vite": "^4.3.9"
+    "@vitejs/plugin-vue": "^4.3.4",
+    "vite": "^4.4.9"
   }
 }
 ```
@@ -99,6 +100,32 @@ createInertiaApp({
   }
 })
 ```
+
+```javascript
+// myapp/src/main/javascript/ssr.js (Optional, for Server Side Rendering)
+import { createSSRApp, h } from 'vue'
+import { createInertiaApp } from '@inertiajs/vue3'
+import createServer from '@inertiajs/vue3/server'
+import { renderToString } from '@vue/server-renderer'
+
+createServer(page =>
+    createInertiaApp({
+        page,
+        render: renderToString,
+        resolve: async (name) => {
+            const pages = import.meta.glob('./Pages/**/*.vue')
+            return (await pages[`./Pages/${name}.vue`]()).default
+        },
+        setup({ App, props, plugin }) {
+            return createSSRApp({
+                render: () => h(App, props)
+            })
+            .use(plugin)
+        }
+    })
+)
+```
+
 It can be a good idea to add the following entries to your .gitignore
 ```gitignore
 # myapp/.gitignore
@@ -154,4 +181,14 @@ and then run whatever you want to do:
 ```shell
 ./gradlew integrationTest
 ./gradlew bootJar
+```
+### SSR
+To enable server-side rendering, make sure a Node.js version compatible with your client-side app is installed and added
+to the PATH on your system and add the following to your `application.yml`:
+```yaml
+inertia:
+  ssr:
+    enabled: true
+    url: 'http://localhost:13714/render'
+    bundle: 'src/main/resources/ssr/ssr.mjs'
 ```
