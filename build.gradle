@@ -1,41 +1,41 @@
-buildscript {
-    repositories {
-        maven { url "https://plugins.gradle.org/m2" }
-        maven { url 'https://repo.grails.org/grails/core' }
-    }
-    dependencies {
-        classpath "org.grails:grails-gradle-plugin:$grailsGradlePluginVersion"
-        classpath "io.github.gradle-nexus:publish-plugin:1.1.0"
-        classpath "org.grails.plugins:views-gradle:2.3.2"
-    }
+plugins {
+    id 'groovy'
+    id 'org.grails.grails-web'
+    id 'org.grails.plugins.views-json'
+    id 'war'
+    id 'idea'
+    id 'org.grails.grails-plugin'
+    id 'maven-publish'
+    id 'signing'
+    id 'application'
+    id 'eclipse'
 }
 
-group 'io.github.matrei'
-
-apply plugin: 'eclipse'
-apply plugin: 'idea'
-apply plugin: 'org.grails.grails-plugin'
-apply plugin: 'org.grails.grails-gsp'
-apply plugin: 'org.grails.plugins.views-json'
-apply plugin: 'maven-publish'
-apply plugin: 'signing'
-
-sourceCompatibility = JavaVersion.toVersion 8
-targetCompatibility = JavaVersion.toVersion 8
+group = 'io.github.matrei'
 
 repositories {
+    mavenCentral()
     maven { url "https://repo.grails.org/grails/core" }
 }
 
+configurations {
+    all {
+        resolutionStrategy.force 'org.codehaus.groovy:groovy-xml:3.0.13'
+    }
+}
+
 dependencies {
-    compileOnly 'io.micronaut:micronaut-inject-groovy'
+
     implementation 'org.grails:grails-logging'
     implementation 'org.grails:grails-plugin-interceptors'
     implementation 'org.grails.plugins:gsp'
     implementation 'org.grails.plugins:views-json'
-    profile 'org.grails.profiles:web-plugin'
+
+    compileOnly 'io.micronaut:micronaut-inject-groovy'
+
     testImplementation 'io.micronaut:micronaut-inject-groovy'
     testImplementation 'org.grails:grails-web-testing-support'
+
 }
 
 tasks.withType(GroovyCompile).configureEach {
@@ -63,6 +63,8 @@ jar {
 }
 
 java {
+    sourceCompatibility = JavaVersion.VERSION_11
+    targetCompatibility = JavaVersion.VERSION_11
     withSourcesJar()
     withJavadocJar()
 }
