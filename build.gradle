@@ -67,6 +67,29 @@ java {
     withJavadocJar()
 }
 
+ext.pomInfo = {
+    name = 'Grails Adapter for Inertia.js'
+    description = 'Grails plugin with server-side adapter for Inertia.js'
+    url = 'https://github.com/matrei/grails-inertia-plugin'
+    licenses {
+        license {
+            name = 'The Apache License, Version 2.0'
+            url = 'https://www.apache.org/licenses/LICENSE-2.0.txt'
+        }
+    }
+    developers {
+        developer {
+            id = 'matrei'
+            name = 'Mattias Reichel'
+            email = 'mattias.reichel@gmail.com'
+        }
+    }
+    scm {
+        connection = 'scm:git:git://github.com/matrei/grails-inertia-plugin.git'
+        developerConnection = 'scm:git:ssh://github.com:matrei/grails-inertia-plugin.git'
+        url = 'https://github.com/matrei/grails-inertia-plugin'
+    }
+}
 publishing {
     publications {
         maven(MavenPublication) {
@@ -83,28 +106,12 @@ publishing {
                 }
             }
 
-            pom {
-                name = 'Grails Adapter for Inertia.js'
-                description = 'Grails plugin with server-side adapter for Inertia.js'
-                url = 'https://github.com/matrei/grails-inertia-plugin'
-                licenses {
-                    license {
-                        name = 'The Apache License, Version 2.0'
-                        url = 'https://www.apache.org/licenses/LICENSE-2.0.txt'
-                    }
-                }
-                developers {
-                    developer {
-                        id = 'matrei'
-                        name = 'Mattias Reichel'
-                        email = 'mattias.reichel@gmail.com'
-                    }
-                }
-                scm {
-                    connection = 'scm:git:git://github.com/matrei/grails-inertia-plugin.git'
-                    developerConnection = 'scm:git:ssh://github.com:matrei/grails-inertia-plugin.git'
-                    url = 'https://github.com/matrei/grails-inertia-plugin'
-                }
+            pom.withXml {
+                def xml = asNode()
+                xml.children().last() + pomInfo
+                // dependency management shouldn't be included
+                def n = xml.get("dependencyManagement")
+                if (n) xml.remove(n)
             }
         }
     }
