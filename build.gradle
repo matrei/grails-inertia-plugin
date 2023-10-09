@@ -69,28 +69,29 @@ java {
 }
 
 ext.pomInfo = {
-    name = 'Grails Adapter for Inertia.js'
-    description = 'Grails plugin with server-side adapter for Inertia.js'
-    url = 'https://github.com/matrei/grails-inertia-plugin'
-    licenses {
-        license {
-            name = 'The Apache License, Version 2.0'
-            url = 'https://www.apache.org/licenses/LICENSE-2.0.txt'
+    delegate.name 'Grails Adapter for Inertia.js'
+    delegate.description 'Grails plugin with server-side adapter for Inertia.js'
+    delegate.url 'https://github.com/matrei/grails-inertia-plugin'
+    delegate.licenses {
+        delegate.license {
+            delegate.name 'The Apache License, Version 2.0'
+            delegate.url 'https://www.apache.org/licenses/LICENSE-2.0.txt'
         }
     }
-    developers {
-        developer {
-            id = 'matrei'
-            name = 'Mattias Reichel'
-            email = 'mattias.reichel@gmail.com'
+    delegate.developers {
+        delegate.developer {
+            delegate.id 'matrei'
+            delegate.name 'Mattias Reichel'
+            delegate.email 'mattias.reichel@gmail.com'
         }
     }
-    scm {
-        connection = 'scm:git:git://github.com/matrei/grails-inertia-plugin.git'
-        developerConnection = 'scm:git:ssh://github.com:matrei/grails-inertia-plugin.git'
-        url = 'https://github.com/matrei/grails-inertia-plugin'
+    delegate.scm {
+        delegate.connection 'scm:git:git://github.com/matrei/grails-inertia-plugin.git'
+        delegate.developerConnection 'scm:git:ssh://github.com:matrei/grails-inertia-plugin.git'
+        delegate.url 'https://github.com/matrei/grails-inertia-plugin'
     }
 }
+
 publishing {
     publications {
         maven(MavenPublication) {
