@@ -10,10 +10,9 @@ jobs:
       GIT_USER_EMAIL: mattias.reichel@gmail.com
     steps:
       - name: Checkout repository
-        uses: actions/checkout@v4
+        uses: actions/checkout@v2
         with:
           token: ${{ secrets.GITHUB_TOKEN }}
-          fetch-tags: true
       - name: Cache Gradle
         id: cache-gradle
         uses: actions/cache@v2
