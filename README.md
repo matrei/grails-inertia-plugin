@@ -8,8 +8,12 @@ Inertia.js lets you, in its own words, *“quickly build modern single-page Reac
 
 Using Inertia.js allows using your favorite MVC server-side framework (Grails obviously) with your favorite client-side SPA framework - no need to build a separate API.
 
-## Demo
-[A port (using this plugin)](https://github.com/matrei/pingcrm-grails) of the [original Laravel/PHP Inertia.js Ping CRM demo](https://github.com/inertiajs/pingcrm) is available. 
+## Demo application
+***Ping CRM*** is an application using this plugin\
+**[Source](https://github.com/matrei/pingcrm-grails) | [Live Demo](https://pingcrm.mattiasreichel.com)**
+
+>[!NOTE]
+>This is a port to Grails/Groovy of the original [Ping CRM demo](https://github.com/inertiajs/pingcrm) written in Laravel/PHP. 
 
 ## Installation
 If you don't have an application already:
@@ -17,7 +21,7 @@ If you don't have an application already:
 grails create-app myapp
 cd myapp
 ```
-
+\
 Add the plugin dependency to the project:
 ```groovy
 // myapp/build.gradle
@@ -28,9 +32,14 @@ dependencies {
     //...
 }
 ```
-To add the client dependencies and workflow to a Grails project, create the following files **(Vue 3 example)**:
+> [!NOTE]
+> For a Grails 5/Java 8 - use the latest version of the plugin with major version 1.\
+> For Grails 6/Java 11 - use the latest version of the plugin.
+
+\
+To add the client dependencies and workflow to a Grails project, create the following files: **(Vue 3 example)**
 ```javascript
-// myapp/package.json (versions @ 2023-03-01) 
+// myapp/package.json (versions @ 2023-10-19) 
 ```
 ```json
 {
@@ -42,13 +51,13 @@ To add the client dependencies and workflow to a Grails project, create the foll
     "build": "vite build && vite build --outDir src/main/resources/ssr --ssr src/main/javascript/ssr.js"
   },
   "dependencies": {
-    "@inertiajs/vue3": "^1.0.11",
     "vue": "^3.3.4",
+    "@inertiajs/vue3": "^1.0.12",
     "@vue/server-renderer": "^3.3.4"
   },
   "devDependencies": {
-    "@vitejs/plugin-vue": "^4.3.4",
-    "vite": "^4.4.9"
+    "@vitejs/plugin-vue": "^4.4.0",
+    "vite": "^4.5.0"
   }
 }
 ```
@@ -100,7 +109,6 @@ createInertiaApp({
   }
 })
 ```
-
 ```javascript
 // myapp/src/main/javascript/ssr.js (Optional, for Server Side Rendering)
 import { createSSRApp, h } from 'vue'
@@ -125,7 +133,7 @@ createServer(page =>
     })
 )
 ```
-
+\
 It can be a good idea to add the following entries to your .gitignore
 ```gitignore
 # myapp/.gitignore
@@ -133,23 +141,22 @@ It can be a good idea to add the following entries to your .gitignore
 node_modules
 src/main/resources/public/dist
 ```
-And run:
+\
+And run the following command to install the client dependencies:
 ```shell
 npm install
 ```
 
 ## Usage
-In your controllers, you can now select which JavaScript Page Component to render and pass the values of the props to it.
+In your Grails controllers, you can now select which JavaScript Page Component to render and pass the values of the props to it.
 ```groovy
 // myapp/grails-app/controllers/myapp/BookController.groovy
 package myapp
 
 class BookController {
     
-    BookService bookService
-    
     def index() {
-        def books = bookService.listBooks()
+        def books = ['Grails in Action', 'Programming Grails', 'The Definitive Guide to Grails 2']
         renderInertia 'Books/Index', [books: books]
     }
 }
@@ -162,10 +169,11 @@ defineProps({ books: Array })
 </script>
 <template>
   <ul>
-    <li v-for="book in books">{{ book.name }}</li>
+    <li v-for="book in books">{{ book }}</li>
   </ul>
 </template>
 ```
+\
 For development with [Hot Module Replacement](https://vitejs.dev/guide/features.html#hot-module-replacement) of the application run: (in separate terminals)
 ```shell
 npm run serve
@@ -173,11 +181,13 @@ npm run serve
 ```shell
 ./gradlew bootRun
 ```
-For production or test, first build production version of JavaScript app:
+\
+For production or test, first build the production version of your JavaScript app...
 ```shell
 npm run build
 ```
-and then run whatever you want to do:
+\
+...and then run whatever you want to do:
 ```shell
 ./gradlew integrationTest
 ./gradlew bootJar
