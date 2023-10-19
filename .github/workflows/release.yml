@@ -68,7 +68,8 @@ jobs:
       - name: --- COMMIT & PUSH THE NEW SNAPSHOT VERSION ---
         uses: actions-js/push@156f2b10c3aa000c44dbe75ea7018f32ae999772 # v1.4
         with:
+          branch: ${{ github.ref_name }}
           github_token: ${{ secrets.GITHUB_TOKEN }}
           author_name: ${{ secrets.GIT_USER_NAME }}
           author_email: ${{ secrets.GIT_USER_EMAIL }}
-          message: "Next development version: ${{ steps.bump_semver.outputs.new_version }}"
+          message: "Next development version: ${{ steps.bump_semver.outputs.new_version }}-SNAPSHOT"
