@@ -20,9 +20,6 @@ apply plugin: 'org.grails.plugins.views-json'
 apply plugin: 'maven-publish'
 apply plugin: 'signing'
 
-sourceCompatibility = JavaVersion.toVersion 8
-targetCompatibility = JavaVersion.toVersion 8
-
 repositories {
     maven { url "https://repo.grails.org/grails/core" }
 }
@@ -38,6 +35,13 @@ dependencies {
     testImplementation 'org.grails:grails-web-testing-support'
 }
 
+java {
+    sourceCompatibility = '1.8'
+    targetCompatibility = '1.8'
+    withSourcesJar()
+    withJavadocJar()
+}
+
 tasks.withType(GroovyCompile).configureEach {
     configure(groovyOptions) {
         forkOptions.jvmArgs = ['-Xmx1024m']
@@ -45,7 +49,12 @@ tasks.withType(GroovyCompile).configureEach {
 }
 
 tasks.withType(Test).configureEach {
+    dependsOn compileGsonViews
     useJUnitPlatform()
+}
+
+tasks.named('compileTestGroovy').configure {
+    dependsOn compileGsonViews
 }
 
 compileGsonViews {
@@ -60,11 +69,6 @@ bootJar.enabled = false
 jar {
     enabled = true
     archiveClassifier.set('')
-}
-
-java {
-    withSourcesJar()
-    withJavadocJar()
 }
 
 ext.pomInfo = {
