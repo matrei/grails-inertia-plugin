@@ -1,38 +1,42 @@
+
 name: Release
+
 on:
   release:
     types: [ published ]
+
 jobs:
   release:
+
     runs-on: ubuntu-latest
+
     env:
       GIT_USER_NAME: matrei
       GIT_USER_EMAIL: mattias.reichel@gmail.com
+
     steps:
-      - name: Checkout repository
-        uses: actions/checkout@v2
+
+      - name: --- CHECKOUT REPOSITORY ---
+        uses: actions/checkout@v4
         with:
           token: ${{ secrets.GITHUB_TOKEN }}
-      - name: Cache Gradle
-        id: cache-gradle
-        uses: actions/cache@v2
+
+      - name: --- VALIDATE GRADLE WRAPPER ---
+        uses: gradle/wrapper-validation-action@v1
+
+      - name: --- SET UP JDK ---
+        uses: actions/setup-java@v3
         with:
-          path: ./gradle/
-          key: ${{ runner.os }}-gradle
-      - uses: gradle/wrapper-validation-action@v1
-      - name: Set up JDK
-        uses: actions/setup-java@v2
-        with:
-          distribution: 'zulu'
           java-version: '8'
-      - name: Get latest release version number
-        id: get_version
-        uses: battila7/get-version-action@v2
-      - name: Run pre-release
-        uses: micronaut-projects/github-actions/pre-release@master
+          distribution: 'adopt'
+
+      - name: --- GET THE RELEASE VERSION NUMBER FROM RELEASE TAG ---
+        id: version
+        uses: nowsprinting/check-version-format-action@v3
         with:
-          token: ${{ secrets.GITHUB_TOKEN }}
-      - name: Publish to Sonatype OSSRH
+          prefix: 'v'
+
+      - name: --- PUBLISH TO SONATYPE OSSRH ---
         env:
           SONATYPE_USERNAME: ${{ secrets.SONATYPE_USERNAME }}
           SONATYPE_PASSWORD: ${{ secrets.SONATYPE_PASSWORD }}
@@ -40,35 +44,31 @@ jobs:
           SIGNING_KEY: ${{ secrets.SIGNING_KEY }}
           SIGNING_PASSPHRASE: ${{ secrets.SIGNING_PASSPHRASE }}
           SECRING_FILE: ${{ secrets.SECRING_FILE }}
-          RELEASE_VERSION: ${{ steps.get_version.outputs.version-without-v }}
+          RELEASE_VERSION: ${{ steps.version.outputs.full_without_prefix }}
         run: |
           echo "$SECRING_FILE" | base64 -d > ${GITHUB_WORKSPACE}/secring.gpg
           echo "Publishing Artifacts for $RELEASE_VERSION"
           (set -x; ./gradlew --info -Prelease=true -Pversion="${RELEASE_VERSION}" -Psigning.secretKeyRingFile="${GITHUB_WORKSPACE}/secring.gpg" publishToSonatype closeAndReleaseSonatypeStagingRepository --no-daemon)
           rm ${GITHUB_WORKSPACE}/secring.gpg
-      - name: Bump patch version by one
+
+      - name: --- BUMP PATCH VERSION BY ONE ---
         uses: actions-ecosystem/action-bump-semver@v1
         id: bump_semver
         with:
-          current_version: ${{steps.get_version.outputs.version-without-v }}
+          current_version: ${{ steps.version.outputs.full_without_prefix }}
           level: patch
-      - name: Set version in gradle.properties
+
+      - name: --- UPDATE PROJECT WITH NEW SNAPSHOT VERSION ---
         env:
           NEXT_VERSION: ${{ steps.bump_semver.outputs.new_version }}
         run: |
-          echo "Preparing next snapshot"
-          ./gradlew snapshotVersion -Pversion="${NEXT_VERSION}"
-      - name: Commit & Push changes
-        uses: actions-js/push@master
+          echo "Preparing next snapshot: ${{ steps.bump_semver.outputs.new_version }}"
+          ./gradlew snapshotVersion -Pversion="${{ steps.bump_semver.outputs.new_version }}"
+
+      - name: --- COMMIT & PUSH THE NEW SNAPSHOT VERSION ---
+        uses: actions-js/push@156f2b10c3aa000c44dbe75ea7018f32ae999772 # v1.4
         with:
           github_token: ${{ secrets.GITHUB_TOKEN }}
           author_name: ${{ secrets.GIT_USER_NAME }}
-          author_email: $${ secrets.GIT_USER_EMAIL }}
-          message: 'Set version to next SNAPSHOT'
-      - name: Export Gradle Properties
-        uses: micronaut-projects/github-actions/export-gradle-properties@master
-      - name: Run post-release
-        if: success()
-        uses: micronaut-projects/github-actions/post-release@master
-        with:
-          token: ${{ secrets.GITHUB_TOKEN }}
+          author_email: ${{ secrets.GIT_USER_EMAIL }}
+          message: "Next development version: ${{ steps.bump_semver.outputs.new_version }}"
