@@ -37,6 +37,13 @@ dependencies {
 
 }
 
+java {
+    sourceCompatibility = JavaVersion.VERSION_11
+    targetCompatibility = JavaVersion.VERSION_11
+    withSourcesJar()
+    withJavadocJar()
+}
+
 tasks.withType(GroovyCompile).configureEach {
     configure(groovyOptions) {
         forkOptions.jvmArgs = ['-Xmx1024m']
@@ -45,6 +52,10 @@ tasks.withType(GroovyCompile).configureEach {
 
 tasks.withType(Test).configureEach {
     useJUnitPlatform()
+}
+
+tasks.named('compileTestGroovy').configure {
+    dependsOn compileGsonViews
 }
 
 compileGsonViews {
@@ -59,13 +70,6 @@ bootJar.enabled = false
 jar {
     enabled = true
     archiveClassifier.set('')
-}
-
-java {
-    sourceCompatibility = JavaVersion.VERSION_11
-    targetCompatibility = JavaVersion.VERSION_11
-    withSourcesJar()
-    withJavadocJar()
 }
 
 ext.pomInfo = {
