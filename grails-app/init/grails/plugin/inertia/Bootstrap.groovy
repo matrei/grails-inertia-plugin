@@ -61,11 +61,11 @@ class BootStrap {
         }
 
         ssrProcess = new ProcessBuilder().inheritIO().command('node',  bundle).start()
-        log.debug 'SSR process started with pid: ' + ssrProcess.pid()
+        log.debug 'SSR process started'
     }
 
     void stopSSR() {
-        log.debug 'Stopping SSR process with pid: ' + ssrProcess?.pid()
+        log.debug 'Stopping SSR process'
         ssrProcess?.destroy()
     }
 }
