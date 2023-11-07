@@ -76,6 +76,15 @@ class Inertia {
         response.status = SC_CONFLICT
     }
 
+    @SuppressWarnings('unused')
+    static void cancel() {
+        request.setAttribute INERTIA_ATTRIBUTE_CANCEL_INERTIA, true
+    }
+
+    static boolean getIsCanceled() {
+        request.getAttribute INERTIA_ATTRIBUTE_CANCEL_INERTIA
+    }
+
     private static ModelAndView renderInternal(String component, Map props, Map viewData) {
         isInertiaRequest ?
             renderJson(component, props) :

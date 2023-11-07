@@ -58,4 +58,12 @@ trait InertiaTrait {
     void setInertiaSharedData(Map sharedData) {
         Inertia.sharedData = sharedData
     }
+
+    void cancelInertia() {
+        Inertia.cancel()
+    }
+
+    boolean isInertiaCanceled() {
+        Inertia.isCanceled
+    }
 }

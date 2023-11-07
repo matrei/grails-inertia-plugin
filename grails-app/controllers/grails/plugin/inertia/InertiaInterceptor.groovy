@@ -23,7 +23,6 @@ import groovy.json.JsonSlurper
 import groovy.transform.CompileStatic
 import io.micronaut.http.HttpStatus
 
-import static Inertia.INERTIA_ATTRIBUTE_CANCEL_INERTIA
 import static Inertia.INERTIA_ATTRIBUTE_MANIFEST
 import static Inertia.INERTIA_ATTRIBUTE_VERSION
 import static Inertia.INERTIA_HEADER
@@ -64,7 +63,7 @@ class InertiaInterceptor implements GrailsConfigurationAware {
 
     boolean after() {
 
-        if (inertiaResponseCanceled) return true
+        if (Inertia.isCanceled) return true
 
         setContentType()
         setHeaders()
@@ -117,7 +116,6 @@ class InertiaInterceptor implements GrailsConfigurationAware {
     boolean getMethodNotAllowedShouldBePrevented() { isInertiaRequest && response.status == HttpStatus.FOUND.code && request.method in ['PUT', 'PATCH', 'DELETE'] }
     boolean getIsInertiaHtmlView() { modelAndView?.viewName == INERTIA_VIEW_HTML }
     boolean getIsInertiaRequest() { request.getHeader(INERTIA_HEADER) == 'true' }
-    boolean isInertiaResponseCanceled() { request.getAttribute(INERTIA_ATTRIBUTE_CANCEL_INERTIA) }
     boolean getIsAssetsCurrent() {
         def currentVersion = request.getAttribute(INERTIA_ATTRIBUTE_VERSION) as String
         def requestedVersion = request.getHeader(INERTIA_HEADER_VERSION) as String

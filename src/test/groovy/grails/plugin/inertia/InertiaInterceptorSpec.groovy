@@ -106,6 +106,21 @@ class InertiaInterceptorSpec extends Specification implements InterceptorUnitTes
         ! response.containsHeader('X-Inertia')
         ! ('X-Inertia' in response.getHeaders('Vary'))
     }
+
+    def 'canceling Inertia request with Inertia.cancel() works'() {
+        given: 'a controller'
+        def controller = (TestController) mockController(TestController)
+
+        when: 'a request for json is processed'
+        request.addHeader 'X-Inertia', true
+        request.addHeader 'X-Inertia-Version', '0'
+        withInterceptors(controller: 'test', httpMethod: 'GET') { controller.cancelInertiaAction() }
+        interceptor.after()
+
+        then: 'no inertia response headers are set'
+        ! response.containsHeader('X-Inertia')
+        ! ('X-Inertia' in response.getHeaders('Vary'))
+    }
 }
 
 @Controller
@@ -114,6 +129,11 @@ class TestController {
 
     def index() {
         renderInertia 'index', [hello: 'world']
+    }
+
+    def cancelInertiaAction() {
+        Inertia.cancel()
+        render 'cancelInertiaAction'
     }
 
     def testing() {
