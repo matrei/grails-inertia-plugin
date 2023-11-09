@@ -21,12 +21,6 @@ repositories {
     maven { url "https://repo.grails.org/grails/core" }
 }
 
-configurations {
-    all {
-        resolutionStrategy.force 'org.codehaus.groovy:groovy-xml:3.0.13'
-    }
-}
-
 dependencies {
 
     implementation 'org.grails:grails-logging'
