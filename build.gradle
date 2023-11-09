@@ -1,13 +1,17 @@
 plugins {
+
+    id 'eclipse'
+    id 'idea'
+
     id 'groovy'
+    id 'war'
+
     id 'org.grails.grails-web'
     id 'org.grails.plugins.views-json'
-    id 'war'
-    id 'idea'
     id 'org.grails.grails-plugin'
+
     id 'maven-publish'
     id 'signing'
-    id 'eclipse'
 }
 
 group = 'io.github.matrei'
