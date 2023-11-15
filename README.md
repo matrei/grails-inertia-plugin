@@ -1,5 +1,7 @@
 # Grails Adapter for Inertia.js
 
+[![Java CI](https://github.com/matrei/grails-inertia-plugin/actions/workflows/gradle-check.yml/badge.svg)](https://github.com/matrei/grails-inertia-plugin/actions/workflows/gradle-check.yml)
+
 Grails plugin for using [Inertia.js](https://inertiajs.com/) to build single-page apps without building an API.
 
 ## What is Inertia.js?
