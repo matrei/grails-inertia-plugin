@@ -8,6 +8,6 @@ versions.load(new FileInputStream(file('../gradle.properties')))
 
 dependencies {
     implementation "org.grails:grails-gradle-plugin:$versions.grailsGradlePluginVersion"
-    implementation "io.github.gradle-nexus:publish-plugin:1.1.0"
+    implementation "io.github.gradle-nexus:publish-plugin:1.3.0"
     implementation "org.grails.plugins:views-gradle:3.1.0"
 }
