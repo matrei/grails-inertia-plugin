@@ -1,3 +1,8 @@
+import io.github.gradlenexus.publishplugin.InitializeNexusStagingRepository
+import io.github.gradlenexus.publishplugin.NexusRepository
+
+import java.time.Duration
+
 plugins {
 
     id 'eclipse'
@@ -10,6 +15,7 @@ plugins {
     id 'org.grails.plugins.views-json'
     id 'org.grails.grails-plugin'
 
+    id 'io.github.gradle-nexus.publish-plugin'
     id 'maven-publish'
     id 'signing'
 }
@@ -18,7 +24,7 @@ group = 'io.github.matrei'
 
 repositories {
     mavenCentral()
-    maven { url "https://repo.grails.org/grails/core" }
+    maven { url 'https://repo.grails.org/grails/core' }
 }
 
 dependencies {
@@ -91,11 +97,10 @@ ext.pomInfo = {
 
 publishing {
     publications {
-        maven(MavenPublication) {
-
+        maven(MavenPublication)
+                {
             from components.java
 
-            // The generateMetadataFileForMavenPublication fails without the following versionMapping block
             versionMapping {
                 usage('java-api') {
                     fromResolutionOf('runtimeClasspath')
@@ -109,18 +114,18 @@ publishing {
                 def xml = asNode()
                 xml.children().last() + pomInfo
                 // dependency management shouldn't be included
-                def n = xml.get("dependencyManagement")
+                def n = xml.get('dependencyManagement')
                 if (n) xml.remove(n)
             }
         }
     }
 }
 
-ext."signing.keyId" = project.findProperty('signing.keyId') ?: System.getenv('SIGNING_KEY')
-ext."signing.password" = project.findProperty('signing.password') ?: System.getenv('SIGNING_PASSPHRASE')
-ext."signing.secretKeyRingFile" = project.findProperty('signing.secretKeyRingFile') ?: (System.getenv('GITHUB_WORKSPACE') ? "${System.getenv('GITHUB_WORKSPACE')}/secring.gpg" : "${System.getProperty('user.home')}/.gnupg/secring.gpg")
+ext.set 'signing.keyId', project.findProperty('signing.keyId') ?: System.getenv('SIGNING_KEY')
+ext.set 'signing.password', project.findProperty('signing.password') ?: System.getenv('SIGNING_PASSPHRASE')
+ext.set 'signing.secretKeyRingFile', project.findProperty('signing.secretKeyRingFile') ?: (System.getenv('GITHUB_WORKSPACE') ? "${System.getenv('GITHUB_WORKSPACE')}/secring.gpg" : "${System.getProperty('user.home')}/.gnupg/secring.gpg")
 
-ext.isReleaseVersion = !version.endsWith('-SNAPSHOT')
+ext.set 'isReleaseVersion', !version.toString().endsWith('-SNAPSHOT')
 
 afterEvaluate {
     signing {
@@ -128,21 +133,28 @@ afterEvaluate {
         sign publishing.publications.maven
     }
 }
+//do not generate extra load on Nexus with new staging repository if signing fails
+tasks.withType(InitializeNexusStagingRepository).configureEach {
+    shouldRunAfter tasks.withType(Sign)
+}
 
-if(project.hasProperty('release')) {
-    apply plugin: 'io.github.gradle-nexus.publish-plugin'
+if (project.hasProperty('release')) {
     nexusPublishing {
+        String username = System.getenv('SONATYPE_USERNAME') ?: project.findProperty('sonatypeOssUsername') ?: ''
+        String password = System.getenv('SONATYPE_PASSWORD') ?: project.findProperty('sonatypeOssPassword') ?: ''
+        String stagingProfileId = System.getenv('SONATYPE_STAGING_PROFILE_ID') ?: project.findProperty('sonatypeOssStagingProfileId') ?: ''
         repositories {
-            sonatype {
-                def ossUser = System.getenv('SONATYPE_USERNAME') ?: project.findProperty('sonatypeOssUsername') ?: ''
-                def ossPass = System.getenv('SONATYPE_PASSWORD') ?: project.findProperty('sonatypeOssPassword') ?: ''
-                def ossStagingProfileId = System.getenv('SONATYPE_STAGING_PROFILE_ID') ?: project.findProperty('sonatypeOssStagingProfileIdInertia') ?: ''
-                nexusUrl = uri 'https://s01.oss.sonatype.org/service/local/'
-                snapshotRepositoryUrl = uri 'https://s01.oss.sonatype.org/content/repositories/snapshots/'
-                username = ossUser
-                password = ossPass
-                stagingProfileId = ossStagingProfileId
+            sonatype { NexusRepository repo ->
+                repo.nexusUrl.set uri('https://s01.oss.sonatype.org/service/local/')
+                repo.snapshotRepositoryUrl.set uri('https://s01.oss.sonatype.org/content/repositories/snapshots/')
+                repo.username.set username
+                repo.password.set password
+                repo.stagingProfileId.set = stagingProfileId
             }
+        }
+        transitionCheckOptions {
+            maxRetries.set 40
+            delayBetween.set Duration.ofMillis(2000)
         }
     }
 }
