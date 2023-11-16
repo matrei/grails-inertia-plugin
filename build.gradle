@@ -9,7 +9,7 @@ plugins {
     id 'idea'
 
     id 'groovy'
-    id 'war'
+    id 'java-library'
 
     id 'org.grails.grails-web'
     id 'org.grails.plugins.views-json'
@@ -43,7 +43,7 @@ dependencies {
 
 java {
     toolchain {
-        languageVersion = JavaLanguageVersion.of(11)
+        languageVersion = JavaLanguageVersion.of 11
     }
     withSourcesJar()
     withJavadocJar()
@@ -71,7 +71,7 @@ tasks.withType(Groovydoc).configureEach {
 bootJar.enabled = false
 jar {
     enabled = true
-    archiveClassifier.set('')
+    archiveClassifier.set ''
 }
 
 ext.pomInfo = {
@@ -100,8 +100,8 @@ ext.pomInfo = {
 
 publishing {
     publications {
-        maven(MavenPublication)
-                {
+        maven(MavenPublication) {
+
             from components.java
 
             versionMapping {

@@ -1,13 +1,14 @@
-repositories {
-    mavenCentral()
-    maven { url 'https://repo.grails.org/grails/core/' }
+plugins {
+    id 'groovy-gradle-plugin'
 }
 
-def versions = new Properties()
-versions.load(new FileInputStream(file('../gradle.properties')))
+repositories {
+    mavenCentral()
+    maven { url 'https://repo.grails.org/grails/core' }
+}
 
 dependencies {
-    implementation "org.grails:grails-gradle-plugin:$versions.grailsGradlePluginVersion"
-    implementation "io.github.gradle-nexus:publish-plugin:1.3.0"
-    implementation "org.grails.plugins:views-gradle:3.1.0"
+    implementation libs.grails.gradle.plugin
+    implementation libs.nexus.publish.gradle.plugin
+    implementation libs.grails.views.gradle.plugin
 }

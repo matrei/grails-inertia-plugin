@@ -1,0 +1,9 @@
+rootProject.name = 'grails-inertia-plugin'
+
+dependencyResolutionManagement {
+    versionCatalogs {
+        libs {
+            from(files('../gradle/libs.versions.toml'))
+        }
+    }
+}
