@@ -60,7 +60,7 @@ tasks.named('compileTestGroovy').configure {
     dependsOn compileGsonViews
 }
 
-compileGsonViews {
+tasks.named('compileGsonViews').configure {
     // This is needed for the gson view to be resolved from plugin
     packageName = 'inertia'
 }
@@ -68,10 +68,12 @@ tasks.withType(Groovydoc).configureEach {
     dependsOn compileGsonViews
 }
 
-bootJar.enabled = false
-jar {
+tasks.named('bootJar').configure {
+    enabled = false
+}
+tasks.withType(Jar).configureEach {
     enabled = true
-    archiveClassifier.set ''
+    archiveClassifier = ''
 }
 
 ext.pomInfo = {
