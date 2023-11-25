@@ -41,7 +41,7 @@ dependencies {
 \
 To add the client dependencies and workflow to a Grails project, create the following files: **(Vue 3 example)**
 ```javascript
-// myapp/package.json (versions @ 2023-10-19) 
+// myapp/package.json (versions @ 2023-11-25) 
 ```
 ```json
 {
@@ -53,13 +53,12 @@ To add the client dependencies and workflow to a Grails project, create the foll
     "build": "vite build && vite build --outDir src/main/resources/ssr --ssr src/main/javascript/ssr.js"
   },
   "dependencies": {
-    "vue": "^3.3.4",
-    "@inertiajs/vue3": "^1.0.12",
-    "@vue/server-renderer": "^3.3.4"
+    "vue": "^3.3.9",
+    "@inertiajs/vue3": "^1.0.14"
   },
   "devDependencies": {
-    "@vitejs/plugin-vue": "^4.4.0",
-    "vite": "^4.5.0"
+    "@vitejs/plugin-vue": "^4.5.0",
+    "vite": "^5.0.2"
   }
 }
 ```
