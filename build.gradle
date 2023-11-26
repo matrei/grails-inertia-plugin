@@ -57,7 +57,7 @@ tasks.withType(Test).configureEach {
 }
 
 tasks.named('compileTestGroovy').configure {
-    dependsOn compileGsonViews
+    dependsOn 'compileGsonViews'
 }
 
 tasks.named('compileGsonViews').configure {
@@ -65,7 +65,7 @@ tasks.named('compileGsonViews').configure {
     packageName = 'inertia'
 }
 tasks.withType(Groovydoc).configureEach {
-    dependsOn compileGsonViews
+    dependsOn 'compileGsonViews'
 }
 
 tasks.named('bootJar').configure {
