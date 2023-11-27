@@ -17,7 +17,9 @@ Using Inertia.js allows using your favorite MVC server-side framework (Grails ob
 >[!NOTE]
 >This is a port to Grails/Groovy of the original [Ping CRM demo](https://github.com/inertiajs/pingcrm) written in Laravel/PHP. 
 
-## Installation
+![Screenshot of the Ping CRM application](screenshot.png)
+
+## Plugin Installation
 If you don't have an application already:
 ```shell
 grails create-app myapp
