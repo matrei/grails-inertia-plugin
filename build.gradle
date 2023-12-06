@@ -68,10 +68,10 @@ tasks.withType(Groovydoc).configureEach {
     dependsOn 'compileGsonViews'
 }
 
-tasks.named('bootJar').configure {
+tasks.named('bootJar') {
     enabled = false
 }
-tasks.withType(Jar).configureEach {
+tasks.named('jar', Jar) {
     enabled = true
     archiveClassifier = ''
 }
