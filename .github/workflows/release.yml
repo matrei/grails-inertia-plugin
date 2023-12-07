@@ -47,9 +47,8 @@ jobs:
           SIGNING_KEY: ${{ secrets.SIGNING_KEY }}
           SIGNING_PASSPHRASE: ${{ secrets.SIGNING_PASSPHRASE }}
           SECRING_FILE: ${{ secrets.SECRING_FILE }}
-          RELEASE_VERSION: ${{ steps.version.outputs.full_without_prefix }}
         with:
-          arguments: -Prelease=true -Pversion=${RELEASE_VERSION} -Psigning.secretKeyRingFile=${{ github.workspace }}/secring.gpg publishToSonatype closeAndReleaseSonatypeStagingRepository
+          arguments: -Prelease=true -Pversion=${{ steps.version.outputs.full_without_prefix }} -Psigning.secretKeyRingFile=${{ github.workspace }}/secring.gpg publishToSonatype closeAndReleaseSonatypeStagingRepository
 
       - name: --- DELETE SECRING FILE ---
         run: rm ${{ github.workspace }}/secring.gpg

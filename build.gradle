@@ -153,8 +153,8 @@ if (project.hasProperty('release')) {
             }
         }
         transitionCheckOptions {
-            maxRetries = 40
-            delayBetween = java.time.Duration.ofMillis(2000)
+            maxRetries = 100
+            delayBetween = java.time.Duration.ofSeconds(5)
         }
     }
 }
