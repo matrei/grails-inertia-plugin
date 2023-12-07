@@ -11,8 +11,4 @@ jobs:
       - uses: actions/setup-java@v4
         with: { java-version: 11, distribution: adopt }
       - uses: gradle/gradle-build-action@v2
-
-      - name: Run Tests
-        run: |
-          chmod +x gradlew
-          ./gradlew check
+        with: { arguments: check }

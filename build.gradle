@@ -1,8 +1,3 @@
-import io.github.gradlenexus.publishplugin.InitializeNexusStagingRepository
-import io.github.gradlenexus.publishplugin.NexusRepository
-
-import java.time.Duration
-
 plugins {
 
     id 'eclipse'
@@ -139,27 +134,27 @@ afterEvaluate {
     }
 }
 //do not generate extra load on Nexus with new staging repository if signing fails
-tasks.withType(InitializeNexusStagingRepository).configureEach {
+tasks.withType(io.github.gradlenexus.publishplugin.InitializeNexusStagingRepository).configureEach {
     shouldRunAfter tasks.withType(Sign)
 }
 
 if (project.hasProperty('release')) {
     nexusPublishing {
-        String username = System.getenv('SONATYPE_USERNAME') ?: project.findProperty('sonatypeOssUsername') ?: ''
-        String password = System.getenv('SONATYPE_PASSWORD') ?: project.findProperty('sonatypeOssPassword') ?: ''
-        String stagingProfileId = System.getenv('SONATYPE_STAGING_PROFILE_ID') ?: project.findProperty('sonatypeOssStagingProfileId') ?: ''
+        String sonatypeUsername = System.getenv('SONATYPE_USERNAME') ?: project.findProperty('sonatypeOssUsername') ?: ''
+        String sonatypePassword = System.getenv('SONATYPE_PASSWORD') ?: project.findProperty('sonatypeOssPassword') ?: ''
+        String sonatypeStagingProfileId = System.getenv('SONATYPE_STAGING_PROFILE_ID') ?: project.findProperty('sonatypeOssStagingProfileId') ?: ''
         repositories {
-            sonatype { NexusRepository repo ->
-                repo.nexusUrl.set uri('https://s01.oss.sonatype.org/service/local/')
-                repo.snapshotRepositoryUrl.set uri('https://s01.oss.sonatype.org/content/repositories/snapshots/')
-                repo.username.set username
-                repo.password.set password
-                repo.stagingProfileId.set = stagingProfileId
+            sonatype {
+                nexusUrl = uri('https://s01.oss.sonatype.org/service/local/')
+                snapshotRepositoryUrl = uri('https://s01.oss.sonatype.org/content/repositories/snapshots/')
+                username = sonatypeUsername
+                password = sonatypePassword
+                stagingProfileId = sonatypeStagingProfileId
             }
         }
         transitionCheckOptions {
-            maxRetries.set 40
-            delayBetween.set Duration.ofMillis(2000)
+            maxRetries = 40
+            delayBetween = java.time.Duration.ofMillis(2000)
         }
     }
 }

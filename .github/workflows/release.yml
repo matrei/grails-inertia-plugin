@@ -24,17 +24,22 @@ jobs:
 
       - name: --- SET UP JDK ---
         uses: actions/setup-java@v4
-        with:
-          java-version: '11'
-          distribution: 'adopt'
+        with: { java-version: 11, distribution: adopt }
 
       - name: --- GET THE RELEASE VERSION NUMBER FROM RELEASE TAG ---
         id: version
         uses: nowsprinting/check-version-format-action@v3
-        with:
-          prefix: 'v'
+        with: { prefix: v }
+
+      - name: --- GENERATE SECRING FILE ---
+        if: success()
+        env:
+          SECRING_FILE: ${{ secrets.SECRING_FILE }}
+        run: echo "$SECRING_FILE" | base64 -d > ${{ github.workspace }}/secring.gpg
 
       - name: --- PUBLISH TO SONATYPE OSSRH ---
+        if: success()
+        uses: gradle/gradle-build-action@v2
         env:
           SONATYPE_USERNAME: ${{ secrets.SONATYPE_USERNAME }}
           SONATYPE_PASSWORD: ${{ secrets.SONATYPE_PASSWORD }}
@@ -43,11 +48,11 @@ jobs:
           SIGNING_PASSPHRASE: ${{ secrets.SIGNING_PASSPHRASE }}
           SECRING_FILE: ${{ secrets.SECRING_FILE }}
           RELEASE_VERSION: ${{ steps.version.outputs.full_without_prefix }}
-        run: |
-          echo "$SECRING_FILE" | base64 -d > ${GITHUB_WORKSPACE}/secring.gpg
-          echo "Publishing Artifacts for $RELEASE_VERSION"
-          (set -x; ./gradlew --info -Prelease=true -Pversion="${RELEASE_VERSION}" -Psigning.secretKeyRingFile="${GITHUB_WORKSPACE}/secring.gpg" publishToSonatype closeAndReleaseSonatypeStagingRepository --no-daemon)
-          rm ${GITHUB_WORKSPACE}/secring.gpg
+        with:
+          arguments: -Prelease=true -Pversion=${RELEASE_VERSION} -Psigning.secretKeyRingFile=${{ github.workspace }}/secring.gpg publishToSonatype closeAndReleaseSonatypeStagingRepository
+
+      - name: --- DELETE SECRING FILE ---
+        run: rm ${{ github.workspace }}/secring.gpg
 
       - name: --- BUMP PATCH VERSION BY ONE ---
         uses: actions-ecosystem/action-bump-semver@v1
@@ -57,9 +62,9 @@ jobs:
           level: patch
 
       - name: --- UPDATE PROJECT WITH NEW SNAPSHOT VERSION ---
-        run: |
-          echo "Preparing next snapshot: ${{ steps.bump_semver.outputs.new_version }}"
-          ./gradlew snapshotVersion -Pversion="${{ steps.bump_semver.outputs.new_version }}"
+        uses: gradle/gradle-build-action@v2
+        with:
+          arguments: snapshotVersion -Pversion=${{ steps.bump_semver.outputs.new_version }}
 
       - name: --- COMMIT & PUSH THE NEW SNAPSHOT VERSION ---
         uses: actions-js/push@156f2b10c3aa000c44dbe75ea7018f32ae999772 # v1.4
