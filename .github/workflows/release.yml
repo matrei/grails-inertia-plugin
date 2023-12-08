@@ -18,6 +18,7 @@ jobs:
 
       - name: --- CHECKOUT REPOSITORY ---
         uses: actions/checkout@v4
+        with: { token: ${{ secrets.GH_TOKEN }} }
 
       - name: --- VALIDATE GRADLE WRAPPER ---
         uses: gradle/wrapper-validation-action@v1
@@ -53,23 +54,10 @@ jobs:
       - name: --- DELETE SECRING FILE ---
         run: rm ${{ github.workspace }}/secring.gpg
 
-      - name: --- BUMP PATCH VERSION BY ONE ---
-        uses: actions-ecosystem/action-bump-semver@v1
-        id: bump_semver
+      - name: --- RUN POST-RELEASE ---
+        uses: matrei/github-actions/post-release@master
         with:
-          current_version: ${{ steps.version.outputs.full_without_prefix }}
-          level: patch
-
-      - name: --- UPDATE PROJECT WITH NEW SNAPSHOT VERSION ---
-        uses: gradle/gradle-build-action@v2
-        with:
-          arguments: snapshotVersion -Pversion=${{ steps.bump_semver.outputs.new_version }}
-
-      - name: --- COMMIT & PUSH THE NEW SNAPSHOT VERSION ---
-        uses: actions-js/push@156f2b10c3aa000c44dbe75ea7018f32ae999772 # v1.4
-        with:
-          branch: ${{ github.ref_name }}
-          github_token: ${{ secrets.GITHUB_TOKEN }}
-          author_name: ${{ secrets.GIT_USER_NAME }}
-          author_email: ${{ secrets.GIT_USER_EMAIL }}
-          message: "Next development version: ${{ steps.bump_semver.outputs.new_version }}-SNAPSHOT"
+          token: ${{ secrets.GITHUB_TOKEN }}
+        env:
+          RELEASE_VERSION: ${{ steps.version.outputs.full_without_prefix }}
+          SNAPSHOT_SUFFIX: -SNAPSHOT

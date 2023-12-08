@@ -138,7 +138,7 @@ tasks.withType(io.github.gradlenexus.publishplugin.InitializeNexusStagingReposit
     shouldRunAfter tasks.withType(Sign)
 }
 
-if (project.hasProperty('release')) {
+if (isReleaseVersion && project.hasProperty('release')) {
     nexusPublishing {
         String sonatypeUsername = System.getenv('SONATYPE_USERNAME') ?: project.findProperty('sonatypeOssUsername') ?: ''
         String sonatypePassword = System.getenv('SONATYPE_PASSWORD') ?: project.findProperty('sonatypeOssPassword') ?: ''
@@ -155,16 +155,6 @@ if (project.hasProperty('release')) {
         transitionCheckOptions {
             maxRetries = 100
             delayBetween = java.time.Duration.ofSeconds(5)
-        }
-    }
-}
-
-tasks.register('snapshotVersion') {
-    doLast {
-        if (isReleaseVersion) {
-            ant.propertyfile(file: 'gradle.properties') {
-                entry(key: 'version', value: "${project.version}-SNAPSHOT")
-            }
         }
     }
 }
