@@ -18,7 +18,8 @@ jobs:
 
       - name: --- CHECKOUT REPOSITORY ---
         uses: actions/checkout@v4
-        with: { token: ${{ secrets.GH_TOKEN }} }
+        with:
+          token: ${{ secrets.GH_TOKEN }}
 
       - name: --- VALIDATE GRADLE WRAPPER ---
         uses: gradle/wrapper-validation-action@v1
