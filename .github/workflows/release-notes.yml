@@ -20,6 +20,6 @@ jobs:
         run: echo "value=${GITHUB_REF:11}" >> $GITHUB_OUTPUT
       - uses: release-drafter/release-drafter@v5
         env:
-          GITHUB_TOKEN: ${{ secrets.GH_TOKEN }}
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
         with:
           commitish: ${{ steps.extract_branch.outputs.value }}
