@@ -34,10 +34,12 @@ dependencies {
     implementation 'org.grails.plugins:views-json'
 
     compileOnly 'io.micronaut:micronaut-inject-groovy'
-    compileOnly libs.slf4j.nop // Get rid of warning about missing slf4j implementation during compilation
+    compileOnly libs.slf4j.nop // Get rid of warning about missing slf4j implementation during compileGsonViews task
 
     testImplementation 'io.micronaut:micronaut-inject-groovy'
     testImplementation 'org.grails:grails-web-testing-support'
+
+    testRuntimeOnly libs.slf4j.nop // Get rid of warning about missing slf4j implementation during test task
 }
 
 java {
