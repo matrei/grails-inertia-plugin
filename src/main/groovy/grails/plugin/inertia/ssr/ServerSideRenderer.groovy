@@ -2,10 +2,14 @@ package grails.plugin.inertia.ssr
 
 import grails.plugin.inertia.InertiaPage
 import groovy.json.JsonOutput
+import groovy.transform.CompileStatic
+import io.micronaut.context.annotation.Requires
 import jakarta.inject.Inject
-import org.springframework.stereotype.Service
+import jakarta.inject.Singleton
 
-@Service
+@Singleton
+@CompileStatic
+@Requires(property = 'inertia.ssr.enabled', value = 'true')
 class ServerSideRenderer {
 
     private final ServerSideRenderConfig ssr
