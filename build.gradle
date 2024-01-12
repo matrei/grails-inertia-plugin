@@ -1,3 +1,5 @@
+import grails.views.gradle.json.JsonViewCompilerTask
+
 plugins {
 
     id 'eclipse'
@@ -55,7 +57,7 @@ tasks.named('compileTestGroovy').configure {
     dependsOn 'compileGsonViews'
 }
 
-tasks.named('compileGsonViews').configure {
+tasks.named('compileGsonViews', JsonViewCompilerTask) {
     // This is needed for the gson view to be resolved from plugin
     packageName = 'inertia'
 }
