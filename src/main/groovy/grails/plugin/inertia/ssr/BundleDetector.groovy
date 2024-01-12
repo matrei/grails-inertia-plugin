@@ -1,7 +1,9 @@
 package grails.plugin.inertia.ssr
 
 import grails.config.Config
+import groovy.transform.CompileStatic
 
+@CompileStatic
 class BundleDetector {
 
     static String detect(Config config) {
