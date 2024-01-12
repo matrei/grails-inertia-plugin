@@ -1,13 +1,1 @@
-pluginManagement {
-    repositories {
-        mavenLocal()
-        maven { url 'https://repo.grails.org/grails/core' }
-        gradlePluginPortal()
-    }
-    plugins {
-        id 'org.grails.grails-web' version '6.1.1'
-        id 'org.grails.plugins.views-json' version '3.1.1'
-    }
-}
-
 rootProject.name = 'grails-inertia-plugin'

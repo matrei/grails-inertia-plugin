@@ -1,4 +1,6 @@
 import grails.views.gradle.json.JsonViewCompilerTask
+import io.github.gradlenexus.publishplugin.InitializeNexusStagingRepository
+import java.time.Duration
 
 plugins {
 
@@ -21,7 +23,7 @@ group = 'io.github.matrei'
 
 repositories {
     mavenCentral()
-    maven { url 'https://repo.grails.org/grails/core' }
+    maven { url = 'https://repo.grails.org/grails/core' }
 }
 
 dependencies {
@@ -32,112 +34,99 @@ dependencies {
     implementation 'org.grails.plugins:views-json'
 
     compileOnly 'io.micronaut:micronaut-inject-groovy'
+    compileOnly libs.slf4j.nop // Get rid of warning about missing slf4j implementation during compilation
 
     testImplementation 'io.micronaut:micronaut-inject-groovy'
     testImplementation 'org.grails:grails-web-testing-support'
-
 }
 
 java {
-    toolchain {
-        languageVersion = JavaLanguageVersion.of 11
-    }
+    sourceCompatibility = JavaVersion.VERSION_11
     withSourcesJar()
     withJavadocJar()
 }
 
 tasks.withType(Test).configureEach {
     useJUnitPlatform()
-    testLogging {
-        events 'passed', 'skipped', 'failed'
-    }
+    testLogging { events 'passed', 'skipped', 'failed', 'standardOut', 'standardError' }
 }
 
-tasks.named('compileTestGroovy').configure {
+tasks.named('compileTestGroovy') {
     dependsOn 'compileGsonViews'
 }
 
 tasks.named('compileGsonViews', JsonViewCompilerTask) {
-    // This is needed for the gson view to be resolved from plugin
-    packageName = 'inertia'
+    packageName = 'inertia' // This is needed for the gson view to be resolved from plugin
 }
 tasks.withType(Groovydoc).configureEach {
     dependsOn 'compileGsonViews'
 }
 
 tasks.named('bootJar') {
-    enabled = false
+    enabled = false // Plugins should not create a bootJar
 }
 tasks.named('jar', Jar) {
-    enabled = true
-    archiveClassifier = ''
+    enabled = true // Enable the jar task again, as the bootJar task has been disabled
+    archiveClassifier = '' // Remove '-plain' suffix from jar file name
 }
 
-ext.pomInfo = {
-    delegate.name 'Grails Adapter for Inertia.js'
-    delegate.description 'Grails plugin with server-side adapter for Inertia.js'
-    delegate.url 'https://github.com/matrei/grails-inertia-plugin'
-    delegate.licenses {
-        delegate.license {
-            delegate.name 'The Apache License, Version 2.0'
-            delegate.url 'https://www.apache.org/licenses/LICENSE-2.0.txt'
-        }
-    }
-    delegate.developers {
-        delegate.developer {
-            delegate.id 'matrei'
-            delegate.name 'Mattias Reichel'
-            delegate.email 'mattias.reichel@gmail.com'
-        }
-    }
-    delegate.scm {
-        delegate.connection 'scm:git:git://github.com/matrei/grails-inertia-plugin.git'
-        delegate.developerConnection 'scm:git:ssh://github.com:matrei/grails-inertia-plugin.git'
-        delegate.url 'https://github.com/matrei/grails-inertia-plugin'
-    }
-}
-
+def javaComponent = components.named('java')
 publishing {
     publications {
-        maven(MavenPublication) {
-
-            from components.java
-
+        create('inertiaPlugin', MavenPublication) {
+            from javaComponent.get()
             versionMapping {
-                usage('java-api') {
-                    fromResolutionOf('runtimeClasspath')
+                usage('java-api') { fromResolutionOf('runtimeClasspath') }
+                usage('java-runtime') { fromResolutionResult() }
+            }
+            pom {
+                name = 'Grails Adapter for Inertia.js'
+                description = 'Grails plugin with server-side adapter for Inertia.js'
+                url = 'https://github.com/matrei/grails-inertia-plugin'
+                licenses {
+                    license {
+                        name = 'The Apache License, Version 2.0'
+                        url = 'https://www.apache.org/licenses/LICENSE-2.0.txt'
+                    }
                 }
-                usage('java-runtime') {
-                    fromResolutionResult()
+                developers {
+                    developer {
+                        id = 'matrei'
+                        name = 'Mattias Reichel'
+                        email = 'mattias.reichel@gmail.com'
+                    }
+                }
+                scm {
+                    connection = 'scm:git:git://github.com/matrei/grails-inertia-plugin.git'
+                    developerConnection = 'scm:git:ssh://github.com:matrei/grails-inertia-plugin.git'
+                    url = 'https://github.com/matrei/grails-inertia-plugin'
                 }
             }
-
+            // dependency management shouldn't be included
             pom.withXml {
-                def xml = asNode()
-                xml.children().last() + pomInfo
-                // dependency management shouldn't be included
-                def n = xml.get('dependencyManagement')
-                if (n) xml.remove(n)
+                def root = it.asElement()
+                root.getElementsByTagName('dependencyManagement').each { root.removeChild(it) }
             }
         }
     }
 }
 
-ext.set 'signing.keyId', project.findProperty('signing.keyId') ?: System.getenv('SIGNING_KEY')
-ext.set 'signing.password', project.findProperty('signing.password') ?: System.getenv('SIGNING_PASSPHRASE')
-ext.set 'signing.secretKeyRingFile', project.findProperty('signing.secretKeyRingFile') ?: (System.getenv('GITHUB_WORKSPACE') ? "${System.getenv('GITHUB_WORKSPACE')}/secring.gpg" : "${System.getProperty('user.home')}/.gnupg/secring.gpg")
+ext.set('signing.keyId', project.findProperty('signing.keyId') ?: System.getenv('SIGNING_KEY'))
+ext.set('signing.password', project.findProperty('signing.password') ?: System.getenv('SIGNING_PASSPHRASE'))
+ext.set('signing.secretKeyRingFile', project.findProperty('signing.secretKeyRingFile') ?: (System.getenv('GITHUB_WORKSPACE') ? "${System.getenv('GITHUB_WORKSPACE')}/secring.gpg" : "${System.getProperty('user.home')}/.gnupg/secring.gpg"))
+ext.set('isReleaseVersion', !version.toString().endsWith('-SNAPSHOT'))
 
-ext.set 'isReleaseVersion', !version.toString().endsWith('-SNAPSHOT')
-
+def mavenPublication = publishing.publications.named('inertiaPlugin')
 afterEvaluate {
     signing {
-        required { isReleaseVersion }
-        sign publishing.publications.maven
+        required = isReleaseVersion
+        sign mavenPublication.get()
     }
 }
+
 //do not generate extra load on Nexus with new staging repository if signing fails
-tasks.withType(io.github.gradlenexus.publishplugin.InitializeNexusStagingRepository).configureEach {
-    shouldRunAfter tasks.withType(Sign)
+tasks.withType(InitializeNexusStagingRepository).configureEach {
+    shouldRunAfter = tasks.withType(Sign)
 }
 
 if (isReleaseVersion && project.hasProperty('release')) {
@@ -155,8 +144,8 @@ if (isReleaseVersion && project.hasProperty('release')) {
             }
         }
         transitionCheckOptions {
-            maxRetries = 100
-            delayBetween = java.time.Duration.ofSeconds(5)
+            maxRetries = 100 // Default 60
+            delayBetween = Duration.ofSeconds(5) // Default 10
         }
     }
 }

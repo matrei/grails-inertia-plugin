@@ -4,11 +4,12 @@ plugins {
 
 repositories {
     mavenCentral()
-    maven { url 'https://repo.grails.org/grails/core' }
+    maven { url = 'https://repo.grails.org/grails/core' }
 }
 
 dependencies {
-    implementation libs.grails.gradle.plugin
-    implementation libs.nexus.publish.gradle.plugin
-    implementation libs.grails.views.gradle.plugin
+
+    implementation buildsrcLibs.grails.gradle.plugin
+    implementation buildsrcLibs.nexus.publish.gradle.plugin
+    implementation buildsrcLibs.grails.views.gradle.plugin
 }
