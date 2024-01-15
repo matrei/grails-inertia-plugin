@@ -76,7 +76,7 @@ class BootStrap {
         int tryNumber = 0
         while (!portOpen && ++tryNumber <= maxRetries) {
             log.debug "Checking if SSR server is up on $host:$port ($tryNumber/$maxRetries)..."
-            try (Socket socket = new Socket(host, port)) {
+            try (Socket ignore = new Socket(host, port)) {
                 // If the socket is successfully created, the port is open
                 log.debug "SSR server is up!"
                 portOpen = true
