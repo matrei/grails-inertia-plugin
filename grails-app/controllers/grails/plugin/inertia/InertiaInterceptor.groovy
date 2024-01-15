@@ -44,8 +44,6 @@ class InertiaInterceptor implements GrailsConfigurationAware {
     private String manifestHash = 'not yet calculated'
     private volatile Object manifestObject
 
-    private boolean ssrEnabled
-
     private static final String CONTENT_TYPE_JSON = 'application/json;charset=utf-8'
     private static final String CONTENT_TYPE_HTML = 'text/html;charset=utf-8'
 
@@ -131,6 +129,5 @@ class InertiaInterceptor implements GrailsConfigurationAware {
             manifestLocation = co.getRequiredProperty'inertia.manifest.location'
             loadManifest()
         }
-        ssrEnabled = co.getProperty'inertia.ssr.enabled', Boolean, false
     }
 }
