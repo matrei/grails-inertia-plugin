@@ -51,6 +51,8 @@ java {
 tasks.withType(Test).configureEach {
     useJUnitPlatform()
     testLogging { events 'passed', 'skipped', 'failed', 'standardOut', 'standardError' }
+    reports.html.required = false
+    reports.junitXml.required = false
 }
 
 tasks.named('compileTestGroovy') {
