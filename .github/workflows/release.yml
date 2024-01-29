@@ -22,7 +22,7 @@ jobs:
           token: ${{ secrets.GH_TOKEN }}
 
       - name: --- VALIDATE GRADLE WRAPPER ---
-        uses: gradle/wrapper-validation-action@v1
+        uses: gradle/wrapper-validation-action@v2
 
       - name: --- SET UP JDK ---
         uses: actions/setup-java@v4
