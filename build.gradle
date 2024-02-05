@@ -135,9 +135,9 @@ tasks.withType(InitializeNexusStagingRepository).configureEach {
 
 if (isReleaseVersion && project.hasProperty('release')) {
     nexusPublishing {
-        String sonatypeUsername = System.getenv('SONATYPE_USERNAME') ?: project.findProperty('sonatypeOssUsername') ?: ''
-        String sonatypePassword = System.getenv('SONATYPE_PASSWORD') ?: project.findProperty('sonatypeOssPassword') ?: ''
-        String sonatypeStagingProfileId = System.getenv('SONATYPE_STAGING_PROFILE_ID') ?: project.findProperty('sonatypeOssStagingProfileId') ?: ''
+        String sonatypeUsername = project.findProperty('sonatypeOssUsername') ?: ''
+        String sonatypePassword = project.findProperty('sonatypeOssPassword') ?: ''
+        String sonatypeStagingProfileId = project.findProperty('sonatypeOssStagingProfileId') ?: ''
         repositories {
             sonatype {
                 nexusUrl = uri('https://s01.oss.sonatype.org/service/local/')
