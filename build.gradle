@@ -123,7 +123,7 @@ ext.set('isReleaseVersion', !version.toString().endsWith('-SNAPSHOT'))
 def mavenPublication = publishing.publications.named('inertiaPlugin')
 afterEvaluate {
     signing {
-        required = isReleaseVersion
+        required = { isReleaseVersion }
         sign mavenPublication.get()
     }
 }
