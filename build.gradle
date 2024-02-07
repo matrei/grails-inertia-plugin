@@ -77,7 +77,7 @@ tasks.named('jar', Jar) {
 def javaComponent = components.named('java')
 publishing {
     publications {
-        create('inertiaPlugin', MavenPublication) {
+        register('inertiaPlugin', MavenPublication) {
             from javaComponent.get()
             versionMapping {
                 usage('java-api') { fromResolutionOf('runtimeClasspath') }
@@ -115,9 +115,8 @@ publishing {
     }
 }
 
-ext.set('signing.keyId', project.findProperty('signing.keyId') ?: System.getenv('SIGNING_KEY'))
-ext.set('signing.password', project.findProperty('signing.password') ?: System.getenv('SIGNING_PASSPHRASE'))
-ext.set('signing.secretKeyRingFile', project.findProperty('signing.secretKeyRingFile') ?: (System.getenv('GITHUB_WORKSPACE') ? "${System.getenv('GITHUB_WORKSPACE')}/secring.gpg" : "${System.getProperty('user.home')}/.gnupg/secring.gpg"))
+ext.set('signing.keyId', System.getenv('SIGNING_KEY'))
+ext.set('signing.password', System.getenv('SIGNING_PASSPHRASE'))
 ext.set('isReleaseVersion', !version.toString().endsWith('-SNAPSHOT'))
 
 def mavenPublication = publishing.publications.named('inertiaPlugin')
