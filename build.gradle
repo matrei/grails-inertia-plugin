@@ -10,6 +10,7 @@ plugins {
     id 'groovy'
     id 'java-library'
 
+    id 'org.grails.grails-gsp'
     id 'org.grails.grails-web'
     id 'org.grails.plugins.views-json'
     id 'org.grails.grails-plugin'
@@ -30,8 +31,9 @@ dependencies {
 
     implementation 'org.grails:grails-logging'
     implementation 'org.grails:grails-plugin-interceptors'
-    implementation 'org.grails.plugins:gsp'
     implementation 'org.grails.plugins:views-json'
+
+    runtimeOnly 'org.grails.plugins:gsp'
 
     compileOnly 'io.micronaut:micronaut-inject-groovy'
     compileOnly libs.slf4j.nop // Get rid of warning about missing slf4j implementation during compileGsonViews task
