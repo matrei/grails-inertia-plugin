@@ -3,10 +3,6 @@ import io.github.gradlenexus.publishplugin.InitializeNexusStagingRepository
 import java.time.Duration
 
 plugins {
-
-    id 'eclipse'
-    id 'idea'
-
     id 'groovy'
     id 'java-library'
 
