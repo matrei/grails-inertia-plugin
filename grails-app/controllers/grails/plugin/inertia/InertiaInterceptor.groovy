@@ -21,6 +21,7 @@ import grails.util.Environment
 import grails.util.Holders
 import groovy.json.JsonSlurper
 import groovy.transform.CompileStatic
+import groovy.util.logging.Slf4j
 import io.micronaut.http.HttpStatus
 
 import static Inertia.INERTIA_ATTRIBUTE_MANIFEST
@@ -37,6 +38,7 @@ import static grails.web.http.HttpHeaders.VARY
  * @author Mattias Reichel
  * @since 1.0.0
  */
+@Slf4j
 @CompileStatic
 class InertiaInterceptor implements GrailsConfigurationAware {
 

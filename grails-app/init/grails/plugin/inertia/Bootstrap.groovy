@@ -19,6 +19,7 @@ import grails.core.GrailsApplication
 import grails.plugin.inertia.ssr.BundleDetector
 import grails.plugin.inertia.ssr.ServerSideRenderConfig
 import groovy.transform.CompileStatic
+import groovy.util.logging.Slf4j
 
 /**
  * A class that handles startup and shutdown tasks.
@@ -26,6 +27,7 @@ import groovy.transform.CompileStatic
  * @author Mattias Reichel
  * @since 1.0.0
  */
+@Slf4j
 @CompileStatic
 class BootStrap {
 

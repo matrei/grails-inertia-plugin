@@ -29,7 +29,6 @@ repositories {
 
 dependencies {
 
-    implementation 'org.grails:grails-logging'
     implementation 'org.grails:grails-plugin-interceptors'
     implementation 'org.grails.plugins:views-json'
 
