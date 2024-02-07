@@ -62,7 +62,7 @@ jobs:
       - name: --- RUN POST-RELEASE ---
         uses: matrei/github-actions/post-release@main
         with:
-          token: ${{ secrets.GITHUB_TOKEN }}
+          token: ${{ secrets.GH_TOKEN }}
         env:
           RELEASE_VERSION: ${{ steps.version.outputs.full_without_prefix }}
           SNAPSHOT_SUFFIX: -SNAPSHOT
