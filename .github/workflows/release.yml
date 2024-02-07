@@ -60,7 +60,7 @@ jobs:
         run: rm ${{ github.workspace }}/secring.gpg
 
       - name: --- RUN POST-RELEASE ---
-        uses: matrei/github-actions/post-release@master
+        uses: matrei/github-actions/post-release@main
         with:
           token: ${{ secrets.GITHUB_TOKEN }}
         env:
