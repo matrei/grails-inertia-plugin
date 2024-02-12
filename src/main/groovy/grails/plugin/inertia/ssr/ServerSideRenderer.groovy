@@ -9,7 +9,7 @@ import jakarta.inject.Singleton
 
 @Singleton
 @CompileStatic
-@Requires(property = 'inertia.ssr.enabled', value = 'true') // TODO: This doesn't work when true is set on command line via: java -jar application.war --inertia.ssr.enabled=true
+@Requires(property = 'inertia.ssr.enabled', value = 'true')
 class ServerSideRenderer {
 
     private final ServerSideRenderConfig ssr
