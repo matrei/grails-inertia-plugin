@@ -16,16 +16,9 @@ jobs:
 
     steps:
 
-      - name: --- CHECKOUT REPOSITORY ---
-        uses: actions/checkout@v4
-        with:
-          token: ${{ secrets.GITHUB_TOKEN }}
-
-      - name: --- VALIDATE GRADLE WRAPPER ---
-        uses: gradle/wrapper-validation-action@v2
-
-      - name: --- SET UP JDK ---
-        uses: actions/setup-java@v4
+      - uses: actions/checkout@v4
+      - uses: gradle/wrapper-validation-action@v2
+      - uses: actions/setup-java@v4
         with: { java-version: 11, distribution: temurin }
 
       - name: --- GET THE RELEASE VERSION NUMBER FROM RELEASE TAG ---
