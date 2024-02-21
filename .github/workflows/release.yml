@@ -26,7 +26,7 @@ jobs:
 
       - name: --- SET UP JDK ---
         uses: actions/setup-java@v4
-        with: { java-version: 11, distribution: adopt }
+        with: { java-version: 11, distribution: temurin }
 
       - name: --- GET THE RELEASE VERSION NUMBER FROM RELEASE TAG ---
         id: version
