@@ -1,8 +1,16 @@
 [versions]
 grails = '6.1.2'
+grails-gsp = '6.2.0'
+grails-testing-support = '3.1.2'
+grails-views = '3.1.2'
+micronaut = '3.10.3'
 slf4j = '1.7.36'
 spring = '5.3.32'
 
 [libraries]
+grails-gsp = { module = 'org.grails.plugins:gsp', version.ref = 'grails-gsp' }
 grails-interceptors = { module = 'org.grails:grails-interceptors', version.ref = 'grails' }
+grails-testing-support-web = { module = 'org.grails:grails-web-testing-support', version.ref = 'grails-testing-support' }
+grails-views-json = { module = 'org.grails.plugins:views-json', version.ref = 'grails-views' }
+micronaut-inject-groovy = { module = 'io.micronaut:micronaut-inject-groovy', version.ref = 'micronaut' }
 slf4j-nop = { module = 'org.slf4j:slf4j-nop', version.ref = 'slf4j' }
