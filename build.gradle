@@ -11,6 +11,8 @@ plugins {
 }
 
 group = 'io.github.matrei'
+
+ext.set('spring.version', libs.versions.spring.get())
 ext.set('grailsVersion', libs.versions.grails.get())
 apply plugin: 'org.grails.grails-gsp'
 apply plugin: 'org.grails.grails-web'
