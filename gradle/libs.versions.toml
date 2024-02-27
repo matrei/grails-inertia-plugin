@@ -9,7 +9,7 @@ spring = '5.3.32'
 
 [libraries]
 grails-gsp = { module = 'org.grails.plugins:gsp', version.ref = 'grails-gsp' }
-grails-interceptors = { module = 'org.grails:grails-interceptors', version.ref = 'grails' }
+grails-interceptors = { module = 'org.grails:grails-plugin-interceptors', version.ref = 'grails' }
 grails-testing-support-web = { module = 'org.grails:grails-web-testing-support', version.ref = 'grails-testing-support' }
 grails-views-json = { module = 'org.grails.plugins:views-json', version.ref = 'grails-views' }
 micronaut-inject-groovy = { module = 'io.micronaut:micronaut-inject-groovy', version.ref = 'micronaut' }
