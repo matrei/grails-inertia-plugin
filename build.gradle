@@ -5,18 +5,17 @@ import java.time.Duration
 plugins {
     id 'groovy'
     id 'java-library'
-
-    id 'org.grails.grails-gsp'
-    id 'org.grails.grails-web'
-    id 'org.grails.plugins.views-json'
-    id 'org.grails.grails-plugin'
-
     id 'io.github.gradle-nexus.publish-plugin'
     id 'maven-publish'
     id 'signing'
 }
 
 group = 'io.github.matrei'
+ext.set('grailsVersion', libs.versions.grails.get())
+apply plugin: 'org.grails.grails-gsp'
+apply plugin: 'org.grails.grails-web'
+apply plugin: 'org.grails.grails-plugin'
+apply plugin: 'org.grails.plugins.views-json'
 
 repositories {
     mavenCentral()
@@ -25,7 +24,7 @@ repositories {
 
 dependencies {
 
-    implementation 'org.grails:grails-plugin-interceptors'
+    implementation libs.grails.interceptors
     implementation 'org.grails.plugins:views-json'
 
     runtimeOnly 'org.grails.plugins:gsp'

@@ -1,5 +1,7 @@
 [versions]
+grails = '6.1.2'
 slf4j = '1.7.36'
 
 [libraries]
+grails-interceptors = { module = 'org.grails:grails-interceptors', version.ref = 'grails' }
 slf4j-nop = { module = 'org.slf4j:slf4j-nop', version.ref = 'slf4j' }
