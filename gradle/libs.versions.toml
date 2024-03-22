@@ -3,7 +3,7 @@ grails = '6.1.2'
 grails-gsp = '6.2.1'
 grails-testing-support = '3.2.1'
 grails-views = '3.1.2'
-micronaut = '3.10.3'
+micronaut = '4.3.12'
 slf4j = '1.7.36'
 spring = '5.3.32'
 
