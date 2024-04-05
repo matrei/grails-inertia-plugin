@@ -1,5 +1,5 @@
 [versions]
-grails-gradle-plugin = '6.1.2'
+grails-gradle-plugin = '6.2.0'
 grails-gsp = '6.2.1'
 grails-views = '3.2.2'
 nexus-publish-gradle-plugin = '1.3.0'
