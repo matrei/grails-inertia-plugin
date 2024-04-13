@@ -17,6 +17,7 @@ jobs:
       - uses: gradle/actions/wrapper-validation@v3
       - uses: actions/setup-java@v4
         with: { java-version: 11, distribution: temurin }
+      - uses: gradle/actions/setup-gradle@v3
 
       - name: Get the release version from the release tag and set it in gradle.properties
         uses: matrei/github-actions/pre-release@main
@@ -29,19 +30,18 @@ jobs:
 
       - name: Publish release artifacts to Sonatype
         if: success()
-        uses: gradle/actions/setup-gradle@v3
         env:
           ORG_GRADLE_PROJECT_sonatypeOssUsername: ${{ secrets.SONATYPE_USERNAME }}
           ORG_GRADLE_PROJECT_sonatypeOssPassword: ${{ secrets.SONATYPE_PASSWORD }}
           ORG_GRADLE_PROJECT_sonatypeOssStagingProfileId: ${{ secrets.SONATYPE_STAGING_PROFILE_ID }}
           SIGNING_KEY: ${{ secrets.SIGNING_KEY }}
           SIGNING_PASSPHRASE: ${{ secrets.SIGNING_PASSPHRASE }}
-        with:
-          arguments: |
-            -Prelease=true
-            -Psigning.secretKeyRingFile=${{ github.workspace }}/secring.gpg
-            publishToSonatype
-            closeAndReleaseSonatypeStagingRepository
+        run: |
+          ./gradlew
+          -Prelease=true
+          -Psigning.secretKeyRingFile=${{ github.workspace }}/secring.gpg
+          publishToSonatype
+          closeAndReleaseSonatypeStagingRepository
 
       - name: Set the next snapshot version in gradle.properties
         if: success()
