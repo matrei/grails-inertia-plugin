@@ -5,7 +5,6 @@ grails-testing-support = '3.2.2'
 grails-views = '3.2.3'
 micronaut = '3.10.4'
 slf4j = '1.7.36'
-spring = '5.3.32'
 
 [libraries]
 grails-gsp = { module = 'org.grails.plugins:gsp', version.ref = 'grails-gsp' }
