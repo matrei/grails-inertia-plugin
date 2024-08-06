@@ -5,7 +5,7 @@ plugins {
 
 develocity {
     buildScan {
-        publishing.onlyIf { System.getenv('CI') }
+        publishing.onlyIf { System.getenv('CI') == 'true' }
         uploadInBackground = false
     }
 }
