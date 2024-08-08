@@ -1,4 +1,4 @@
-name: Release
+name: "Release"
 
 on:
   release:
@@ -13,25 +13,28 @@ jobs:
       GIT_USER_EMAIL: mattias.reichel@gmail.com
 
     steps:
-      - uses: actions/checkout@v4
-      - uses: actions/setup-java@v4
+      - name: "📥 Checkout repository"
+        uses: actions/checkout@v4
+      - name: "☕️ Set up JDK"
+        uses: actions/setup-java@v4
         with: { java-version: 11, distribution: temurin }
-      - uses: gradle/actions/setup-gradle@v4
+      - name: "🐘 Set up Gradle"
+        uses: gradle/actions/setup-gradle@v4
         with:
           build-scan-publish: true
           build-scan-terms-of-use-url: "https://gradle.com/terms-of-service"
           build-scan-terms-of-use-agree: "yes"
 
-      - name: Get the release version from the release tag and set it in gradle.properties
+      - name: "🔢 Get the release version from the release tag and set it in gradle.properties"
         uses: matrei/github-actions/pre-release@main
 
-      - name: Generate key file for artifact signing
+      - name: "🔐 Generate key file for artifact signing"
         if: success()
         env:
           SECRING_FILE: ${{ secrets.SECRING_FILE }}
         run: echo "$SECRING_FILE" | base64 -d > ${{ github.workspace }}/secring.gpg
 
-      - name: Publish release artifacts to Sonatype
+      - name: "📤 Publish release artifacts to Sonatype"
         if: success()
         env:
           ORG_GRADLE_PROJECT_sonatypeOssUsername: ${{ secrets.SONATYPE_USERNAME }}
@@ -46,6 +49,6 @@ jobs:
           publishToSonatype
           closeAndReleaseSonatypeStagingRepository
 
-      - name: Set the next snapshot version in gradle.properties
+      - name: "🔢 Set the next snapshot version in gradle.properties"
         if: success()
         uses: matrei/github-actions/post-release@main
