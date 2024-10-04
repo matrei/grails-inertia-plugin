@@ -1,6 +1,6 @@
 [versions]
 grails = '6.2.0'
-grails-gsp = '6.2.1'
+grails-gsp = '6.2.3'
 grails-testing-support = '3.2.2'
 grails-views = '3.2.3'
 micronaut = '3.10.4'
