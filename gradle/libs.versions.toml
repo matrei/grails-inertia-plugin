@@ -1,5 +1,5 @@
 [versions]
-grails = '6.2.0'
+grails = '6.2.2'
 grails-gsp = '6.2.4'
 grails-testing-support = '3.2.2'
 grails-views = '3.2.3'
