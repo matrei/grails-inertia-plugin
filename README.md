@@ -1,16 +1,17 @@
-# Grails Adapter for Inertia.js
+# 🧩 Grails Adapter for Inertia.js
 
 [![Maven Central](https://img.shields.io/maven-central/v/io.github.matrei/grails-inertia-plugin.svg?label=Maven%20Central)](https://central.sonatype.com/artifact/io.github.matrei/grails-inertia-plugin) [![Java CI](https://github.com/matrei/grails-inertia-plugin/actions/workflows/gradle-check.yml/badge.svg?event=push)](https://github.com/matrei/grails-inertia-plugin/actions/workflows/gradle-check.yml)
 
 Grails plugin for using [Inertia.js](https://inertiajs.com/) to build single-page apps without building an API.
 
-## What is Inertia.js?
+## ❔ What is Inertia.js?
 
 Inertia.js lets you, in its own words, *“quickly build modern single-page React, Vue and Svelte apps using classic server-side routing and controllers”.*
 
 Using Inertia.js allows using your favorite MVC server-side framework (Grails obviously) with your favorite client-side SPA framework - no need to build a separate API.
 
-## Demo application
+## 🎬 Demo application
+
 ***Ping CRM*** is an application using this plugin\
 **[Source](https://github.com/matrei/pingcrm-grails) | [Live Demo](https://pingcrm.mattiasreichel.com)**
 
@@ -19,7 +20,8 @@ Using Inertia.js allows using your favorite MVC server-side framework (Grails ob
 
 ![Screenshot of the Ping CRM application](screenshot.png)
 
-## Plugin Installation
+## 📦 Plugin Installation
+
 If you don't have an application already:
 ```shell
 grails create-app myapp
@@ -151,7 +153,8 @@ And run the following command to install the client dependencies:
 npm install
 ```
 
-## Usage
+## 📖 Usage
+
 In your Grails controllers, you can now select which JavaScript Page Component to render and pass the values of the props to it.
 ```groovy
 // myapp/grails-app/controllers/myapp/BookController.groovy
@@ -196,7 +199,8 @@ npm run build
 ./gradlew integrationTest
 ./gradlew bootJar
 ```
-### SSR
+### ⚙️ SSR
+
 To enable server-side rendering, make sure a Node.js version compatible with your client-side app is installed and added
 to the PATH on your system and add the following to your `application.yml`:
 ```yaml
