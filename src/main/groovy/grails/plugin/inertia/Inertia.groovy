@@ -1,5 +1,5 @@
 /*
- * Copyright 2022-2024 original authors
+ * Copyright 2022-present original authors
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -15,19 +15,21 @@
  */
 package grails.plugin.inertia
 
-import grails.plugin.inertia.ssr.ServerSideRenderConfig
-import grails.plugin.inertia.ssr.ServerSideRenderer
+import groovy.json.JsonSlurper
+import groovy.transform.CompileStatic
+
+import jakarta.servlet.http.HttpServletRequest
+import jakarta.servlet.http.HttpServletResponse
+
+import org.springframework.web.servlet.ModelAndView
+
 import grails.plugin.json.view.JsonViewTemplateEngine
 import grails.util.Holders
 import grails.web.mvc.FlashScope
-import groovy.json.JsonSlurper
-import groovy.transform.CompileStatic
-import org.springframework.web.servlet.ModelAndView
 
-import javax.servlet.http.HttpServletRequest
-import javax.servlet.http.HttpServletResponse
+import grails.plugin.inertia.ssr.ServerSideRenderer
 
-import static javax.servlet.http.HttpServletResponse.SC_CONFLICT
+import static jakarta.servlet.http.HttpServletResponse.SC_CONFLICT
 import static org.grails.web.util.WebUtils.retrieveGrailsWebRequest as webRequest
 
 /**
@@ -59,12 +61,16 @@ class Inertia {
 
 
     @SuppressWarnings('unused')
-    static ModelAndView render(String component) { render component, [:], [:] }
+    static ModelAndView render(String component) {
+        render(component, [:], [:])
+    }
     @SuppressWarnings('unused')
-    static ModelAndView render(String component, Map props) { render component, props, [:] }
+    static ModelAndView render(String component, Map props) {
+        render(component, props, [:])
+    }
     static ModelAndView render(String component, Map props, Map viewData) {
-        request.setAttribute INERTIA_ATTRIBUTE_NAME, true
-        renderInternal component, chainModel + sharedData + props, viewData
+        request.setAttribute(INERTIA_ATTRIBUTE_NAME, true)
+        renderInternal(component, chainModel + sharedData + props, viewData)
     }
 
 /*
@@ -72,17 +78,17 @@ class Inertia {
 */
 
     static void location(String url) {
-        response.setHeader INERTIA_HEADER_LOCATION, url
+        response.setHeader(INERTIA_HEADER_LOCATION, url)
         response.status = SC_CONFLICT
     }
 
     @SuppressWarnings('unused')
     static void cancel() {
-        request.setAttribute INERTIA_ATTRIBUTE_CANCEL_INERTIA, true
+        request.setAttribute(INERTIA_ATTRIBUTE_CANCEL_INERTIA, true)
     }
 
     static boolean getIsCanceled() {
-        request.getAttribute INERTIA_ATTRIBUTE_CANCEL_INERTIA
+        request.getAttribute(INERTIA_ATTRIBUTE_CANCEL_INERTIA)
     }
 
     private static ModelAndView renderInternal(String component, Map props, Map viewData) {
@@ -92,26 +98,26 @@ class Inertia {
     }
 
     private static ModelAndView renderJson(String component, Map model) {
-        def jsonModel = createJsonModel component, model
+        def jsonModel = createJsonModel(component, model)
         new ModelAndView(INERTIA_VIEW_JSON, jsonModel)
     }
 
     private static ModelAndView renderHtml(String component, Map props, Map viewData) {
 
         if (ssrEnabled) {
-            def page = createInertiaPageModel component, props
-            def ssrResult = ssrRenderer.render page
+            def page = createInertiaPageModel(component, props)
+            def ssrResult = ssrRenderer.render(page)
             if (ssrResult) {
-                def ssrResultJson = new JsonSlurper().parseText ssrResult
-                request.setAttribute INERTIA_ATTRIBUTE_SSR_RESPONSE, ssrResultJson
+                def ssrResultJson = new JsonSlurper().parseText(ssrResult)
+                request.setAttribute(INERTIA_ATTRIBUTE_SSR_RESPONSE, ssrResultJson)
                 return new ModelAndView(INERTIA_VIEW_HTML, (viewData ?: [:]))
             }
         }
 
-        def jsonTemplate = jsonViewTemplateEngine.resolveTemplate INERTIA_VIEW_JSON
-        def jsonModel = createJsonModel component, props
+        def jsonTemplate = jsonViewTemplateEngine.resolveTemplate(INERTIA_VIEW_JSON)
+        def jsonModel = createJsonModel(component, props)
         def jsonString = jsonTemplate.make(jsonModel).writeTo(new StringWriter()).toString()
-        request.setAttribute INERTIA_ATTRIBUTE_PAGE, jsonString
+        request.setAttribute(INERTIA_ATTRIBUTE_PAGE, jsonString)
         new ModelAndView(INERTIA_VIEW_HTML, (viewData ?: [:]))
     }
 
@@ -131,7 +137,7 @@ class Inertia {
     }
 
     static void setSharedData(Map data) {
-        request.setAttribute INERTIA_SHARED_DATA, data
+        request.setAttribute(INERTIA_SHARED_DATA, data)
     }
 
     static Map getChainModel() {
@@ -143,15 +149,25 @@ class Inertia {
     }
 
     static JsonViewTemplateEngine getJsonViewTemplateEngine() {
-        Holders.getApplicationContext().getBean JSON_VIEW_TEMPLATE_ENGINE_BEAN_NAME, JsonViewTemplateEngine
+        Holders.getApplicationContext().getBean(
+                JSON_VIEW_TEMPLATE_ENGINE_BEAN_NAME,
+                JsonViewTemplateEngine
+        )
     }
 
     static ServerSideRenderer getSsrRenderer() {
-        Holders.getApplicationContext().getBean SSR_RENDERER_BEAN_NAME, ServerSideRenderer
+        Holders.getApplicationContext().getBean(
+                SSR_RENDERER_BEAN_NAME,
+                ServerSideRenderer
+        )
     }
 
     static boolean isSsrEnabled() {
-        Holders.getConfig().getProperty("${ServerSideRenderConfig.PREFIX}.enabled", Boolean, false)
+        Holders.getConfig().getProperty(
+                'inertia.ssr.enabled',
+                Boolean,
+                false
+        )
     }
 
     static FlashScope getFlash() {
@@ -167,11 +183,11 @@ class Inertia {
     }
 
     static String getInertiaAssetVersion() {
-        request.getAttribute INERTIA_ATTRIBUTE_VERSION
+        request.getAttribute(INERTIA_ATTRIBUTE_VERSION)
     }
 
     static boolean getIsInertiaRequest() {
-        request.getHeader INERTIA_HEADER
+        request.getHeader(INERTIA_HEADER)
     }
 
     static HttpServletRequest getRequest() {

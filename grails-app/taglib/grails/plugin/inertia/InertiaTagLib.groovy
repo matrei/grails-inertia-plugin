@@ -1,5 +1,5 @@
 /*
- * Copyright 2022-2024 original authors
+ * Copyright 2022-present original authors
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -16,6 +16,7 @@
 package grails.plugin.inertia
 
 import groovy.transform.CompileStatic
+
 import org.grails.encoder.CodecLookup
 
 /**
@@ -32,7 +33,7 @@ class InertiaTagLib {
     final static String namespace = 'inertia'
 
     Closure app = { Map<String,Object> attrs, Closure body ->
-        if(ssrResponse) {
+        if (ssrResponse) {
             out << ssrResponse.body
         } else {
             String tagName = attrs.tagName ?: 'div'
@@ -43,7 +44,7 @@ class InertiaTagLib {
     }
 
     Closure head = { Map<String,Object> attrs, Closure body ->
-        if(ssrResponse) {
+        if (ssrResponse) {
             ssrResponse.head.each { headElement ->
                 out << headElement
             }

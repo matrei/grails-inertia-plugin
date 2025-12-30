@@ -2,16 +2,73 @@ plugins {
     id 'groovy-gradle-plugin'
 }
 
+def versions = new Properties()
+file('../gradle.properties').withInputStream {
+    versions.load(it)
+}
+
 repositories {
     mavenCentral()
-    maven { url = 'https://repo.grails.org/grails/core' }
+    maven { url = 'https://repo.grails.org/grails/restricted' }
+    maven {
+        url = 'https://repository.apache.org/content/repositories/staging'
+        content {
+            includeGroupAndSubgroups('org.apache.grails')
+            includeGroupAndSubgroups('org.apache.groovy')
+        }
+        mavenContent {
+            releasesOnly()
+        }
+    }
+    maven {
+        url = 'https://repository.apache.org/content/repositories/snapshots'
+        content {
+            includeGroupAndSubgroups('org.apache.grails')
+            includeGroupAndSubgroups('org.apache.groovy')
+        }
+        mavenContent {
+            snapshotsOnly()
+        }
+    }
 }
 
 dependencies {
+    implementation platform("org.apache.grails:grails-bom:${versions['grailsVersion']}")
+    implementation 'org.apache.grails:grails-gradle-plugins'
+    implementation 'org.apache.grails.gradle:grails-publish'
+}
 
-    implementation buildsrcLibs.nexus.publish.gradle.plugin
-    implementation buildsrcLibs.grails.views.gradle.plugin
-
-    runtimeOnly buildsrcLibs.grails.gradle.plugin
-    runtimeOnly buildsrcLibs.grails.gsp.gradle.plugin
+gradlePlugin {
+    plugins {
+        register('grailsPlugin') {
+            id = 'build.config.grails-plugin'
+            implementationClass = 'build.config.GrailsPlugin'
+            displayName = 'Grails Plugin Build Configuration'
+            description = 'Configures Grails Plugin for the build'
+        }
+        register('java') {
+            id = 'build.config.java'
+            implementationClass = 'build.config.Java'
+            displayName = 'Java Build Configuration'
+            description = 'Configures Java for the build'
+        }
+        register('publish') {
+            id = 'build.config.publish'
+            implementationClass = 'build.config.Publish'
+            displayName = 'Publish Configuration'
+            description = 'Configures publishing'
+        }
+        register('reproducible') {
+            id = 'build.config.reproducible'
+            implementationClass = 'build.config.Reproducible'
+            displayName = 'Reproducible Build Configuration'
+            description = 'Configures the build for reproducible outputs'
+        }
+        register('test') {
+            id = 'build.config.test'
+            implementationClass = 'build.config.Test'
+            displayName = 'Test Configuration'
+            description = 'Configures tests'
+        }
+    }
 }

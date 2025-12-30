@@ -1,1 +1,25 @@
-rootProject.name = 'grails-inertia-plugin'
+rootProject.name = 'grails-inertia'
+
+dependencyResolutionManagement {
+    repositoriesMode = RepositoriesMode.FAIL_ON_PROJECT_REPOS
+    repositories {
+        mavenCentral()
+        maven { url = 'https://repo.grails.org/grails/restricted' }
+        maven {
+            url = 'https://repository.apache.org/content/repositories/staging'
+            content {
+                includeGroupAndSubgroups('org.apache.grails')
+                includeGroupAndSubgroups('org.apache.groovy')
+            }
+            mavenContent { releasesOnly() }
+        }
+        maven {
+            url = 'https://repository.apache.org/content/repositories/snapshots'
+            content {
+                includeGroupAndSubgroups('org.apache.grails')
+                includeGroupAndSubgroups('org.apache.groovy')
+            }
+            mavenContent { snapshotsOnly() }
+        }
+    }
+}

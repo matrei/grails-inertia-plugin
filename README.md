@@ -37,13 +37,14 @@ dependencies {
 }
 ```
 > [!NOTE]
-> For a Grails 5/Java 8 - use the latest version of the plugin with major version 1.\
-> For Grails 6/Java 11 - use the latest version of the plugin.
+> For Grails 7/Java 17 - use the latest version of the plugin.\
+> For Grails 6/Java 11 - use version 2.\
+> For a Grails 5/Java 8 - use version 1.\
 
 \
 To add the client dependencies and workflow to a Grails project, create the following files: **(Vue 3 example)**
 ```javascript
-// myapp/package.json (versions @ 2023-11-25) 
+// myapp/package.json (versions @ 2025-12-30) 
 ```
 ```json
 {
@@ -55,12 +56,12 @@ To add the client dependencies and workflow to a Grails project, create the foll
     "build": "vite build && vite build --outDir src/main/resources/ssr --ssr src/main/javascript/ssr.js"
   },
   "dependencies": {
-    "vue": "^3.3.9",
-    "@inertiajs/vue3": "^1.0.14"
+    "vue": "^3.5.26",
+    "@inertiajs/vue3": "^2.3.4"
   },
   "devDependencies": {
-    "@vitejs/plugin-vue": "^4.5.0",
-    "vite": "^5.0.2"
+    "@vitejs/plugin-vue": "^5.2.4",
+    "vite": "^6.4.1"
   }
 }
 ```
@@ -160,7 +161,7 @@ class BookController {
     
     def index() {
         def books = ['Grails in Action', 'Programming Grails', 'The Definitive Guide to Grails 2']
-        renderInertia 'Books/Index', [books: books]
+        renderInertia('Books/Index', [books: books])
     }
 }
 ```
