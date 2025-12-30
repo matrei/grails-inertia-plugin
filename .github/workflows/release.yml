@@ -1,114 +1,54 @@
 name: "Release"
+
 on:
   release:
     types: [ published ]
-permissions:
-  contents: write
-env:
-  GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
-  GRAILS_PUBLISH_RELEASE: 'true'
-  JAVA_DISTRIBUTION: liberica
-  JAVA_VERSION: 17.0.17 # this must be a specific version for reproducible builds, keep it sync with .sdkmanrc
-  NEXUS_PUBLISH_URL: https://ossrh-staging-api.central.sonatype.com/service/local/
-  REPO_NAME: ${{ github.event.repository.name }}
-  TAG: ${{ github.event.release.tag_name }}
-  VERSION: will be computed in each job
+
 jobs:
-  publish:
-    name: "Publish to Sonatype Staging Repository"
-    runs-on: ubuntu-24.04
+  release:
+    runs-on: ubuntu-latest
+
+    env:
+      GIT_USER_NAME: matrei
+      GIT_USER_EMAIL: mattias.reichel@gmail.com
+
     steps:
-      - name: "📝 Establish release version"
-        run: |
-          echo "Release version: ${TAG#v}"
-          echo "VERSION=${TAG#v}" >> "$GITHUB_ENV"
-      - name: "📥 Checkout the repository"
-        uses: actions/checkout@v6
-        with:
-          ref: ${{ env.TAG }}
-          token: ${{ secrets.GITHUB_TOKEN }}
-      - name: "📅 Store common build date" # to ensure a reproducible build
-        run: echo "SOURCE_DATE_EPOCH=$(git log -1 --pretty=%ct)" >> "$GITHUB_ENV"
-      - name: "📅 Ensure source files use common date"
-        run: find . -depth \( -type f -o -type d \) -exec touch -d "@${SOURCE_DATE_EPOCH}" {} +
-      - name: "☕️ Setup JDK"
-        uses: actions/setup-java@v5
-        with:
-          distribution: ${{ env.JAVA_DISTRIBUTION }}
-          java-version: ${{ env.JAVA_VERSION }}
-      - name: "🐘 Setup Gradle"
-        uses: gradle/actions/setup-gradle@v5
+      - name: "📥 Checkout repository"
+        uses: actions/checkout@v4
+      - name: "☕️ Set up JDK"
+        uses: actions/setup-java@v4
+        with: { java-version: 11, distribution: temurin }
+      - name: "🐘 Set up Gradle"
+        uses: gradle/actions/setup-gradle@v4
         with:
           build-scan-publish: true
-          build-scan-terms-of-use-url: https://gradle.com/terms-of-service
-          build-scan-terms-of-use-agree: yes
-      - name: "⚙️ Run pre-release"
-        uses: apache/grails-github-actions/pre-release@asf
-        env:
-          RELEASE_VERSION: ${{ env.VERSION }}
+          build-scan-terms-of-use-url: "https://gradle.com/terms-of-service"
+          build-scan-terms-of-use-agree: "yes"
+
+      - name: "🔢 Get the release version from the release tag and set it in gradle.properties"
+        uses: matrei/github-actions/pre-release@main
+
       - name: "🔐 Generate key file for artifact signing"
-        run: printf "%s" "$SECRING_FILE" | base64 -d > "${{ github.workspace }}/secring.gpg"
+        if: success()
         env:
           SECRING_FILE: ${{ secrets.SECRING_FILE }}
-      - name: "📤 Publish to Staging Repository"
+        run: echo "$SECRING_FILE" | base64 -d > ${{ github.workspace }}/secring.gpg
+
+      - name: "📤 Publish release artifacts to Sonatype"
+        if: success()
         env:
-          NEXUS_PUBLISH_USERNAME: ${{ secrets.SONATYPE_USERNAME }}
-          NEXUS_PUBLISH_PASSWORD: ${{ secrets.SONATYPE_PASSWORD }}
-          NEXUS_PUBLISH_DESCRIPTION: '${{ env.REPO_NAME }}:${{ env.VERSION }}'
+          ORG_GRADLE_PROJECT_sonatypeOssUsername: ${{ secrets.SONATYPE_USERNAME }}
+          ORG_GRADLE_PROJECT_sonatypeOssPassword: ${{ secrets.SONATYPE_PASSWORD }}
+          ORG_GRADLE_PROJECT_sonatypeOssStagingProfileId: ${{ secrets.SONATYPE_STAGING_PROFILE_ID }}
           SIGNING_KEY: ${{ secrets.SIGNING_KEY }}
           SIGNING_PASSPHRASE: ${{ secrets.SIGNING_PASSPHRASE }}
-        run: >
+        run: |
           ./gradlew
-          -Psigning.keyId=${SIGNING_KEY}
+          -Prelease=true
           -Psigning.secretKeyRingFile=${{ github.workspace }}/secring.gpg
-          publishMavenPublicationToSonatypeRepository
-          closeSonatypeStagingRepository
-      - name: "📅 Generate Build Date file"
-        run: |
-          mkdir -p build
-          echo "$SOURCE_DATE_EPOCH" >> build/BUILD_DATE.txt
-      - name: "📤 Upload Build Date file"
-        uses: softprops/action-gh-release@v2
-        with:
-          tag_name: ${{ env.TAG }}
-          files: build/BUILD_DATE.txt
-  release:
-    name: "Release Artifacts and Run Post-Release"
-    needs: publish
-    runs-on: ubuntu-24.04
-    permissions:
-      contents: write
-      issues: write
-      pull-requests: write
-    steps:
-      - name: "📝 Establish release version"
-        run: |
-          echo "Release version: ${TAG#v}"
-          echo "VERSION=${TAG#v}" >> "$GITHUB_ENV"
-      - name: "📥 Checkout repository"
-        uses: actions/checkout@v6
-        with:
-          ref: ${{ env.TAG }}
-          token: ${{ secrets.GITHUB_TOKEN }}
-      - name: "☕️ Setup JDK"
-        uses: actions/setup-java@v5
-        with:
-          distribution: ${{ env.JAVA_DISTRIBUTION }}
-          java-version: ${{ env.JAVA_VERSION }}
-      - name: "🐘 Setup Gradle"
-        uses: gradle/actions/setup-gradle@v5
-        with:
-          build-scan-publish: true
-          build-scan-terms-of-use-url: https://gradle.com/terms-of-service
-          build-scan-terms-of-use-agree: yes
-      - name: "📤 Release to Maven Central"
-        env:
-          NEXUS_PUBLISH_USERNAME: ${{ secrets.SONATYPE_USERNAME }}
-          NEXUS_PUBLISH_PASSWORD: ${{ secrets.SONATYPE_PASSWORD }}
-          NEXUS_PUBLISH_DESCRIPTION: '${{ env.REPO_NAME }}:${{ env.VERSION }}'
-        run: >
-          ./gradlew
-          findSonatypeStagingRepository
-          releaseSonatypeStagingRepository
-      - name: "⚙️ Run post-release"
-        uses: apache/grails-github-actions/post-release@asf
+          publishToSonatype
+          closeAndReleaseSonatypeStagingRepository
+
+      - name: "🔢 Set the next snapshot version in gradle.properties"
+        if: success()
+        uses: matrei/github-actions/post-release@main

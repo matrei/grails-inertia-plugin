@@ -1,26 +1,23 @@
 name: "Tests"
-on: [ push, pull_request, workflow_dispatch ]
-env:
-  GRAILS_PUBLISH_RELEASE: 'false'
-  JAVA_DISTRIBUTION: liberica
-  JAVA_VERSION: 17.0.17 # keep in sync with .sdkmanrc
+
+on: [push, pull_request]
+
 jobs:
   check:
-    name: "Test Project"
-    runs-on: ubuntu-24.04
+    runs-on: ubuntu-latest
     steps:
       - name: "📥 Checkout repository"
-        uses: actions/checkout@v6
+        uses: actions/checkout@v4
       - name: "☕️ Set up JDK"
-        uses: actions/setup-java@v5
-        with:
-          distribution: ${{ env.JAVA_DISTRIBUTION }}
-          java-version: ${{ env.JAVA_VERSION }}
+        uses: actions/setup-java@v4
+        with: { java-version: 11, distribution: temurin }
       - name: "🐘 Set up Gradle"
-        uses: gradle/actions/setup-gradle@v5
+        uses: gradle/actions/setup-gradle@v4
         with:
           build-scan-publish: true
-          build-scan-terms-of-use-url: https://gradle.com/terms-of-service
-          build-scan-terms-of-use-agree: yes
-      - name: "🏃‍♂️ Run Tests"
-        run: ./gradlew check --continue
+          build-scan-terms-of-use-url: "https://gradle.com/terms-of-service"
+          build-scan-terms-of-use-agree: "yes"
+      - name: "✅ Run tests"
+        run: >
+          ./gradlew
+          check
