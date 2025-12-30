@@ -32,14 +32,14 @@ Add the plugin dependency to the project:
 dependencies {
     //...
     // Replace $inertiaPluginVersion with a suitable release version for your project, or define it in ~/myapp/gradle.properties
-    implementation "io.github.matrei:grails-inertia-plugin:$inertiaPluginVersion"
+    implementation "io.github.matrei:grails-inertia:$inertiaPluginVersion"
     //...
 }
 ```
 > [!NOTE]
 > For Grails 7/Java 17 - use the latest version of the plugin.\
-> For Grails 6/Java 11 - use version 2.\
-> For a Grails 5/Java 8 - use version 1.\
+> For Grails 6/Java 11 - use version 2 (io.github.matrei:grails-inertia-plugin).\
+> For a Grails 5/Java 8 - use version 1 (io.github.matrei:grails-inertia-plugin).
 
 \
 To add the client dependencies and workflow to a Grails project, create the following files: **(Vue 3 example)**
