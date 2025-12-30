@@ -1,6 +1,6 @@
 # 🧩 Grails Adapter for Inertia.js
 
-[![Maven Central](https://img.shields.io/maven-central/v/io.github.matrei/grails-inertia-plugin.svg?label=Maven%20Central)](https://central.sonatype.com/artifact/io.github.matrei/grails-inertia-plugin) [![Java CI](https://github.com/matrei/grails-inertia-plugin/actions/workflows/gradle-check.yml/badge.svg?event=push)](https://github.com/matrei/grails-inertia-plugin/actions/workflows/gradle-check.yml)
+[![Maven Central](https://img.shields.io/maven-central/v/io.github.matrei/grails-inertia.svg?label=Maven%20Central)](https://central.sonatype.com/artifact/io.github.matrei/grails-inertia) [![Java CI](https://github.com/matrei/grails-inertia-plugin/actions/workflows/gradle-check.yml/badge.svg?event=push)](https://github.com/matrei/grails-inertia-plugin/actions/workflows/gradle-check.yml)
 
 Grails plugin for using [Inertia.js](https://inertiajs.com/) to build single-page apps without building an API.
 
