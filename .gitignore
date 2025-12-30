@@ -3,3 +3,7 @@
 build
 .DS_Store
 *.iml
+!.idea/codeStyles/
+!.idea/codeStyles/Project.xml
+!.idea/codeStyles/codeStyleConfig.xml
+!buildSrc/src/main/groovy/build

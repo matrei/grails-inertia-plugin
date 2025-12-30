@@ -5,12 +5,12 @@ categories:
     labels:
       - "type: enhancement"
       - "type: new feature"
-      - "type: major"
-  - title: 🐛 Bug Fixes/Improvements
+      - "type: minor"
+  - title: 🪲 Bug Fixes/Improvements
     labels:
       - "type: improvement"
       - "type: bug"
-      - "type: minor"
+      - "type: patch"
   - title: 🛠 Dependency upgrades
     labels:
       - "type: dependency upgrade"
