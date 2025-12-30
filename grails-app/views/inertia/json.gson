@@ -4,7 +4,7 @@ import groovy.transform.Field
 @Field InertiaPage inertiaPage
 json {
     component inertiaPage.component
-    props inertiaPage.props
+    props g.render(inertiaPage.props)
     url inertiaPage.url
     version inertiaPage.version
 }
