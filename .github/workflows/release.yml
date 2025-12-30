@@ -42,7 +42,7 @@ jobs:
           ORG_GRADLE_PROJECT_sonatypeOssStagingProfileId: ${{ secrets.SONATYPE_STAGING_PROFILE_ID }}
           SIGNING_KEY: ${{ secrets.SIGNING_KEY }}
           SIGNING_PASSPHRASE: ${{ secrets.SIGNING_PASSPHRASE }}
-        run: |
+        run: >
           ./gradlew
           -Prelease=true
           -Psigning.secretKeyRingFile=${{ github.workspace }}/secring.gpg
