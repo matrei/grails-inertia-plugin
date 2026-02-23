@@ -20,9 +20,9 @@ class Publish implements Plugin<Project> {
             it.desc.set('Grails plugin with server-side adapter for Inertia.js')
             it.license.name = 'Apache-2.0'
             it.githubSlug.set('matrei/grails-inertia-plugin')
-            it.developers.set(project.provider {
-                project.findProperty('pomDevelopers') as Map ?: [:]
-            } as Provider<? extends Map<? extends String, ? extends String>>)
+            it.developers = [
+                    matrei: 'Mattias Reichel',
+            ]
         }
     }
 }
