@@ -206,7 +206,7 @@ to the PATH on your system and add the following to your `application.yml`:
 ```yaml
 inertia:
   ssr:
-    enabled: true
-    url: 'http://localhost:13714/render'
-    bundle: 'src/main/resources/ssr/ssr.mjs'
+    enabled: true # Defaults to false
+    url: 'http://localhost:13714/render' # Not needed, this is already the default value
+    bundle: 'src/main/resources/ssr/ssr.mjs' # Not needed, this is already the default value
 ```
