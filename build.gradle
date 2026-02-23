@@ -2,12 +2,6 @@ plugins {
     id 'build.config.grails-plugin'
 }
 
-ext {
-    pomDevelopers = [
-        matrei: 'Mattias Reichel',
-    ]
-}
-
 dependencies {
 
     implementation 'org.apache.grails:grails-interceptors'
