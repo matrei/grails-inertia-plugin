@@ -1,0 +1,22 @@
+{
+  "properties": [
+    {
+      "name": "inertia.ssr.enabled",
+      "type": "java.lang.Boolean",
+      "description": "Whether server-side rendering is enabled. Defaults to false.",
+      "defaultValue": false
+    },
+    {
+      "name": "inertia.ssr.url",
+      "type": "java.lang.String",
+      "description": "The URL of the server-side rendering service. Defaults to 'http://localhost:13714/render'.",
+      "defaultValue": "http://localhost:13714/render"
+    },
+    {
+      "name": "inertia.ssr.bundle",
+      "type": "java.lang.String",
+      "description": "The path to the server-side rendering bundle file.",
+      "defaultValue": "src/main/resources/ssr/ssr.mjs"
+    }
+  ]
+}
