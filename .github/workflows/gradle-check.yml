@@ -12,7 +12,7 @@ on:
 env:
   GRAILS_PUBLISH_RELEASE: 'false'
   JAVA_DISTRIBUTION: liberica
-  JAVA_VERSION: 17.0.17 # keep in sync with .sdkmanrc
+  JAVA_VERSION: 17.0.18 # keep in sync with .sdkmanrc
 jobs:
   check:
     name: "Test Project"

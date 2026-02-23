@@ -8,7 +8,7 @@ env:
   GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
   GRAILS_PUBLISH_RELEASE: 'true'
   JAVA_DISTRIBUTION: liberica
-  JAVA_VERSION: 17.0.17 # this must be a specific version for reproducible builds, keep it sync with .sdkmanrc
+  JAVA_VERSION: 17.0.18 # this must be a specific version for reproducible builds, keep it sync with .sdkmanrc
   NEXUS_PUBLISH_URL: https://ossrh-staging-api.central.sonatype.com/service/local/
   REPO_NAME: ${{ github.event.repository.name }}
   TAG: ${{ github.event.release.tag_name }}
