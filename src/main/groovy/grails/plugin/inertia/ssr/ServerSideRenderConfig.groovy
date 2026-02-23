@@ -29,7 +29,7 @@ import org.springframework.boot.context.properties.ConfigurationProperties
 @ConfigurationProperties('inertia.ssr')
 class ServerSideRenderConfig {
 
-    boolean enabled
-    String url
-    String bundle
+    boolean enabled = false
+    String url = 'http://localhost:13714/render'
+    String bundle = 'src/main/resources/ssr/ssr.mjs'
 }

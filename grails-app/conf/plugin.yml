@@ -1,6 +1,0 @@
-inertia:
-  manifest:
-    location: 'classpath:public/dist/.vite/manifest.json'
-  ssr:
-    enabled: false
-    url: 'http://localhost:13714/render'
