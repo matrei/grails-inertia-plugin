@@ -41,16 +41,16 @@ import static org.grails.web.util.WebUtils.retrieveGrailsWebRequest as webReques
 @CompileStatic
 class Inertia {
 
-    static final String INERTIA_SHARED_DATA = 'grails.plugin.inertia.InertiaSharedData'
-    static final String INERTIA_ATTRIBUTE_NAME = 'grails.plugin.inertia.InertiaRequest'
-    static final String INERTIA_ATTRIBUTE_VERSION = 'grails.plugin.inertia.InertiaManifestVersion'
-    static final String INERTIA_ATTRIBUTE_PAGE = 'grails.plugin.inertia.InertiaPage'
-    static final String INERTIA_ATTRIBUTE_SSR_RESPONSE = 'grails.plugin.inertia.InertiaSsrResponse'
-    static final String INERTIA_ATTRIBUTE_CANCEL_INERTIA = 'grails.plugin.inertia.CancelInertia'
-    static final String INERTIA_ATTRIBUTE_MANIFEST = 'inertiaManifest'
-    static final String INERTIA_HEADER = 'X-Inertia'
-    static final String INERTIA_HEADER_VERSION = 'X-Inertia-Version'
-    static final String INERTIA_HEADER_LOCATION = 'X-Inertia-Location'
+    public static final String INERTIA_SHARED_DATA = 'grails.plugin.inertia.InertiaSharedData'
+    public static final String INERTIA_ATTRIBUTE_NAME = 'grails.plugin.inertia.InertiaRequest'
+    public static final String INERTIA_ATTRIBUTE_VERSION = 'grails.plugin.inertia.InertiaManifestVersion'
+    public static final String INERTIA_ATTRIBUTE_PAGE = 'grails.plugin.inertia.InertiaPage'
+    public static final String INERTIA_ATTRIBUTE_SSR_RESPONSE = 'grails.plugin.inertia.InertiaSsrResponse'
+    public static final String INERTIA_ATTRIBUTE_CANCEL_INERTIA = 'grails.plugin.inertia.CancelInertia'
+    public static final String INERTIA_ATTRIBUTE_MANIFEST = 'inertiaManifest'
+    public static final String INERTIA_HEADER = 'X-Inertia'
+    public static final String INERTIA_HEADER_VERSION = 'X-Inertia-Version'
+    public static final String INERTIA_HEADER_LOCATION = 'X-Inertia-Location'
 
     protected static final String INERTIA_VIEW_HTML = '/inertia/html'
     protected static final String INERTIA_VIEW_JSON = '/inertia/json'
