@@ -68,7 +68,7 @@ jobs:
           mkdir -p build
           echo "$SOURCE_DATE_EPOCH" >> build/BUILD_DATE.txt
       - name: "📤 Upload Build Date file"
-        uses: softprops/action-gh-release@v2
+        uses: softprops/action-gh-release@v3
         with:
           tag_name: ${{ env.TAG }}
           files: build/BUILD_DATE.txt
