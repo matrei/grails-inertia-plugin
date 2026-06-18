@@ -23,7 +23,7 @@ jobs:
           echo "Release version: ${TAG#v}"
           echo "VERSION=${TAG#v}" >> "$GITHUB_ENV"
       - name: "📥 Checkout the repository"
-        uses: actions/checkout@v6
+        uses: actions/checkout@v7
         with:
           ref: ${{ env.TAG }}
           token: ${{ secrets.GITHUB_TOKEN }}
@@ -86,7 +86,7 @@ jobs:
           echo "Release version: ${TAG#v}"
           echo "VERSION=${TAG#v}" >> "$GITHUB_ENV"
       - name: "📥 Checkout repository"
-        uses: actions/checkout@v6
+        uses: actions/checkout@v7
         with:
           ref: ${{ env.TAG }}
           token: ${{ secrets.GITHUB_TOKEN }}
