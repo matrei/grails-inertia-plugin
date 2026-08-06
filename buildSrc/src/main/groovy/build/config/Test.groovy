@@ -14,7 +14,7 @@ class Test implements Plugin<Project> {
             configureTests(project)
             project.dependencies.add(
                     'testRuntimeOnly',
-                    'org.junit.jupiter:junit-jupiter-api'
+                    'org.junit.platform:junit-platform-launcher'
             )
         }
     }
