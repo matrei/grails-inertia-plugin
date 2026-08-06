@@ -35,7 +35,7 @@ class InertiaInterceptorSpec extends Specification implements InterceptorUnitTes
     void 'inertia #method requests from stale assets returns appropriately'(String action, String method, String location, int status) {
 
         given: 'a controller'
-            def controller = (TestController) mockController(TestController)
+            def controller = mockController(TestController) as TestController
 
         when: 'an inertia request with an outdated asset version is handled'
             request.addHeader('X-Inertia', true)
@@ -52,23 +52,23 @@ class InertiaInterceptorSpec extends Specification implements InterceptorUnitTes
             response.status == status
 
         where:
-            action    | method    | location   | status
-            'index'   | 'GET'     | ''         | SC_CONFLICT
-            'testing' | 'GET'     | '/testing' | SC_CONFLICT
-            'index'   | 'HEAD'    | null       | SC_OK
-            'index'   | 'POST'    | null       | SC_OK
-            'index'   | 'PUT'     | null       | SC_OK
-            'index'   | 'DELETE'  | null       | SC_OK
-            'index'   | 'CONNECT' | null       | SC_OK
-            'index'   | 'OPTIONS' | null       | SC_OK
-            'index'   | 'TRACE'   | null       | SC_OK
-            'index'   | 'PATCH'   | null       | SC_OK
+            action    | method    | location   || status
+            'index'   | 'GET'     | ''         || SC_CONFLICT
+            'testing' | 'GET'     | '/testing' || SC_CONFLICT
+            'index'   | 'HEAD'    | null       || SC_OK
+            'index'   | 'POST'    | null       || SC_OK
+            'index'   | 'PUT'     | null       || SC_OK
+            'index'   | 'DELETE'  | null       || SC_OK
+            'index'   | 'CONNECT' | null       || SC_OK
+            'index'   | 'OPTIONS' | null       || SC_OK
+            'index'   | 'TRACE'   | null       || SC_OK
+            'index'   | 'PATCH'   | null       || SC_OK
     }
 
     void 'the http headers are correct for html responses'() {
 
         given: 'a controller'
-            def controller = (TestController) mockController(TestController)
+            def controller = mockController(TestController) as TestController
 
         when: 'a request for html is processed'
             withInterceptors(controller: 'test', httpMethod: 'GET') {
@@ -83,7 +83,7 @@ class InertiaInterceptorSpec extends Specification implements InterceptorUnitTes
 
     def 'the http headers are correct for json responses'() {
         given: 'a controller'
-            def controller = (TestController) mockController(TestController)
+            def controller = mockController(TestController) as TestController
 
         when: 'a request for json is processed'
             request.addHeader('X-Inertia', true)
@@ -100,7 +100,7 @@ class InertiaInterceptorSpec extends Specification implements InterceptorUnitTes
 
     def 'canceling Inertia request works'() {
         given: 'a controller'
-            def controller = (TestController) mockController(TestController)
+            def controller = mockController(TestController) as TestController
 
         when: 'a request for json is processed'
             request.addHeader('X-Inertia', true)
