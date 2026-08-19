@@ -57,7 +57,7 @@ class Inertia {
 
     private static final String JSON_VIEW_TEMPLATE_ENGINE_BEAN_NAME = 'jsonTemplateEngine'
     private static final String SSR_RENDERER_BEAN_NAME = 'serverSideRenderer'
-    private static final String INERTIA_PAGE_MODEL_KEY = 'inertiaPage'
+    static final String INERTIA_PAGE_MODEL_KEY = 'inertiaPage'
 
 
     @SuppressWarnings('unused')
@@ -122,14 +122,7 @@ class Inertia {
     }
 
     private static InertiaPage createInertiaPageModel(String component, Map model) {
-        if (!model.errors) model.errors = []
-        if (!model.flash) model.flash = flash
-        new InertiaPage(
-            component: component,
-            props: model,
-            url: forwardURI ?: requestURI,
-            version: inertiaAssetVersion
-        )
+        InertiaResponseFactory.createPage(component, model)
     }
 
     static Map getSharedData() {
@@ -145,7 +138,7 @@ class Inertia {
     }
 
     static Map<String,InertiaPage> createJsonModel(String component, Map model) {
-        [(INERTIA_PAGE_MODEL_KEY): createInertiaPageModel(component, model)]
+        InertiaResponseFactory.createJsonModel(component, model)
     }
 
     static JsonViewTemplateEngine getJsonViewTemplateEngine() {
