@@ -28,4 +28,31 @@ class InertiaViewSpec extends Specification implements JsonViewTest {
             result.json.url == '/helloworld'
             result.json.version == '1'
     }
+
+    void 'optional page metadata is rendered only when present'() {
+
+        given:
+            def inertiaPage = new InertiaPage(
+                    component: 'Users/Index',
+                    props: [users: []],
+                    url: '/users',
+                    version: '1',
+                    mergeProps: ['users'],
+                    deferredProps: [default: ['permissions']],
+                    encryptHistory: true
+            )
+
+        when:
+            def result = render(
+                    view: '/inertia/json',
+                    model: [inertiaPage: inertiaPage]
+            )
+
+        then:
+            result.json.mergeProps == ['users']
+            result.json.deferredProps.default == ['permissions']
+            result.json.encryptHistory
+            result.json.clearHistory == null
+            result.json.onceProps == null
+    }
 }

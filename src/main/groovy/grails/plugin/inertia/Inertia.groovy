@@ -51,6 +51,15 @@ class Inertia {
     public static final String INERTIA_HEADER = 'X-Inertia'
     public static final String INERTIA_HEADER_VERSION = 'X-Inertia-Version'
     public static final String INERTIA_HEADER_LOCATION = 'X-Inertia-Location'
+    public static final String INERTIA_HEADER_PARTIAL_COMPONENT = 'X-Inertia-Partial-Component'
+    public static final String INERTIA_HEADER_PARTIAL_DATA = 'X-Inertia-Partial-Data'
+    public static final String INERTIA_HEADER_PARTIAL_EXCEPT = 'X-Inertia-Partial-Except'
+    public static final String INERTIA_HEADER_RESET = 'X-Inertia-Reset'
+    public static final String INERTIA_HEADER_ERROR_BAG = 'X-Inertia-Error-Bag'
+    public static final String INERTIA_HEADER_INFINITE_SCROLL_MERGE_INTENT =
+            'X-Inertia-Infinite-Scroll-Merge-Intent'
+    public static final String INERTIA_HEADER_EXCEPT_ONCE_PROPS = 'X-Inertia-Except-Once-Props'
+    public static final String INERTIA_HEADER_PURPOSE = 'Purpose'
 
     protected static final String INERTIA_VIEW_HTML = '/inertia/html'
     protected static final String INERTIA_VIEW_JSON = '/inertia/json'
@@ -181,6 +190,10 @@ class Inertia {
 
     static boolean getIsInertiaRequest() {
         request.getHeader(INERTIA_HEADER)
+    }
+
+    static InertiaRequestContext getRequestContext() {
+        InertiaRequestContext.from(request)
     }
 
     static HttpServletRequest getRequest() {

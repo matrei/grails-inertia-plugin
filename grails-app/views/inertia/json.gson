@@ -7,4 +7,16 @@ json {
     props g.render(inertiaPage.props)
     url inertiaPage.url
     version inertiaPage.version
+    if (inertiaPage.clearHistory) clearHistory true
+    if (inertiaPage.encryptHistory) encryptHistory true
+    if (inertiaPage.preserveFragment) preserveFragment true
+    if (inertiaPage.mergeProps) mergeProps g.render(inertiaPage.mergeProps)
+    if (inertiaPage.prependProps) prependProps g.render(inertiaPage.prependProps)
+    if (inertiaPage.deepMergeProps) deepMergeProps g.render(inertiaPage.deepMergeProps)
+    if (inertiaPage.matchPropsOn) matchPropsOn g.render(inertiaPage.matchPropsOn)
+    if (inertiaPage.scrollProps) scrollProps g.render(inertiaPage.scrollProps)
+    if (inertiaPage.deferredProps) deferredProps g.render(inertiaPage.deferredProps)
+    if (inertiaPage.rescuedProps) rescuedProps g.render(inertiaPage.rescuedProps)
+    if (inertiaPage.sharedProps) sharedProps g.render(inertiaPage.sharedProps)
+    if (inertiaPage.onceProps) onceProps g.render(inertiaPage.onceProps)
 }
