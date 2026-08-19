@@ -29,14 +29,16 @@ import grails.plugins.Plugin
 @SuppressWarnings('unused')
 class InertiaGrailsPlugin extends Plugin {
 
-    def grailsVersion = '7.0.0 > *'
+    def grailsVersion = '8.0.0 > *'
     def title = 'Grails Adapter for Inertia.js'
     def author = 'Mattias Reichel'
     def authorEmail = 'matrei@apache.org'
     def description = 'Inertia server-side adapter for Grails'
     def documentation = 'https://github.com/matrei/inertia-grails-plugin#readme'
     def license = 'Apache 2.0 License'
-    def issueManagement = [system: 'GitHub Issues', url: 'https://github.com/matrei/inertia-grails-plugin/issues']
+    def issueManagement = [
+            system: 'GitHub Issues',
+            url: 'https://github.com/matrei/inertia-grails-plugin/issues'
+    ]
     def scm = [url: 'https://github.com/matrei/inertia-grails-plugin']
-
 }
