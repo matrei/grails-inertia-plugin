@@ -47,6 +47,9 @@ class Inertia {
     public static final String INERTIA_ATTRIBUTE_PAGE = 'grails.plugin.inertia.InertiaPage'
     public static final String INERTIA_ATTRIBUTE_SSR_RESPONSE = 'grails.plugin.inertia.InertiaSsrResponse'
     public static final String INERTIA_ATTRIBUTE_CANCEL_INERTIA = 'grails.plugin.inertia.CancelInertia'
+    public static final String INERTIA_ATTRIBUTE_CLEAR_HISTORY = 'grails.plugin.inertia.ClearHistory'
+    public static final String INERTIA_ATTRIBUTE_ENCRYPT_HISTORY = 'grails.plugin.inertia.EncryptHistory'
+    public static final String INERTIA_ATTRIBUTE_PRESERVE_FRAGMENT = 'grails.plugin.inertia.PreserveFragment'
     public static final String INERTIA_ATTRIBUTE_MANIFEST = 'inertiaManifest'
     public static final String INERTIA_HEADER = 'X-Inertia'
     public static final String INERTIA_HEADER_VERSION = 'X-Inertia-Version'
@@ -133,6 +136,18 @@ class Inertia {
     @SuppressWarnings('unused')
     static void cancel() {
         request.setAttribute(INERTIA_ATTRIBUTE_CANCEL_INERTIA, true)
+    }
+
+    static void clearHistory() {
+        request.setAttribute(INERTIA_ATTRIBUTE_CLEAR_HISTORY, true)
+    }
+
+    static void encryptHistory() {
+        request.setAttribute(INERTIA_ATTRIBUTE_ENCRYPT_HISTORY, true)
+    }
+
+    static void preserveFragment() {
+        request.setAttribute(INERTIA_ATTRIBUTE_PRESERVE_FRAGMENT, true)
     }
 
     static boolean getIsCanceled() {

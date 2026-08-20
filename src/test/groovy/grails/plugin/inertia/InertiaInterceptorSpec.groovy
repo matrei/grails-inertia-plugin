@@ -134,6 +134,23 @@ class InertiaInterceptorSpec extends Specification implements InterceptorUnitTes
             ! ('X-Inertia' in response.getHeaders('Vary'))
     }
 
+    def 'page history controls are exposed through the Inertia facade'() {
+        given:
+            def controller = (TestController) mockController(TestController)
+            request.addHeader('X-Inertia', true)
+            request.addHeader('X-Inertia-Version', '0')
+
+        when:
+            withInterceptors(controller: 'test', httpMethod: 'GET') {
+                controller.pageControlsAction()
+            }
+
+        then:
+            request.getAttribute(Inertia.INERTIA_ATTRIBUTE_CLEAR_HISTORY)
+            request.getAttribute(Inertia.INERTIA_ATTRIBUTE_ENCRYPT_HISTORY)
+            request.getAttribute(Inertia.INERTIA_ATTRIBUTE_PRESERVE_FRAGMENT)
+    }
+
     def 'redirects with fragments use the Inertia redirect header'() {
         given:
             def controller = mockController(TestController) as TestController
@@ -190,6 +207,13 @@ class TestController {
     def cancelInertiaAction() {
         Inertia.cancel()
         render('cancelInertiaAction')
+    }
+
+    def pageControlsAction() {
+        Inertia.clearHistory()
+        Inertia.encryptHistory()
+        Inertia.preserveFragment()
+        renderInertia('controls')
     }
 
     def testing() {

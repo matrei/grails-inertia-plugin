@@ -45,6 +45,9 @@ class InertiaResponseFactory {
                 url: Inertia.forwardURI ?: Inertia.requestURI,
                 version: Inertia.inertiaAssetVersion,
                 flash: flash,
+                clearHistory: requestFlag(Inertia.INERTIA_ATTRIBUTE_CLEAR_HISTORY),
+                encryptHistory: requestFlag(Inertia.INERTIA_ATTRIBUTE_ENCRYPT_HISTORY),
+                preserveFragment: requestFlag(Inertia.INERTIA_ATTRIBUTE_PRESERVE_FRAGMENT),
                 deferredProps: resolved.deferredProps,
                 mergeProps: resolved.mergeProps,
                 prependProps: resolved.prependProps,
@@ -62,5 +65,9 @@ class InertiaResponseFactory {
             List<String> sharedProps = []
     ) {
         [(Inertia.INERTIA_PAGE_MODEL_KEY): createPage(component, model, sharedProps)]
+    }
+
+    private static boolean requestFlag(String attribute) {
+        Inertia.request.getAttribute(attribute) == true
     }
 }

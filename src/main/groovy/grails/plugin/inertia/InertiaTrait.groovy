@@ -65,6 +65,18 @@ trait InertiaTrait {
         Inertia.cancel()
     }
 
+    void clearInertiaHistory() {
+        Inertia.clearHistory()
+    }
+
+    void encryptInertiaHistory() {
+        Inertia.encryptHistory()
+    }
+
+    void preserveInertiaFragment() {
+        Inertia.preserveFragment()
+    }
+
     boolean isInertiaCanceled() {
         Inertia.isCanceled
     }
