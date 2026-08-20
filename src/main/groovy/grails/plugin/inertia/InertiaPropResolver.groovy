@@ -30,7 +30,7 @@ class InertiaPropResolver {
             Map model,
             InertiaRequestContext context
     ) {
-        boolean partial = context.partialReload && context.partialComponent == component
+        boolean partial = isPartialReloadForComponent(component, context)
         Map resolved = [:]
         Map deferred = [:]
         List<String> merge = []
@@ -39,30 +39,19 @@ class InertiaPropResolver {
         Map once = [:]
 
         model.each { key, rawValue ->
-            def propName = key as String
-            def prop = rawValue instanceof InertiaProp ?
-                    rawValue as InertiaProp :
-                    InertiaProp.regular(rawValue)
-
-            if (prop.type == InertiaProp.Type.DEFERRED && !partial) {
-                addDeferred(deferred, prop.group, propName)
-                return
-            }
-
-            String onceKey = prop.key ?: propName
-            if (prop.type == InertiaProp.Type.ONCE && !partial &&
-                    context.exceptOnceProps.contains(onceKey)) {
-                addOnce(once, onceKey, propName, prop.expiresAt)
-                return
-            }
-
-            if (!include(propName, prop, context, partial)) return
-            resolved[propName] = resolveValue(prop.value)
-
-            addMetadata(prop, propName, merge, prepend, deepMerge)
-            if (prop.type == InertiaProp.Type.ONCE) {
-                addOnce(once, onceKey, propName, prop.expiresAt)
-            }
+            resolveProp(
+                    key as String,
+                    key as String,
+                    rawValue,
+                    resolved,
+                    deferred,
+                    merge,
+                    prepend,
+                    deepMerge,
+                    once,
+                    context,
+                    partial
+            )
         }
 
         new InertiaResolvedProps(
@@ -75,34 +64,169 @@ class InertiaPropResolver {
         )
     }
 
-    private static boolean include(
-            String propName,
+    private static void resolveProp(
+            String path,
+            String outputPath,
+            Object rawValue,
+            Map output,
+            Map deferred,
+            List<String> merge,
+            List<String> prepend,
+            List<String> deepMerge,
+            Map once,
+            InertiaRequestContext context,
+            boolean partial
+    ) {
+        def prop = rawValue instanceof InertiaProp ?
+                rawValue as InertiaProp : InertiaProp.regular(rawValue)
+
+        if (shouldDeferProp(prop, partial)) {
+            addDeferred(deferred, prop.group, path)
+            return
+        }
+        if (isOptionalPropExcluded(prop, partial)) {
+            return
+        }
+
+        def onceKey = prop.key ?: path
+        if (isPreviouslyLoadedOnceProp(prop, onceKey, partial, context)) {
+            addOnce(once, onceKey, path, prop.expiresAt)
+            return
+        }
+
+        def selection = determineSelection(path, prop, context, partial)
+        if (isExcludedSelection(selection)) {
+            return
+        }
+
+        def value = prop.value
+        if (value instanceof Closure) {
+            value = (value as Closure).call()
+        }
+        def resolvedValue = resolveNested(path, value, selection, output, context, partial,
+                deferred, merge, prepend, deepMerge, once)
+        if (shouldWriteResolvedValue(resolvedValue, value)) {
+            put(output, outputPath, resolvedValue)
+        }
+
+        addMetadata(prop, path, merge, prepend, deepMerge, isResetProp(path, context))
+        if (isOnceProp(prop)) {
+            addOnce(once, onceKey, path, prop.expiresAt)
+        }
+    }
+
+    private static Object resolveNested(
+            String path,
+            Object value,
+            Selection selection,
+            Map output,
+            InertiaRequestContext context,
+            boolean partial,
+            Map deferred,
+            List<String> merge,
+            List<String> prepend,
+            List<String> deepMerge,
+            Map once
+    ) {
+        if (isFullyResolvedValue(value, selection)) {
+            return value
+        }
+        def nested = [:]
+        (value as Map).each { key, child ->
+            def childPath = "$path.$key"
+            resolveProp(childPath, key as String, child, nested, deferred, merge, prepend, deepMerge, once,
+                    context, partial)
+        }
+        nested
+    }
+
+    private static Selection determineSelection(
+            String path,
             InertiaProp prop,
             InertiaRequestContext context,
             boolean partial
     ) {
-        if (!partial) {
-            return prop.type != InertiaProp.Type.OPTIONAL &&
-                    prop.type != InertiaProp.Type.DEFERRED
+        if (isFullSelectionRequired(prop, partial)) {
+            return Selection.FULL
         }
-        if (prop.type == InertiaProp.Type.ALWAYS) {
-            return true
+        if (isExcludedByPartialExcept(path, context)) {
+            return Selection.NONE
         }
-        selected(propName, prop, context)
+        if (isIncludedByPartialData(path, context)) {
+            return hasNestedPartialSelection(path, context) ? Selection.PARTIAL : Selection.FULL
+        }
+        Selection.NONE
     }
 
-    private static boolean selected(
-            String propName,
-            InertiaProp prop,
+    private static boolean isPartialReloadForComponent(
+            String component,
             InertiaRequestContext context
     ) {
-        boolean included = context.partialData.empty || context.partialData.contains(propName)
-        boolean excluded = context.partialExcept.contains(propName)
-        included && !excluded
+        context.partialReload && context.partialComponent == component
     }
 
-    private static Object resolveValue(Object value) {
-        value instanceof Closure ? (value as Closure).call() : value
+    private static boolean shouldDeferProp(InertiaProp prop, boolean partial) {
+        prop.type == InertiaProp.Type.DEFERRED && !partial
+    }
+
+    private static boolean isOptionalPropExcluded(InertiaProp prop, boolean partial) {
+        prop.type == InertiaProp.Type.OPTIONAL && !partial
+    }
+
+    private static boolean isPreviouslyLoadedOnceProp(
+            InertiaProp prop,
+            String onceKey,
+            boolean partial,
+            InertiaRequestContext context
+    ) {
+        isOnceProp(prop) && !partial && context.exceptOnceProps.contains(onceKey)
+    }
+
+    private static boolean isExcludedSelection(Selection selection) {
+        selection == Selection.NONE
+    }
+
+    private static boolean shouldWriteResolvedValue(Object resolvedValue, Object originalValue) {
+        resolvedValue != null || !(originalValue instanceof Map)
+    }
+
+    private static boolean isResetProp(String path, InertiaRequestContext context) {
+        context.reset.contains(path)
+    }
+
+    private static boolean isOnceProp(InertiaProp prop) {
+        prop.type == InertiaProp.Type.ONCE
+    }
+
+    private static boolean isFullyResolvedValue(Object value, Selection selection) {
+        !(value instanceof Map) || selection == Selection.FULL
+    }
+
+    private static boolean isFullSelectionRequired(InertiaProp prop, boolean partial) {
+        !partial || prop.type == InertiaProp.Type.ALWAYS
+    }
+
+    private static boolean isExcludedByPartialExcept(
+            String path,
+            InertiaRequestContext context
+    ) {
+        context.partialExcept.any { path == it || path.startsWith("$it.") }
+    }
+
+    private static boolean isIncludedByPartialData(
+            String path,
+            InertiaRequestContext context
+    ) {
+        context.partialData.empty || context.partialData.any {
+            it == path || it.startsWith("$path.") || path.startsWith("$it.")
+        }
+    }
+
+    private static boolean hasNestedPartialSelection(
+            String path,
+            InertiaRequestContext context
+    ) {
+        context.partialData.any { it == path || it.startsWith("$path.") }
     }
 
     private static void addDeferred(Map deferred, String group, String propName) {
@@ -116,8 +240,12 @@ class InertiaPropResolver {
             String propName,
             List<String> merge,
             List<String> prepend,
-            List<String> deepMerge
+            List<String> deepMerge,
+            boolean reset
     ) {
+        if (reset) {
+            return
+        }
         switch (prop.type) {
             case InertiaProp.Type.MERGE:
                 merge << propName
@@ -138,5 +266,24 @@ class InertiaPropResolver {
             Long expiresAt
     ) {
         once[key] = [prop: propName, expiresAt: expiresAt]
+    }
+
+    private static void put(Map output, String path, Object value) {
+        def pathParts = path.split('\\.')
+        def targetMap = output
+        if (pathParts.length > 1) {
+            pathParts[0..-2].each { part ->
+                def child = targetMap[part] instanceof Map ? targetMap[part] as Map : [:]
+                targetMap[part] = child
+                targetMap = child
+            }
+        }
+        targetMap[pathParts[-1]] = value
+    }
+
+    private enum Selection {
+        NONE,
+        PARTIAL,
+        FULL
     }
 }

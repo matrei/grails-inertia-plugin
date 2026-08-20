@@ -141,4 +141,47 @@ class InertiaPropResolverSpec extends Specification {
             result.props == [:]
             result.onceProps == [profile: [prop: 'profile', expiresAt: null]]
     }
+
+    def 'nested props support dot notation in partial reloads'() {
+        given:
+            def evaluated = false
+            def context = new InertiaRequestContext(
+                    partialComponent: 'Dashboard',
+                    partialData: ['auth.notifications']
+            )
+
+        when:
+            def result = InertiaPropResolver.resolve(
+                    'Dashboard',
+                    [auth: [
+                            user: { evaluated = true; [name: 'Mattias'] },
+                            notifications: ['Welcome']
+                    ]],
+                    context
+            )
+
+        then:
+            result.props == [auth: [notifications: ['Welcome']]]
+            !evaluated
+    }
+
+    def 'reset props are returned without merge metadata'() {
+        given:
+            def context = new InertiaRequestContext(
+                    partialComponent: 'Users/Index',
+                    partialData: ['users'],
+                    reset: ['users']
+            )
+
+        when:
+            def result = InertiaPropResolver.resolve(
+                    'Users/Index',
+                    [users: InertiaProp.merge(['fresh'])],
+                    context
+            )
+
+        then:
+            result.props == [users: ['fresh']]
+            result.mergeProps.empty
+    }
 }
