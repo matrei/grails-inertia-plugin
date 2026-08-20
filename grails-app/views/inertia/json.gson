@@ -7,6 +7,7 @@ json {
     props g.render(inertiaPage.props)
     url inertiaPage.url
     version inertiaPage.version
+    if (inertiaPage.flash) flash g.render(inertiaPage.flash)
     if (inertiaPage.clearHistory) clearHistory true
     if (inertiaPage.encryptHistory) encryptHistory true
     if (inertiaPage.preserveFragment) preserveFragment true

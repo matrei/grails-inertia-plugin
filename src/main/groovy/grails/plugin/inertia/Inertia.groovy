@@ -79,7 +79,8 @@ class Inertia {
     }
     static ModelAndView render(String component, Map props, Map viewData) {
         request.setAttribute(INERTIA_ATTRIBUTE_NAME, true)
-        renderInternal(component, chainModel + sharedData + props, viewData)
+        Map shared = sharedData
+        renderInternal(component, chainModel + shared + props, viewData, shared.keySet() as List<String>)
     }
 
 /*
@@ -137,21 +138,31 @@ class Inertia {
         request.getAttribute(INERTIA_ATTRIBUTE_CANCEL_INERTIA)
     }
 
-    private static ModelAndView renderInternal(String component, Map props, Map viewData) {
+    private static ModelAndView renderInternal(
+            String component,
+            Map props,
+            Map viewData,
+            List<String> sharedProps
+    ) {
         isInertiaRequest ?
-            renderJson(component, props) :
-            renderHtml(component, props, viewData)
+            renderJson(component, props, sharedProps) :
+            renderHtml(component, props, viewData, sharedProps)
     }
 
-    private static ModelAndView renderJson(String component, Map model) {
-        def jsonModel = createJsonModel(component, model)
+    private static ModelAndView renderJson(String component, Map model, List<String> sharedProps) {
+        def jsonModel = createJsonModel(component, model, sharedProps)
         new ModelAndView(INERTIA_VIEW_JSON, jsonModel)
     }
 
-    private static ModelAndView renderHtml(String component, Map props, Map viewData) {
+    private static ModelAndView renderHtml(
+            String component,
+            Map props,
+            Map viewData,
+            List<String> sharedProps
+    ) {
 
         if (ssrEnabled) {
-            def page = createInertiaPageModel(component, props)
+            def page = createInertiaPageModel(component, props, sharedProps)
             def ssrResult = ssrRenderer.render(page)
             if (ssrResult) {
                 def ssrResultJson = new JsonSlurper().parseText(ssrResult)
@@ -161,14 +172,18 @@ class Inertia {
         }
 
         def jsonTemplate = jsonViewTemplateEngine.resolveTemplate(INERTIA_VIEW_JSON)
-        def jsonModel = createJsonModel(component, props)
+        def jsonModel = createJsonModel(component, props, sharedProps)
         def jsonString = jsonTemplate.make(jsonModel).writeTo(new StringWriter()).toString()
         request.setAttribute(INERTIA_ATTRIBUTE_PAGE, jsonString)
         new ModelAndView(INERTIA_VIEW_HTML, (viewData ?: [:]))
     }
 
-    private static InertiaPage createInertiaPageModel(String component, Map model) {
-        InertiaResponseFactory.createPage(component, model)
+    private static InertiaPage createInertiaPageModel(
+            String component,
+            Map model,
+            List<String> sharedProps
+    ) {
+        InertiaResponseFactory.createPage(component, model, sharedProps)
     }
 
     static Map getSharedData() {
@@ -185,6 +200,14 @@ class Inertia {
 
     static Map<String,InertiaPage> createJsonModel(String component, Map model) {
         InertiaResponseFactory.createJsonModel(component, model)
+    }
+
+    static Map<String,InertiaPage> createJsonModel(
+            String component,
+            Map model,
+            List<String> sharedProps
+    ) {
+        InertiaResponseFactory.createJsonModel(component, model, sharedProps)
     }
 
     static JsonViewTemplateEngine getJsonViewTemplateEngine() {

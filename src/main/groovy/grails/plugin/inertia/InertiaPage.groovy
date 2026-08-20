@@ -32,6 +32,7 @@ class InertiaPage {
     Map props
     String url
     String version
+    Map flash = [:]
     Boolean clearHistory = false
     Boolean encryptHistory = false
     Boolean preserveFragment = false

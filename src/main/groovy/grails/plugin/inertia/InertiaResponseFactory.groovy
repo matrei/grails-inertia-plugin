@@ -29,7 +29,7 @@ import groovy.transform.CompileStatic
 @CompileStatic
 class InertiaResponseFactory {
 
-    static InertiaPage createPage(String component, Map model) {
+    static InertiaPage createPage(String component, Map model, List<String> sharedProps = []) {
         InertiaResolvedProps resolved = InertiaPropResolver.resolve(
                 component,
                 model,
@@ -37,24 +37,30 @@ class InertiaResponseFactory {
         )
         Map resolvedModel = resolved.props
         if (!resolvedModel.errors) resolvedModel.errors = []
-        if (!resolvedModel.flash) resolvedModel.flash = Inertia.flash
+        Map flash = Inertia.flash ?: [:]
 
         new InertiaPage(
                 component: component,
                 props: resolvedModel,
                 url: Inertia.forwardURI ?: Inertia.requestURI,
                 version: Inertia.inertiaAssetVersion,
+                flash: flash,
                 deferredProps: resolved.deferredProps,
                 mergeProps: resolved.mergeProps,
                 prependProps: resolved.prependProps,
                 deepMergeProps: resolved.deepMergeProps,
                 matchPropsOn: resolved.matchPropsOn,
                 scrollProps: resolved.scrollProps,
+                sharedProps: sharedProps,
                 onceProps: resolved.onceProps
         )
     }
 
-    static Map<String, InertiaPage> createJsonModel(String component, Map model) {
-        [(Inertia.INERTIA_PAGE_MODEL_KEY): createPage(component, model)]
+    static Map<String, InertiaPage> createJsonModel(
+            String component,
+            Map model,
+            List<String> sharedProps = []
+    ) {
+        [(Inertia.INERTIA_PAGE_MODEL_KEY): createPage(component, model, sharedProps)]
     }
 }
