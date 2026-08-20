@@ -37,15 +37,31 @@ class ServerSideRenderer {
 
     String render(InertiaPage page) {
         if (!ssr.enabled) return null
-        // Pass the page to the Inertia SSR Node Server
-        String ssrResult = ((HttpURLConnection) new URL(ssr.url).openConnection()).with {
-            requestMethod = 'POST'
-            doOutput = true
-            outputStream.withWriter {
+        HttpURLConnection connection = null
+        try {
+            connection = (HttpURLConnection) new URI(ssr.url).toURL().openConnection()
+            connection.connectTimeout = ssr.connectTimeout
+            connection.readTimeout = ssr.readTimeout
+            connection.requestMethod = 'POST'
+            connection.doOutput = true
+            connection.setRequestProperty('Content-Type', 'application/json')
+            connection.setRequestProperty('Accept', 'application/json')
+            connection.outputStream.withWriter('UTF-8') {
                 it << JsonOutput.toJson(page)
             }
-            inputStream.text
+            if (isUnsuccessfulResponse(connection.responseCode)) {
+                return null
+            }
+            def result = connection.inputStream.getText('UTF-8')
+            result?.trim() ? result : null
+        } catch (IOException ignored) {
+            null
+        } finally {
+            connection?.disconnect()
         }
-        return ssrResult
+    }
+
+    private static boolean isUnsuccessfulResponse(int responseCode) {
+        responseCode < 200 || responseCode >= 300
     }
 }

@@ -32,4 +32,6 @@ class ServerSideRenderConfig {
     boolean enabled = false
     String url = 'http://localhost:13714/render'
     String bundle = 'src/main/resources/ssr/ssr.mjs'
+    int connectTimeout = 1000
+    int readTimeout = 5000
 }

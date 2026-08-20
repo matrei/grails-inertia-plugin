@@ -17,6 +17,18 @@
       "type": "java.lang.String",
       "description": "The path to the server-side rendering bundle file.",
       "defaultValue": "src/main/resources/ssr/ssr.mjs"
+    },
+    {
+      "name": "inertia.ssr.connect-timeout",
+      "type": "java.lang.Integer",
+      "description": "Maximum time in milliseconds to establish an SSR connection.",
+      "defaultValue": 1000
+    },
+    {
+      "name": "inertia.ssr.read-timeout",
+      "type": "java.lang.Integer",
+      "description": "Maximum time in milliseconds to read an SSR response.",
+      "defaultValue": 5000
     }
   ]
 }
