@@ -30,6 +30,7 @@ import static Inertia.INERTIA_ATTRIBUTE_MANIFEST
 import static Inertia.INERTIA_ATTRIBUTE_VERSION
 import static Inertia.INERTIA_HEADER
 import static Inertia.INERTIA_HEADER_LOCATION
+import static Inertia.INERTIA_HEADER_REDIRECT
 import static Inertia.INERTIA_HEADER_VERSION
 import static Inertia.INERTIA_VIEW_HTML
 import static grails.web.http.HttpHeaders.VARY
@@ -86,8 +87,14 @@ class InertiaInterceptor implements GrailsConfigurationAware {
                         INERTIA_HEADER_LOCATION,
                         webRequest.currentRequest.forwardURI
                 )
+                header(INERTIA_HEADER_VERSION, currentAssetVersion)
                 render(status: HttpStatus.CONFLICT.value())
                 return false // Stop processing the request here and return the response
+            }
+
+            if (redirectWithFragmentShouldBeHandled) {
+                header(INERTIA_HEADER_REDIRECT, response.getHeader('Location'))
+                response.status = HttpStatus.CONFLICT.value()
             }
 
             // Changes the status code during redirects, ensuring they are made as
@@ -168,6 +175,12 @@ class InertiaInterceptor implements GrailsConfigurationAware {
                 request.method in ['PUT', 'PATCH', 'DELETE']
     }
 
+    boolean getRedirectWithFragmentShouldBeHandled() {
+        response.status in [HttpStatus.FOUND.value(), HttpStatus.SEE_OTHER.value()] &&
+                response.getHeader('Location')?.contains('#') &&
+                !Inertia.requestContext.prefetch
+    }
+
     boolean getIsInertiaHtmlView() {
         modelAndView?.viewName == INERTIA_VIEW_HTML
     }
@@ -180,6 +193,10 @@ class InertiaInterceptor implements GrailsConfigurationAware {
         def currentVersion = request.getAttribute(INERTIA_ATTRIBUTE_VERSION) as String
         def requestedVersion = request.getHeader(INERTIA_HEADER_VERSION) as String
         requestedVersion == currentVersion
+    }
+
+    String getCurrentAssetVersion() {
+        request.getAttribute(INERTIA_ATTRIBUTE_VERSION) as String
     }
 
     boolean getIsAssetsOutOfDate() {

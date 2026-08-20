@@ -6,6 +6,7 @@ import grails.testing.web.interceptor.InterceptorUnitTest
 import grails.web.Controller
 
 import static jakarta.servlet.http.HttpServletResponse.SC_CONFLICT
+import static jakarta.servlet.http.HttpServletResponse.SC_FOUND
 import static jakarta.servlet.http.HttpServletResponse.SC_OK
 
 class InertiaInterceptorSpec extends Specification implements InterceptorUnitTest<InertiaInterceptor> {
@@ -131,6 +132,50 @@ class InertiaInterceptorSpec extends Specification implements InterceptorUnitTes
         then: 'no inertia response headers are set'
             ! response.containsHeader('X-Inertia')
             ! ('X-Inertia' in response.getHeaders('Vary'))
+    }
+
+    def 'redirects with fragments use the Inertia redirect header'() {
+        given:
+            def controller = mockController(TestController) as TestController
+            request.addHeader('X-Inertia', true)
+            request.method = 'GET'
+            interceptor.before()
+            request.addHeader('X-Inertia-Version', request.getAttribute(Inertia.INERTIA_ATTRIBUTE_VERSION))
+            withInterceptors(controller: 'test', httpMethod: 'GET') {
+                controller.index()
+            }
+            response.setHeader('Location', '/users#details')
+            response.status = 302
+
+        when:
+            interceptor.after()
+
+        then:
+            response.status == SC_CONFLICT
+            response.getHeader('X-Inertia-Redirect') == '/users#details'
+    }
+
+    def 'prefetch redirects with fragments are not converted'() {
+        given:
+            def controller = mockController(TestController) as TestController
+            request.addHeader('X-Inertia', true)
+            request.addHeader('Purpose', 'prefetch')
+            request.method = 'GET'
+            interceptor.before()
+            request.addHeader('X-Inertia-Version', request.getAttribute(Inertia.INERTIA_ATTRIBUTE_VERSION))
+            withInterceptors(controller: 'test', httpMethod: 'GET') {
+                controller.index()
+            }
+            response.setHeader('Location', '/users#details')
+            response.status = 302
+
+        when:
+            interceptor.after()
+
+        then:
+            response.status == SC_FOUND
+            response.getHeader('Location') == '/users#details'
+            response.getHeader('X-Inertia-Redirect') == null
     }
 }
 

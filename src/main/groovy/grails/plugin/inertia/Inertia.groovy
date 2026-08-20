@@ -51,6 +51,7 @@ class Inertia {
     public static final String INERTIA_HEADER = 'X-Inertia'
     public static final String INERTIA_HEADER_VERSION = 'X-Inertia-Version'
     public static final String INERTIA_HEADER_LOCATION = 'X-Inertia-Location'
+    public static final String INERTIA_HEADER_REDIRECT = 'X-Inertia-Redirect'
     public static final String INERTIA_HEADER_PARTIAL_COMPONENT = 'X-Inertia-Partial-Component'
     public static final String INERTIA_HEADER_PARTIAL_DATA = 'X-Inertia-Partial-Data'
     public static final String INERTIA_HEADER_PARTIAL_EXCEPT = 'X-Inertia-Partial-Except'
