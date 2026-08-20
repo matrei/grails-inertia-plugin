@@ -17,8 +17,6 @@ package grails.plugin.inertia
 
 import groovy.transform.CompileStatic
 
-import org.grails.encoder.CodecLookup
-
 /**
  * Taglib for including Inertia.js in a page.
  *
@@ -28,8 +26,6 @@ import org.grails.encoder.CodecLookup
 @CompileStatic
 class InertiaTagLib {
 
-    CodecLookup codecLookup
-
     final static String namespace = 'inertia'
 
     Closure app = { Map<String,Object> attrs, Closure body ->
@@ -38,8 +34,8 @@ class InertiaTagLib {
         } else {
             String tagName = attrs.tagName ?: 'div'
             String id = attrs.id ?: 'app'
-            def htmlEncoder = codecLookup.lookupEncoder('HTML')
-            out << "<$tagName id=\"$id\" data-page=\"${htmlEncoder.encode(page)}\"></$tagName>"
+            out << "<script data-page=\"app\" type=\"application/json\">${pageForScriptTag}</script>"
+            out << "<$tagName id=\"$id\"></$tagName>"
         }
     }
 
@@ -53,6 +49,10 @@ class InertiaTagLib {
 
     private String getPage() {
         request.getAttribute(Inertia.INERTIA_ATTRIBUTE_PAGE) as String
+    }
+
+    private String getPageForScriptTag() {
+        page?.replace('/', '\\/')
     }
 
     private Map<String,Object> getSsrResponse() {
