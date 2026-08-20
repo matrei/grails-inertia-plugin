@@ -46,7 +46,7 @@ dependencies {
 \
 To add the client dependencies and workflow to a Grails project, create the following files: **(Vue 3 example)**
 ```javascript
-// myapp/package.json (versions @ 2025-12-30) 
+// myapp/package.json (versions checked 2026-08-20)
 ```
 ```json
 {
@@ -58,12 +58,13 @@ To add the client dependencies and workflow to a Grails project, create the foll
     "build": "vite build && vite build --outDir src/main/resources/ssr --ssr src/main/javascript/ssr.js"
   },
   "dependencies": {
-    "vue": "^3.5.26",
-    "@inertiajs/vue3": "^2.3.4"
+    "vue": "^3.5.41",
+    "@inertiajs/vue3": "^3.7.0"
   },
   "devDependencies": {
-    "@vitejs/plugin-vue": "^5.2.4",
-    "vite": "^6.4.1"
+    "@vitejs/plugin-vue": "^6.0.8",
+    "@inertiajs/vite": "^3.7.0",
+    "vite": "^8.2.2"
   }
 }
 ```
@@ -71,6 +72,7 @@ To add the client dependencies and workflow to a Grails project, create the foll
 // myapp/vite.config.js
 import { fileURLToPath, URL } from 'node:url'
 import { defineConfig } from 'vite'
+import inertia from '@inertiajs/vite'
 import vue from '@vitejs/plugin-vue'
 
 export default defineConfig(({ command }) => ({
@@ -84,7 +86,7 @@ export default defineConfig(({ command }) => ({
       input: 'src/main/javascript/main.js'
     }
   },
-  plugins: [vue()],
+  plugins: [vue(), inertia({ ssr: false })],
   resolve: {
     alias: {
       '@': fileURLToPath(new URL('./src/main/javascript', import.meta.url))
@@ -100,7 +102,7 @@ export default defineConfig(({ command }) => ({
 ```
 ```javascript
 // myapp/src/main/javascript/main.js
-import { createApp, h } from 'vue'
+import { createApp, createSSRApp, h } from 'vue'
 import { createInertiaApp } from '@inertiajs/vue3'
 
 createInertiaApp({
@@ -109,7 +111,10 @@ createInertiaApp({
     return (await pages[`./Pages/${name}.vue`]()).default
   },
   setup ({el, App, props, plugin}) {
-    createApp({ render: () => h(App, props) })
+    const app = el.dataset.serverRendered === 'true'
+      ? createSSRApp({ render: () => h(App, props) })
+      : createApp({ render: () => h(App, props) })
+    app
       .use(plugin)
       .mount(el)
   }
@@ -201,12 +206,47 @@ npm run build
 ```
 ### ⚙️ SSR
 
-To enable server-side rendering, make sure a Node.js version compatible with your client-side app is installed and added
-to the PATH on your system and add the following to your `application.yml`:
+To enable server-side rendering, make sure Node.js 22 or later is installed and available on the PATH.
+The Grails adapter starts the production SSR bundle when `inertia.ssr.enabled` is true. Build the client and SSR
+bundles before starting the Grails application:
+```shell
+npm run build
+```
+
+Then add the following to your `application.yml`:
 ```yaml
 inertia:
   ssr:
     enabled: true # Defaults to false
-    url: 'http://localhost:13714/render' # Not needed, this is already the default value
-    bundle: 'src/main/resources/ssr/ssr.mjs' # Not needed, this is already the default value
+    url: 'http://localhost:13714/render' # Optional, this is the default value
+    bundle: 'src/main/resources/ssr/ssr.mjs' # Optional, this is the default value
+    connect-timeout: 1000 # Optional, this is the default value, in milliseconds
+    read-timeout: 5000 # Optional, this is the default value, in milliseconds
 ```
+
+The `@inertiajs/vite` plugin is configured with `ssr: false` in this example because the Grails adapter manages the
+production SSR process. SSR failures fall back to normal client-side rendering.
+
+## Inertia 3 support
+
+The adapter supports the Inertia v3 page protocol, including:
+
+- Partial reloads with `only`, `except`, and nested dot-notation paths.
+- Lazy, optional, always, and deferred props.
+- Merge, prepend, deep-merge, and once props.
+- Infinite-scroll metadata and matching keys.
+- Shared props, flash data, and page metadata.
+- Fragment redirects and asset-version mismatch responses.
+
+For example:
+```groovy
+renderInertia('Users/Index', [
+    users: Inertia.merge({ loadUsers() }),
+    permissions: Inertia.defer({ loadPermissions() }),
+    settings: Inertia.once(loadSettings())
+])
+```
+
+Inertia 3 also removes Axios from the client package, renames several client events, and replaces
+`router.cancel()` with `router.cancelAll()`. See the [Inertia upgrade guide](https://inertiajs.com/docs/v3/getting-started/upgrade-guide)
+when upgrading an existing frontend.
