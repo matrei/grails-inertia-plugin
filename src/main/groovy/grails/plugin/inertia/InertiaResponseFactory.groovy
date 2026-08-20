@@ -30,14 +30,21 @@ import groovy.transform.CompileStatic
 class InertiaResponseFactory {
 
     static InertiaPage createPage(String component, Map model) {
-        if (!model.errors) model.errors = []
-        if (!model.flash) model.flash = Inertia.flash
+        InertiaResolvedProps resolved = InertiaPropResolver.resolve(
+                component,
+                model,
+                Inertia.requestContext
+        )
+        Map resolvedModel = resolved.props
+        if (!resolvedModel.errors) resolvedModel.errors = []
+        if (!resolvedModel.flash) resolvedModel.flash = Inertia.flash
 
         new InertiaPage(
                 component: component,
-                props: model,
+                props: resolvedModel,
                 url: Inertia.forwardURI ?: Inertia.requestURI,
-                version: Inertia.inertiaAssetVersion
+                version: Inertia.inertiaAssetVersion,
+                deferredProps: resolved.deferredProps
         )
     }
 

@@ -91,6 +91,18 @@ class Inertia {
         response.status = SC_CONFLICT
     }
 
+    static InertiaProp always(Object value) {
+        InertiaProp.always(value)
+    }
+
+    static InertiaProp optional(Object value) {
+        InertiaProp.optional(value)
+    }
+
+    static InertiaProp defer(Object value, String group = 'default') {
+        InertiaProp.deferred(value, group)
+    }
+
     @SuppressWarnings('unused')
     static void cancel() {
         request.setAttribute(INERTIA_ATTRIBUTE_CANCEL_INERTIA, true)
