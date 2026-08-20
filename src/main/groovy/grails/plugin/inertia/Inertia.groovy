@@ -104,8 +104,8 @@ class Inertia {
         InertiaProp.optional(value)
     }
 
-    static InertiaProp defer(Object value, String group = 'default') {
-        InertiaProp.deferred(value, group)
+    static InertiaProp defer(Object value, String group = 'default', boolean rescue = false) {
+        InertiaProp.deferred(value, group, rescue)
     }
 
     static InertiaProp merge(Object value) {

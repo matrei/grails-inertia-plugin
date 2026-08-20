@@ -38,6 +38,7 @@ class InertiaPropResolver {
         List<String> deepMerge = []
         List<String> matchOn = []
         Map scroll = [:]
+        List<String> rescued = []
         Map once = [:]
 
         model.each { key, rawValue ->
@@ -52,6 +53,7 @@ class InertiaPropResolver {
                     deepMerge,
                     matchOn,
                     scroll,
+                    rescued,
                     once,
                     context,
                     partial
@@ -66,6 +68,7 @@ class InertiaPropResolver {
                 deepMergeProps: deepMerge,
                 matchPropsOn: matchOn,
                 scrollProps: scroll,
+                rescuedProps: rescued,
                 onceProps: once
         )
     }
@@ -81,6 +84,7 @@ class InertiaPropResolver {
             List<String> deepMerge,
             List<String> matchOn,
             Map scroll,
+            List<String> rescued,
             Map once,
             InertiaRequestContext context,
             boolean partial
@@ -108,11 +112,17 @@ class InertiaPropResolver {
         }
 
         def value = prop.value
-        if (value instanceof Closure) {
-            value = (value as Closure).call()
+        try {
+            if (value instanceof Closure) {
+                value = (value as Closure).call()
+            }
+        } catch (Throwable failure) {
+            if (!prop.rescue) throw failure
+            rescued << path
+            return
         }
         def resolvedValue = resolveNested(path, value, selection, output, context, partial,
-                deferred, merge, prepend, deepMerge, matchOn, scroll, once)
+                    deferred, merge, prepend, deepMerge, matchOn, scroll, rescued, once)
         if (shouldWriteResolvedValue(resolvedValue, value)) {
             put(output, outputPath, resolvedValue)
         }
@@ -137,6 +147,7 @@ class InertiaPropResolver {
             List<String> deepMerge,
             List<String> matchOn,
             Map scroll,
+            List<String> rescued,
             Map once
     ) {
         if (isFullyResolvedValue(value, selection)) {
@@ -146,7 +157,7 @@ class InertiaPropResolver {
         (value as Map).each { key, child ->
             def childPath = "$path.$key"
             resolveProp(childPath, key as String, child, nested, deferred, merge, prepend, deepMerge,
-                    matchOn, scroll, once,
+                    matchOn, scroll, rescued, once,
                     context, partial)
         }
         nested

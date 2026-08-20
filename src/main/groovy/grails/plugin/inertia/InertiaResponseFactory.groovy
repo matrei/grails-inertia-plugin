@@ -54,6 +54,7 @@ class InertiaResponseFactory {
                 deepMergeProps: resolved.deepMergeProps,
                 matchPropsOn: resolved.matchPropsOn,
                 scrollProps: resolved.scrollProps,
+                rescuedProps: resolved.rescuedProps,
                 sharedProps: sharedProps,
                 onceProps: resolved.onceProps
         )

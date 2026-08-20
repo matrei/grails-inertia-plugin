@@ -34,5 +34,6 @@ class InertiaResolvedProps {
     List<String> deepMergeProps = []
     List<String> matchPropsOn = []
     Map scrollProps = [:]
+    List<String> rescuedProps = []
     Map onceProps = [:]
 }

@@ -210,4 +210,45 @@ class InertiaPropResolverSpec extends Specification {
             result.matchPropsOn == ['posts.data.id']
             result.scrollProps == [posts: [pageName: 'page', currentPage: 1, nextPage: 2]]
     }
+
+    def 'rescued deferred props are omitted and announced'() {
+        given:
+            def context = new InertiaRequestContext(
+                    partialComponent: 'Users/Index',
+                    partialData: ['permissions']
+            )
+
+        when:
+            def result = InertiaPropResolver.resolve(
+                    'Users/Index',
+                    [permissions: InertiaProp.deferred({
+                        throw new IllegalStateException('unavailable')
+                    }, 'default', true)],
+                    context
+            )
+
+        then:
+            result.props == [:]
+            result.rescuedProps == ['permissions']
+    }
+
+    def 'unrescued deferred prop failures are propagated'() {
+        given:
+            def context = new InertiaRequestContext(
+                    partialComponent: 'Users/Index',
+                    partialData: ['permissions']
+            )
+
+        when:
+            InertiaPropResolver.resolve(
+                    'Users/Index',
+                    [permissions: InertiaProp.deferred({
+                        throw new IllegalStateException('unavailable')
+                    })],
+                    context
+            )
+
+        then:
+            thrown(IllegalStateException)
+    }
 }

@@ -43,6 +43,7 @@ class InertiaProp {
     final String key
     final Long expiresAt
     final Map scroll
+    final boolean rescue
 
     InertiaProp(
             Object value,
@@ -50,7 +51,8 @@ class InertiaProp {
             String group = 'default',
             String key = null,
             Long expiresAt = null,
-            Map scroll = [:]
+            Map scroll = [:],
+            boolean rescue = false
     ) {
         this.value = value
         this.type = type
@@ -58,6 +60,7 @@ class InertiaProp {
         this.key = key
         this.expiresAt = expiresAt
         this.scroll = scroll ?: [:]
+        this.rescue = rescue
     }
 
     static InertiaProp regular(Object value) {
@@ -72,8 +75,8 @@ class InertiaProp {
         new InertiaProp(value, Type.OPTIONAL)
     }
 
-    static InertiaProp deferred(Object value, String group = 'default') {
-        new InertiaProp(value, Type.DEFERRED, group ?: 'default')
+    static InertiaProp deferred(Object value, String group = 'default', boolean rescue = false) {
+        new InertiaProp(value, Type.DEFERRED, group ?: 'default', null, null, [:], rescue)
     }
 
     static InertiaProp merge(Object value) {

@@ -16,6 +16,7 @@ json {
     if (inertiaPage.deepMergeProps) deepMergeProps g.render(inertiaPage.deepMergeProps)
     if (inertiaPage.matchPropsOn) matchPropsOn g.render(inertiaPage.matchPropsOn)
     if (inertiaPage.scrollProps) scrollProps g.render(inertiaPage.scrollProps)
+    if (inertiaPage.rescuedProps) rescuedProps g.render(inertiaPage.rescuedProps)
     if (inertiaPage.deferredProps) deferredProps g.render(inertiaPage.deferredProps)
     if (inertiaPage.rescuedProps) rescuedProps g.render(inertiaPage.rescuedProps)
     if (inertiaPage.sharedProps) sharedProps g.render(inertiaPage.sharedProps)
