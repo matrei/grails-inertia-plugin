@@ -48,6 +48,8 @@ class InertiaResponseFactory {
                 mergeProps: resolved.mergeProps,
                 prependProps: resolved.prependProps,
                 deepMergeProps: resolved.deepMergeProps,
+                matchPropsOn: resolved.matchPropsOn,
+                scrollProps: resolved.scrollProps,
                 onceProps: resolved.onceProps
         )
     }

@@ -33,7 +33,8 @@ class InertiaProp {
         MERGE,
         PREPEND,
         DEEP_MERGE,
-        ONCE
+        ONCE,
+        SCROLL
     }
 
     final Object value
@@ -41,19 +42,22 @@ class InertiaProp {
     final String group
     final String key
     final Long expiresAt
+    final Map scroll
 
     InertiaProp(
             Object value,
             Type type = Type.REGULAR,
             String group = 'default',
             String key = null,
-            Long expiresAt = null
+            Long expiresAt = null,
+            Map scroll = [:]
     ) {
         this.value = value
         this.type = type
         this.group = group ?: 'default'
         this.key = key
         this.expiresAt = expiresAt
+        this.scroll = scroll ?: [:]
     }
 
     static InertiaProp regular(Object value) {
@@ -86,5 +90,21 @@ class InertiaProp {
 
     static InertiaProp once(Object value, String key = null, Long expiresAt = null) {
         new InertiaProp(value, Type.ONCE, 'default', key, expiresAt)
+    }
+
+    static InertiaProp scroll(
+            Object value,
+            String mergePath,
+            Map scrollProps,
+            String matchOn = null
+    ) {
+        new InertiaProp(
+                value,
+                Type.SCROLL,
+                'default',
+                mergePath,
+                null,
+                [scrollProps: scrollProps ?: [:], matchOn: matchOn]
+        )
     }
 }

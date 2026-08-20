@@ -184,4 +184,30 @@ class InertiaPropResolverSpec extends Specification {
             result.props == [users: ['fresh']]
             result.mergeProps.empty
     }
+
+    def 'scroll props emit infinite-scroll metadata'() {
+        given:
+            def context = new InertiaRequestContext(
+                    partialComponent: 'Posts/Index',
+                    partialData: ['posts']
+            )
+
+        when:
+            def result = InertiaPropResolver.resolve(
+                    'Posts/Index',
+                    [posts: InertiaProp.scroll(
+                            [data: ['first']],
+                            'posts.data',
+                            [pageName: 'page', currentPage: 1, nextPage: 2],
+                            'id'
+                    )],
+                    context
+            )
+
+        then:
+            result.props.posts == [data: ['first']]
+            result.mergeProps == ['posts.data']
+            result.matchPropsOn == ['posts.data.id']
+            result.scrollProps == [posts: [pageName: 'page', currentPage: 1, nextPage: 2]]
+    }
 }

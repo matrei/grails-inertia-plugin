@@ -36,6 +36,8 @@ class InertiaPropResolver {
         List<String> merge = []
         List<String> prepend = []
         List<String> deepMerge = []
+        List<String> matchOn = []
+        Map scroll = [:]
         Map once = [:]
 
         model.each { key, rawValue ->
@@ -48,6 +50,8 @@ class InertiaPropResolver {
                     merge,
                     prepend,
                     deepMerge,
+                    matchOn,
+                    scroll,
                     once,
                     context,
                     partial
@@ -60,6 +64,8 @@ class InertiaPropResolver {
                 mergeProps: merge,
                 prependProps: prepend,
                 deepMergeProps: deepMerge,
+                matchPropsOn: matchOn,
+                scrollProps: scroll,
                 onceProps: once
         )
     }
@@ -73,6 +79,8 @@ class InertiaPropResolver {
             List<String> merge,
             List<String> prepend,
             List<String> deepMerge,
+            List<String> matchOn,
+            Map scroll,
             Map once,
             InertiaRequestContext context,
             boolean partial
@@ -104,12 +112,13 @@ class InertiaPropResolver {
             value = (value as Closure).call()
         }
         def resolvedValue = resolveNested(path, value, selection, output, context, partial,
-                deferred, merge, prepend, deepMerge, once)
+                deferred, merge, prepend, deepMerge, matchOn, scroll, once)
         if (shouldWriteResolvedValue(resolvedValue, value)) {
             put(output, outputPath, resolvedValue)
         }
 
-        addMetadata(prop, path, merge, prepend, deepMerge, isResetProp(path, context))
+        addMetadata(prop, path, merge, prepend, deepMerge, matchOn, scroll,
+                isResetProp(path, context))
         if (isOnceProp(prop)) {
             addOnce(once, onceKey, path, prop.expiresAt)
         }
@@ -126,6 +135,8 @@ class InertiaPropResolver {
             List<String> merge,
             List<String> prepend,
             List<String> deepMerge,
+            List<String> matchOn,
+            Map scroll,
             Map once
     ) {
         if (isFullyResolvedValue(value, selection)) {
@@ -134,7 +145,8 @@ class InertiaPropResolver {
         def nested = [:]
         (value as Map).each { key, child ->
             def childPath = "$path.$key"
-            resolveProp(childPath, key as String, child, nested, deferred, merge, prepend, deepMerge, once,
+            resolveProp(childPath, key as String, child, nested, deferred, merge, prepend, deepMerge,
+                    matchOn, scroll, once,
                     context, partial)
         }
         nested
@@ -241,6 +253,8 @@ class InertiaPropResolver {
             List<String> merge,
             List<String> prepend,
             List<String> deepMerge,
+            List<String> matchOn,
+            Map scroll,
             boolean reset
     ) {
         if (reset) {
@@ -255,6 +269,14 @@ class InertiaPropResolver {
                 break
             case InertiaProp.Type.DEEP_MERGE:
                 deepMerge << propName
+                break
+            case InertiaProp.Type.SCROLL:
+                merge << prop.key
+                if (prop.scroll.matchOn) {
+                    def matchPath = prop.key + '.' + prop.scroll.matchOn
+                    matchOn << matchPath
+                }
+                scroll[propName] = prop.scroll.scrollProps
                 break
         }
     }

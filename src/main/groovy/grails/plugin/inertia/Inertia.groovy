@@ -119,6 +119,15 @@ class Inertia {
         InertiaProp.once(value, key, expiresAt)
     }
 
+    static InertiaProp scroll(
+            Object value,
+            String mergePath,
+            Map scrollProps,
+            String matchOn = null
+    ) {
+        InertiaProp.scroll(value, mergePath, scrollProps, matchOn)
+    }
+
     @SuppressWarnings('unused')
     static void cancel() {
         request.setAttribute(INERTIA_ATTRIBUTE_CANCEL_INERTIA, true)

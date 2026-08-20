@@ -40,6 +40,8 @@ class InertiaViewSpec extends Specification implements JsonViewTest {
                     mergeProps: ['users'],
                     deferredProps: [default: ['permissions']],
                     encryptHistory: true,
+                    matchPropsOn: ['posts.data.id'],
+                    scrollProps: [posts: [pageName: 'page', nextPage: 2]],
                     onceProps: [profile: [prop: 'profile', expiresAt: null]]
             )
 
@@ -53,6 +55,8 @@ class InertiaViewSpec extends Specification implements JsonViewTest {
             result.json.mergeProps == ['users']
             result.json.deferredProps.default == ['permissions']
             result.json.encryptHistory
+            result.json.matchPropsOn == ['posts.data.id']
+            result.json.scrollProps.posts.nextPage == 2
             result.json.clearHistory == null
             result.json.onceProps.profile.prop == 'profile'
     }
