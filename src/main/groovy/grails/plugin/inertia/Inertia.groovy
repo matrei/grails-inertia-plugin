@@ -103,6 +103,22 @@ class Inertia {
         InertiaProp.deferred(value, group)
     }
 
+    static InertiaProp merge(Object value) {
+        InertiaProp.merge(value)
+    }
+
+    static InertiaProp prepend(Object value) {
+        InertiaProp.prepend(value)
+    }
+
+    static InertiaProp deepMerge(Object value) {
+        InertiaProp.deepMerge(value)
+    }
+
+    static InertiaProp once(Object value, String key = null, Long expiresAt = null) {
+        InertiaProp.once(value, key, expiresAt)
+    }
+
     @SuppressWarnings('unused')
     static void cancel() {
         request.setAttribute(INERTIA_ATTRIBUTE_CANCEL_INERTIA, true)

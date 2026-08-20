@@ -93,4 +93,52 @@ class InertiaPropResolverSpec extends Specification {
         then:
             result.props == [users: ['Mattias'], companies: ['Acme']]
     }
+
+    def 'merge and once props produce protocol metadata'() {
+        given:
+            def context = new InertiaRequestContext(
+                    partialComponent: 'Users/Index',
+                    partialData: ['users', 'notifications', 'settings', 'profile']
+            )
+
+        when:
+            def result = InertiaPropResolver.resolve(
+                    'Users/Index',
+                    [
+                            users: InertiaProp.merge(['one']),
+                            notifications: InertiaProp.prepend(['new']),
+                            settings: InertiaProp.deepMerge([theme: 'dark']),
+                            profile: InertiaProp.once([name: 'Mattias'], 'profile', 123L)
+                    ],
+                    context
+            )
+
+        then:
+            result.props.users == ['one']
+            result.props.notifications == ['new']
+            result.props.settings == [theme: 'dark']
+            result.props.profile == [name: 'Mattias']
+            result.mergeProps == ['users']
+            result.prependProps == ['notifications']
+            result.deepMergeProps == ['settings']
+            result.onceProps == [profile: [prop: 'profile', expiresAt: 123L]]
+    }
+
+    def 'once props already loaded by the client are skipped'() {
+        given:
+            def context = new InertiaRequestContext(
+                    exceptOnceProps: ['profile']
+            )
+
+        when:
+            def result = InertiaPropResolver.resolve(
+                    'Users/Index',
+                    [profile: InertiaProp.once { throw new AssertionError((Object) 'must not evaluate') }],
+                    context
+            )
+
+        then:
+            result.props == [:]
+            result.onceProps == [profile: [prop: 'profile', expiresAt: null]]
+    }
 }

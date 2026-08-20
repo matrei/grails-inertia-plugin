@@ -33,6 +33,10 @@ class InertiaPropResolver {
         boolean partial = context.partialReload && context.partialComponent == component
         Map resolved = [:]
         Map deferred = [:]
+        List<String> merge = []
+        List<String> prepend = []
+        List<String> deepMerge = []
+        Map once = [:]
 
         model.each { key, rawValue ->
             def propName = key as String
@@ -45,11 +49,30 @@ class InertiaPropResolver {
                 return
             }
 
+            String onceKey = prop.key ?: propName
+            if (prop.type == InertiaProp.Type.ONCE && !partial &&
+                    context.exceptOnceProps.contains(onceKey)) {
+                addOnce(once, onceKey, propName, prop.expiresAt)
+                return
+            }
+
             if (!include(propName, prop, context, partial)) return
             resolved[propName] = resolveValue(prop.value)
+
+            addMetadata(prop, propName, merge, prepend, deepMerge)
+            if (prop.type == InertiaProp.Type.ONCE) {
+                addOnce(once, onceKey, propName, prop.expiresAt)
+            }
         }
 
-        new InertiaResolvedProps(props: resolved, deferredProps: deferred)
+        new InertiaResolvedProps(
+                props: resolved,
+                deferredProps: deferred,
+                mergeProps: merge,
+                prependProps: prepend,
+                deepMergeProps: deepMerge,
+                onceProps: once
+        )
     }
 
     private static boolean include(
@@ -59,7 +82,8 @@ class InertiaPropResolver {
             boolean partial
     ) {
         if (!partial) {
-            return prop.type != InertiaProp.Type.OPTIONAL && prop.type != InertiaProp.Type.DEFERRED
+            return prop.type != InertiaProp.Type.OPTIONAL &&
+                    prop.type != InertiaProp.Type.DEFERRED
         }
         if (prop.type == InertiaProp.Type.ALWAYS) {
             return true
@@ -85,5 +109,34 @@ class InertiaPropResolver {
         def props = (deferred[group] ?: []) as List<String>
         props << propName
         deferred[group] = props
+    }
+
+    private static void addMetadata(
+            InertiaProp prop,
+            String propName,
+            List<String> merge,
+            List<String> prepend,
+            List<String> deepMerge
+    ) {
+        switch (prop.type) {
+            case InertiaProp.Type.MERGE:
+                merge << propName
+                break
+            case InertiaProp.Type.PREPEND:
+                prepend << propName
+                break
+            case InertiaProp.Type.DEEP_MERGE:
+                deepMerge << propName
+                break
+        }
+    }
+
+    private static void addOnce(
+            Map once,
+            String key,
+            String propName,
+            Long expiresAt
+    ) {
+        once[key] = [prop: propName, expiresAt: expiresAt]
     }
 }

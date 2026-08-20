@@ -29,4 +29,8 @@ class InertiaResolvedProps {
 
     Map props = [:]
     Map deferredProps = [:]
+    List<String> mergeProps = []
+    List<String> prependProps = []
+    List<String> deepMergeProps = []
+    Map onceProps = [:]
 }

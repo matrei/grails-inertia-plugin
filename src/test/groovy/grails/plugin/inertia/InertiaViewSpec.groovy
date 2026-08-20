@@ -39,7 +39,8 @@ class InertiaViewSpec extends Specification implements JsonViewTest {
                     version: '1',
                     mergeProps: ['users'],
                     deferredProps: [default: ['permissions']],
-                    encryptHistory: true
+                    encryptHistory: true,
+                    onceProps: [profile: [prop: 'profile', expiresAt: null]]
             )
 
         when:
@@ -53,6 +54,6 @@ class InertiaViewSpec extends Specification implements JsonViewTest {
             result.json.deferredProps.default == ['permissions']
             result.json.encryptHistory
             result.json.clearHistory == null
-            result.json.onceProps == null
+            result.json.onceProps.profile.prop == 'profile'
     }
 }

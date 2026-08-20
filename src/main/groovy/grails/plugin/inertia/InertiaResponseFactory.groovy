@@ -44,7 +44,11 @@ class InertiaResponseFactory {
                 props: resolvedModel,
                 url: Inertia.forwardURI ?: Inertia.requestURI,
                 version: Inertia.inertiaAssetVersion,
-                deferredProps: resolved.deferredProps
+                deferredProps: resolved.deferredProps,
+                mergeProps: resolved.mergeProps,
+                prependProps: resolved.prependProps,
+                deepMergeProps: resolved.deepMergeProps,
+                onceProps: resolved.onceProps
         )
     }
 

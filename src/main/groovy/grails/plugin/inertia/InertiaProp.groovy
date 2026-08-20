@@ -29,17 +29,31 @@ class InertiaProp {
         REGULAR,
         ALWAYS,
         OPTIONAL,
-        DEFERRED
+        DEFERRED,
+        MERGE,
+        PREPEND,
+        DEEP_MERGE,
+        ONCE
     }
 
     final Object value
     final Type type
     final String group
+    final String key
+    final Long expiresAt
 
-    InertiaProp(Object value, Type type = Type.REGULAR, String group = 'default') {
+    InertiaProp(
+            Object value,
+            Type type = Type.REGULAR,
+            String group = 'default',
+            String key = null,
+            Long expiresAt = null
+    ) {
         this.value = value
         this.type = type
         this.group = group ?: 'default'
+        this.key = key
+        this.expiresAt = expiresAt
     }
 
     static InertiaProp regular(Object value) {
@@ -56,5 +70,21 @@ class InertiaProp {
 
     static InertiaProp deferred(Object value, String group = 'default') {
         new InertiaProp(value, Type.DEFERRED, group ?: 'default')
+    }
+
+    static InertiaProp merge(Object value) {
+        new InertiaProp(value, Type.MERGE)
+    }
+
+    static InertiaProp prepend(Object value) {
+        new InertiaProp(value, Type.PREPEND)
+    }
+
+    static InertiaProp deepMerge(Object value) {
+        new InertiaProp(value, Type.DEEP_MERGE)
+    }
+
+    static InertiaProp once(Object value, String key = null, Long expiresAt = null) {
+        new InertiaProp(value, Type.ONCE, 'default', key, expiresAt)
     }
 }
