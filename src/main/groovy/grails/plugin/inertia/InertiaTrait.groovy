@@ -65,14 +65,23 @@ trait InertiaTrait {
         Inertia.cancel()
     }
 
+    /**
+     * Clear the browser's Inertia history before applying this page.
+     */
     void clearInertiaHistory() {
         Inertia.clearHistory()
     }
 
+    /**
+     * Encrypt this page when it is stored in browser history.
+     */
     void encryptInertiaHistory() {
         Inertia.encryptHistory()
     }
 
+    /**
+     * Preserve the current URL fragment across a redirect.
+     */
     void preserveInertiaFragment() {
         Inertia.preserveFragment()
     }

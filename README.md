@@ -250,3 +250,31 @@ renderInertia('Users/Index', [
 Inertia 3 also removes Axios from the client package, renames several client events, and replaces
 `router.cancel()` with `router.cancelAll()`. See the [Inertia upgrade guide](https://inertiajs.com/docs/v3/getting-started/upgrade-guide)
 when upgrading an existing frontend.
+
+### Page controls
+
+Page history and redirect behavior can be controlled from a Grails controller. These controls apply to the page
+returned by the current request:
+
+```groovy
+class AccountController {
+    def settings() {
+        encryptInertiaHistory()
+        renderInertia('Account/Settings', [account: currentAccount()])
+    }
+
+    def reset() {
+        clearInertiaHistory()
+        renderInertia('Account/Reset')
+    }
+
+    def rename() {
+        preserveInertiaFragment()
+        redirect(uri: '/account/settings')
+    }
+}
+```
+
+The equivalent static methods are `Inertia.encryptHistory()`, `Inertia.clearHistory()`, and
+`Inertia.preserveFragment()`. They emit the v3 `encryptHistory`, `clearHistory`, and `preserveFragment` page
+properties when enabled. Empty or disabled properties are omitted from the JSON response.
