@@ -67,4 +67,25 @@ class InertiaViewSpec extends Specification implements JsonViewTest {
             result.json.scrollProps.posts.nextPage == 2
             result.json.onceProps.profile.prop == 'profile'
     }
+
+    void 'shared prop names are preserved independently from page props'() {
+        given:
+            def page = new InertiaPage(
+                    component: 'Dashboard',
+                    props: [auth: [name: 'controller'], notifications: []],
+                    url: '/dashboard',
+                    version: '1',
+                    sharedProps: ['auth', 'notifications']
+            )
+
+        when:
+            def result = render(
+                    view: '/inertia/json',
+                    model: [inertiaPage: page]
+            )
+
+        then:
+            result.json.props.auth.name == 'controller'
+            result.json.sharedProps == ['auth', 'notifications']
+    }
 }

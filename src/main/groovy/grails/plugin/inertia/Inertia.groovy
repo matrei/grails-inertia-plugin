@@ -84,7 +84,13 @@ class Inertia {
     static ModelAndView render(String component, Map props, Map viewData) {
         request.setAttribute(INERTIA_ATTRIBUTE_NAME, true)
         Map shared = sharedData
-        renderInternal(component, chainModel + shared + props, viewData, shared.keySet() as List<String>)
+        Map chain = chainModel
+        renderInternal(
+                component,
+                chain + shared + props,
+                viewData,
+                sharedPropNames(chain, shared)
+        )
     }
 
 /*
@@ -212,6 +218,16 @@ class Inertia {
 
     static Map getChainModel() {
         (flash['chainModel'] ?: [:]) as Map
+    }
+
+    private static List<String> sharedPropNames(Map chain, Map shared) {
+        List<String> names = []
+        names.addAll(chain.keySet().collect { it as String })
+        shared.keySet().each { key ->
+            String name = key as String
+            if (!names.contains(name)) names << name
+        }
+        names
     }
 
     static Map<String,InertiaPage> createJsonModel(String component, Map model) {
