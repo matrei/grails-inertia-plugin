@@ -150,7 +150,10 @@ class InertiaPropResolver {
             List<String> rescued,
             Map once
     ) {
-        if (isFullyResolvedValue(value, selection)) {
+        if (!(value instanceof Map)) {
+            return value
+        }
+        if (selection == Selection.FULL && !containsDescribedProps(value as Map)) {
             return value
         }
         def nested = [:]
@@ -161,6 +164,12 @@ class InertiaPropResolver {
                     context, partial)
         }
         nested
+    }
+
+    private static boolean containsDescribedProps(Map value) {
+        value.values().any { child ->
+            child instanceof InertiaProp || child instanceof Closure || child instanceof Map
+        }
     }
 
     private static Selection determineSelection(

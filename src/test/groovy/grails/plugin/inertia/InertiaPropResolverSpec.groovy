@@ -251,4 +251,48 @@ class InertiaPropResolverSpec extends Specification {
         then:
             thrown(IllegalStateException)
     }
+
+    def 'nested described props are resolved on full visits'() {
+        given:
+            def evaluated = false
+
+        when:
+            def result = InertiaPropResolver.resolve(
+                    'Dashboard',
+                    [auth: [
+                            user: { evaluated = true; [name: 'Mattias'] },
+                            permissions: InertiaProp.deferred { ['read'] }
+                    ]],
+                    new InertiaRequestContext()
+            )
+
+        then:
+            evaluated
+            result.props.auth.user == [name: 'Mattias']
+            result.props.auth.permissions == null
+            result.deferredProps == [default: ['auth.permissions']]
+    }
+
+    def 'nested merge and once props retain their metadata paths'() {
+        given:
+            def context = new InertiaRequestContext(
+                    partialComponent: 'Dashboard',
+                    partialData: ['feed.items', 'auth.profile']
+            )
+
+        when:
+            def result = InertiaPropResolver.resolve(
+                    'Dashboard',
+                    [
+                            feed: [items: InertiaProp.merge(['one'])],
+                            auth: [profile: InertiaProp.once([name: 'Mattias'])]
+                    ],
+                    context
+            )
+
+        then:
+            result.props == [feed: [items: ['one']], auth: [profile: [name: 'Mattias']]]
+            result.mergeProps == ['feed.items']
+            result.onceProps == ['auth.profile': [prop: 'auth.profile', expiresAt: null]]
+    }
 }
