@@ -130,6 +130,26 @@ class InertiaInterceptorSpec extends Specification implements InterceptorUnitTes
             'X-Inertia' in response.getHeaders('Vary')
     }
 
+    def 'an Inertia partial request produces a filtered page response'() {
+        given:
+            def controller = mockController(TestController) as TestController
+            request.addHeader('X-Inertia', true)
+            request.addHeader('X-Inertia-Version', '0')
+            request.addHeader('X-Inertia-Partial-Component', 'partial')
+            request.addHeader('X-Inertia-Partial-Data', 'users')
+
+        when:
+            withInterceptors(controller: 'test', action: 'partial', httpMethod: 'GET') {
+                controller.partial()
+            }
+            interceptor.after()
+
+        then:
+            response.contentType.equalsIgnoreCase('application/json;charset=UTF-8')
+            response.getHeader('X-Inertia') == 'true'
+            'X-Inertia' in response.getHeaders('Vary')
+    }
+
     def 'canceling Inertia request works'() {
         given: 'a controller'
             def controller = mockController(TestController) as TestController
@@ -245,6 +265,13 @@ class TestController {
         Inertia.encryptHistory()
         Inertia.preserveFragment()
         renderInertia('controls')
+    }
+
+    def partial() {
+        renderInertia('partial', [
+                users: ['Mattias'],
+                companies: ['Acme']
+        ])
     }
 
     def testing() {
