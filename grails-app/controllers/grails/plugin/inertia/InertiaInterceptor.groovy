@@ -85,9 +85,10 @@ class InertiaInterceptor implements GrailsConfigurationAware {
                 )
                 header(
                         INERTIA_HEADER_LOCATION,
-                        webRequest.currentRequest.forwardURI
+                        versionMismatchLocation
                 )
                 header(INERTIA_HEADER_VERSION, currentAssetVersion)
+                removeInertiaResponseHeader()
                 render(status: HttpStatus.CONFLICT.value())
                 return false // Stop processing the request here and return the response
             }
@@ -95,6 +96,7 @@ class InertiaInterceptor implements GrailsConfigurationAware {
             if (redirectWithFragmentShouldBeHandled) {
                 header(INERTIA_HEADER_REDIRECT, response.getHeader('Location'))
                 response.status = HttpStatus.CONFLICT.value()
+                removeInertiaResponseHeader()
             }
 
             // Changes the status code during redirects, ensuring they are made as
@@ -186,7 +188,7 @@ class InertiaInterceptor implements GrailsConfigurationAware {
     }
 
     boolean getIsInertiaRequest() {
-        request.getHeader(INERTIA_HEADER) == 'true'
+        'true'.equalsIgnoreCase(request.getHeader(INERTIA_HEADER)?.trim())
     }
 
     boolean getIsAssetsCurrent() {
@@ -197,6 +199,16 @@ class InertiaInterceptor implements GrailsConfigurationAware {
 
     String getCurrentAssetVersion() {
         request.getAttribute(INERTIA_ATTRIBUTE_VERSION) as String
+    }
+
+    String getVersionMismatchLocation() {
+        def query = request.queryString
+        def uri = request.forwardURI ?: request.requestURI
+        query ? "${uri}?$query" : uri
+    }
+
+    private void removeInertiaResponseHeader() {
+        response.setHeader(INERTIA_HEADER, null)
     }
 
     boolean getIsAssetsOutOfDate() {

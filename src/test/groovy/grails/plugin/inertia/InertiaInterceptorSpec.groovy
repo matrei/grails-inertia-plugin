@@ -66,6 +66,37 @@ class InertiaInterceptorSpec extends Specification implements InterceptorUnitTes
             'index'   | 'PATCH'   | null       || SC_OK
     }
 
+    def 'version mismatch preserves the request query string and current version'() {
+        given:
+            def controller = mockController(TestController) as TestController
+            request.addHeader('X-Inertia', true)
+            request.addHeader('X-Inertia-Version', 'stale')
+            request.setRequestURI('/users')
+            request.setQueryString('page=2&active=true')
+            request.method = 'GET'
+            interceptor.before()
+            withInterceptors(controller: 'test', action: 'testing', httpMethod: 'GET') {
+                controller.testing()
+            }
+
+        when:
+            interceptor.after()
+
+        then:
+            response.status == SC_CONFLICT
+            response.getHeader('X-Inertia-Location') == '/users?page=2&active=true'
+            response.getHeader('X-Inertia-Version') == request.getAttribute(Inertia.INERTIA_ATTRIBUTE_VERSION)
+            response.getHeader('X-Inertia') == null
+    }
+
+    def 'Inertia request header matching ignores case and surrounding whitespace'() {
+        given:
+            request.addHeader('X-Inertia', ' TRUE ')
+
+        expect:
+            interceptor.isInertiaRequest
+    }
+
     void 'the http headers are correct for html responses'() {
 
         given: 'a controller'
