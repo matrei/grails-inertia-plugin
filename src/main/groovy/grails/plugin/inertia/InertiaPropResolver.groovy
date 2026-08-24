@@ -278,6 +278,9 @@ class InertiaPropResolver {
             boolean reset
     ) {
         if (reset) {
+            if (prop.type == InertiaProp.Type.SCROLL) {
+                scroll[propName] = withResetFlag(prop.scroll.scrollProps as Map)
+            }
             return
         }
         switch (prop.type) {
@@ -299,6 +302,13 @@ class InertiaPropResolver {
                 scroll[propName] = prop.scroll.scrollProps
                 break
         }
+    }
+
+    private static Map withResetFlag(Map scrollProps) {
+        Map resetScrollProps = [:]
+        resetScrollProps.putAll(scrollProps ?: [:])
+        resetScrollProps.reset = true
+        resetScrollProps
     }
 
     private static void addOnce(

@@ -232,6 +232,31 @@ class InertiaPropResolverSpec extends Specification {
             result.rescuedProps == ['permissions']
     }
 
+    def 'reset scroll props include reset metadata without a merge instruction'() {
+        given:
+            def context = new InertiaRequestContext(
+                    partialComponent: 'Posts/Index',
+                    partialData: ['posts'],
+                    reset: ['posts']
+            )
+
+        when:
+            def result = InertiaPropResolver.resolve(
+                    'Posts/Index',
+                    [posts: InertiaProp.scroll(
+                            [data: ['fresh']],
+                            'posts.data',
+                            [pageName: 'page', currentPage: 1, nextPage: 2]
+                    )],
+                    context
+            )
+
+        then:
+            result.props.posts == [data: ['fresh']]
+            result.mergeProps.empty
+            result.scrollProps == [posts: [pageName: 'page', currentPage: 1, nextPage: 2, reset: true]]
+    }
+
     def 'unrescued deferred prop failures are propagated'() {
         given:
             def context = new InertiaRequestContext(
