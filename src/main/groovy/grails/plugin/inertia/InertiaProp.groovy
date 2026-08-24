@@ -80,15 +80,27 @@ class InertiaProp {
     }
 
     static InertiaProp merge(Object value) {
-        new InertiaProp(value, Type.MERGE)
+        merge(value, null)
+    }
+
+    static InertiaProp merge(Object value, String matchOn) {
+        new InertiaProp(value, Type.MERGE, 'default', null, null, [matchOn: matchOn])
     }
 
     static InertiaProp prepend(Object value) {
-        new InertiaProp(value, Type.PREPEND)
+        prepend(value, null)
+    }
+
+    static InertiaProp prepend(Object value, String matchOn) {
+        new InertiaProp(value, Type.PREPEND, 'default', null, null, [matchOn: matchOn])
     }
 
     static InertiaProp deepMerge(Object value) {
-        new InertiaProp(value, Type.DEEP_MERGE)
+        deepMerge(value, null)
+    }
+
+    static InertiaProp deepMerge(Object value, String matchOn) {
+        new InertiaProp(value, Type.DEEP_MERGE, 'default', null, null, [matchOn: matchOn])
     }
 
     static InertiaProp once(Object value, String key = null, Long expiresAt = null) {

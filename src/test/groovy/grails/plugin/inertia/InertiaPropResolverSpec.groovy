@@ -257,6 +257,31 @@ class InertiaPropResolverSpec extends Specification {
             result.scrollProps == [posts: [pageName: 'page', currentPage: 1, nextPage: 2, reset: true]]
     }
 
+    def 'merge variants emit matching paths when configured'() {
+        given:
+            def context = new InertiaRequestContext(
+                    partialComponent: 'Feed',
+                    partialData: ['posts', 'notifications', 'conversations']
+            )
+
+        when:
+            def result = InertiaPropResolver.resolve(
+                    'Feed',
+                    [
+                            posts: InertiaProp.merge(['one'], 'id'),
+                            notifications: InertiaProp.prepend(['new'], 'uuid'),
+                            conversations: InertiaProp.deepMerge([data: []], 'id')
+                    ],
+                    context
+            )
+
+        then:
+            result.mergeProps == ['posts']
+            result.prependProps == ['notifications']
+            result.deepMergeProps == ['conversations']
+            result.matchPropsOn == ['posts.id', 'notifications.uuid', 'conversations.id']
+    }
+
     def 'unrescued deferred prop failures are propagated'() {
         given:
             def context = new InertiaRequestContext(

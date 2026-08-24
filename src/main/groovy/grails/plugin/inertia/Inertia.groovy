@@ -118,12 +118,24 @@ class Inertia {
         InertiaProp.merge(value)
     }
 
+    static InertiaProp merge(Object value, String matchOn) {
+        InertiaProp.merge(value, matchOn)
+    }
+
     static InertiaProp prepend(Object value) {
         InertiaProp.prepend(value)
     }
 
+    static InertiaProp prepend(Object value, String matchOn) {
+        InertiaProp.prepend(value, matchOn)
+    }
+
     static InertiaProp deepMerge(Object value) {
         InertiaProp.deepMerge(value)
+    }
+
+    static InertiaProp deepMerge(Object value, String matchOn) {
+        InertiaProp.deepMerge(value, matchOn)
     }
 
     static InertiaProp once(Object value, String key = null, Long expiresAt = null) {

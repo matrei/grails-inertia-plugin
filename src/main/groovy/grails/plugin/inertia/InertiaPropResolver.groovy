@@ -286,12 +286,15 @@ class InertiaPropResolver {
         switch (prop.type) {
             case InertiaProp.Type.MERGE:
                 merge << propName
+                addMatchPath(prop.scroll.matchOn as String, propName, matchOn)
                 break
             case InertiaProp.Type.PREPEND:
                 prepend << propName
+                addMatchPath(prop.scroll.matchOn as String, propName, matchOn)
                 break
             case InertiaProp.Type.DEEP_MERGE:
                 deepMerge << propName
+                addMatchPath(prop.scroll.matchOn as String, propName, matchOn)
                 break
             case InertiaProp.Type.SCROLL:
                 merge << prop.key
@@ -309,6 +312,10 @@ class InertiaPropResolver {
         resetScrollProps.putAll(scrollProps ?: [:])
         resetScrollProps.reset = true
         resetScrollProps
+    }
+
+    private static void addMatchPath(String matchOn, String propName, List<String> matchPaths) {
+        if (matchOn) matchPaths << propName + '.' + matchOn
     }
 
     private static void addOnce(
