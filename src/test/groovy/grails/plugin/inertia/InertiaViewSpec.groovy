@@ -88,4 +88,52 @@ class InertiaViewSpec extends Specification implements JsonViewTest {
             result.json.props.auth.name == 'controller'
             result.json.sharedProps == ['auth', 'notifications']
     }
+
+    void 'the complete v3 page envelope is serialized'() {
+        given:
+            def page = new InertiaPage(
+                    component: 'Feed/Index',
+                    props: [posts: [data: [[id: 1]]]],
+                    url: '/feed?page=1',
+                    version: 'asset-version',
+                    flash: [success: 'Loaded'],
+                    clearHistory: true,
+                    encryptHistory: true,
+                    preserveFragment: true,
+                    mergeProps: ['posts.data'],
+                    prependProps: ['notifications'],
+                    deepMergeProps: ['filters'],
+                    matchPropsOn: ['posts.data.id'],
+                    scrollProps: [posts: [pageName: 'page', nextPage: 2]],
+                    deferredProps: [default: ['permissions']],
+                    rescuedProps: ['analytics'],
+                    sharedProps: ['auth'],
+                    onceProps: [settings: [prop: 'settings', expiresAt: null]]
+            )
+
+        when:
+            def result = render(
+                    view: '/inertia/json',
+                    model: [inertiaPage: page]
+            )
+
+        then:
+            result.json.component == 'Feed/Index'
+            result.json.props.posts.data[0].id == 1
+            result.json.url == '/feed?page=1'
+            result.json.version == 'asset-version'
+            result.json.flash.success == 'Loaded'
+            result.json.clearHistory
+            result.json.encryptHistory
+            result.json.preserveFragment
+            result.json.mergeProps == ['posts.data']
+            result.json.prependProps == ['notifications']
+            result.json.deepMergeProps == ['filters']
+            result.json.matchPropsOn == ['posts.data.id']
+            result.json.scrollProps.posts.nextPage == 2
+            result.json.deferredProps.default == ['permissions']
+            result.json.rescuedProps == ['analytics']
+            result.json.sharedProps == ['auth']
+            result.json.onceProps.settings.prop == 'settings'
+    }
 }
