@@ -55,4 +55,21 @@ class InertiaTagLibSpec extends Specification implements TagLibUnitTest<InertiaT
             applyTemplate('<inertia:app/>') ==
                     $/<script data-page="app" type="application/json">{"url":"\/users"}</script><div id="app"></div>/$
     }
+
+    void 'script closing sequences are escaped without HTML entity encoding'() {
+        given:
+            request.setAttribute(
+                    Inertia.INERTIA_ATTRIBUTE_PAGE,
+                    '{"content":"</script><script>alert(1)</script>"}'
+            )
+
+        when:
+            def output = applyTemplate('<inertia:app/>')
+
+        then:
+            output ==
+                    $/<script data-page="app" type="application/json">{"content":"<\/script><script>alert(1)<\/script>"}</script><div id="app"></div>/$
+            !output.contains('&lt;')
+            !output.contains('</script><script>')
+    }
 }

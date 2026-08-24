@@ -52,7 +52,7 @@ class InertiaTagLib {
     }
 
     private String getPageForScriptTag() {
-        page?.replace('/', '\\/')
+        InertiaScriptJsonEncoder.encode(page)
     }
 
     private Map<String,Object> getSsrResponse() {
