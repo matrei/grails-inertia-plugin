@@ -17,6 +17,7 @@ package grails.plugin.inertia.ssr
 
 import groovy.json.JsonOutput
 import groovy.transform.CompileStatic
+import groovy.util.logging.Slf4j
 
 import grails.plugin.inertia.InertiaPage
 
@@ -26,6 +27,7 @@ import grails.plugin.inertia.InertiaPage
  * @author Mattias Reichel
  * @since 2.0.0
  */
+@Slf4j
 @CompileStatic
 class ServerSideRenderer {
 
@@ -49,12 +51,37 @@ class ServerSideRenderer {
             connection.outputStream.withWriter('UTF-8') {
                 it << JsonOutput.toJson(page)
             }
-            if (isUnsuccessfulResponse(connection.responseCode)) {
+            int responseCode = connection.responseCode
+            if (isUnsuccessfulResponse(responseCode)) {
+                log.warn(
+                        'Inertia SSR render failed: service returned HTTP {} [url={}, component={}, pageUrl={}]',
+                        responseCode,
+                        ssr.url,
+                        page.component,
+                        page.url
+                )
                 return null
             }
             def result = connection.inputStream.getText('UTF-8')
-            result?.trim() ? result : null
-        } catch (IOException ignored) {
+            if (!result?.trim()) {
+                log.warn(
+                        'Inertia SSR render failed: service returned an empty response ' +
+                        '[url={}, component={}, pageUrl={}]',
+                        ssr.url,
+                        page.component,
+                        page.url
+                )
+                return null
+            }
+            result
+        } catch (IOException failure) {
+            log.warn(
+                    'Inertia SSR render failed: service unavailable [url={}, component={}, pageUrl={}]',
+                    ssr.url,
+                    page.component,
+                    page.url,
+                    failure
+            )
             null
         } finally {
             connection?.disconnect()
