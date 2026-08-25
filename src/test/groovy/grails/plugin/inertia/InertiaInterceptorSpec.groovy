@@ -89,6 +89,26 @@ class InertiaInterceptorSpec extends Specification implements InterceptorUnitTes
             response.getHeader('X-Inertia') == null
     }
 
+    def 'version mismatch reflashes data for the follow-up request'() {
+        given:
+            def controller = mockController(TestController) as TestController
+            Inertia.flash.put('notice', 'Saved')
+            request.addHeader('X-Inertia', true)
+            request.addHeader('X-Inertia-Version', 'stale')
+            request.method = 'GET'
+            interceptor.before()
+            withInterceptors(controller: 'test', action: 'testing', httpMethod: 'GET') {
+                controller.testing()
+            }
+
+        when:
+            interceptor.after()
+
+        then:
+            response.status == SC_CONFLICT
+            Inertia.flash.get('notice') == 'Saved'
+    }
+
     def 'Inertia request header matching ignores case and surrounding whitespace'() {
         given:
             request.addHeader('X-Inertia', ' TRUE ')

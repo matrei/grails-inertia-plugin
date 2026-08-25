@@ -83,6 +83,7 @@ class InertiaInterceptor implements GrailsConfigurationAware {
                         'Inertia asset version has changed, notifying Inertia client ' +
                         'and aborting request processing to force full page reload!'
                 )
+                reflashData()
                 header(
                         INERTIA_HEADER_LOCATION,
                         versionMismatchLocation
@@ -209,6 +210,11 @@ class InertiaInterceptor implements GrailsConfigurationAware {
 
     private void removeInertiaResponseHeader() {
         response.setHeader(INERTIA_HEADER, null)
+    }
+
+    private static void reflashData() {
+        def flashData = new LinkedHashMap<String, Object>(Inertia.flash)
+        if (!flashData.empty) Inertia.flash.putAll(flashData)
     }
 
     boolean getIsAssetsOutOfDate() {
