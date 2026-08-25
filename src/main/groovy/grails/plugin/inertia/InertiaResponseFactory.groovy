@@ -35,9 +35,9 @@ class InertiaResponseFactory {
                 model,
                 Inertia.requestContext
         )
-        Map resolvedModel = resolved.props
+        def resolvedModel = new LinkedHashMap(resolved.props)
         if (!resolvedModel.errors) resolvedModel.errors = []
-        Map flash = Inertia.flash ?: [:]
+        def flash = (Inertia.flash ?: [:]) as Map
 
         new InertiaPage(
                 component: component,

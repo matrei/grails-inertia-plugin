@@ -170,6 +170,24 @@ class InertiaInterceptorSpec extends Specification implements InterceptorUnitTes
             'X-Inertia' in response.getHeaders('Vary')
     }
 
+    def 'page factory accepts immutable resolved props when adding defaults'() {
+        given:
+            def controller = mockController(TestController) as TestController
+            def holder = [:]
+
+        when:
+            withInterceptors(controller: 'test', action: 'testing', httpMethod: 'GET') {
+                holder.page = InertiaResponseFactory.createPage(
+                        'Dashboard',
+                        [title: 'Dashboard']
+                )
+            }
+
+        then:
+            holder.page.props.title == 'Dashboard'
+            holder.page.props.errors == []
+    }
+
     def 'canceling Inertia request works'() {
         given: 'a controller'
             def controller = mockController(TestController) as TestController
