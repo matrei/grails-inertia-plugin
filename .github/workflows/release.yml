@@ -16,7 +16,7 @@ env:
 jobs:
   publish:
     name: "Publish to Sonatype Staging Repository"
-    runs-on: ubuntu-24.04
+    runs-on: ubuntu-26.04
     steps:
       - name: "📝 Establish release version"
         run: |
@@ -75,7 +75,7 @@ jobs:
   release:
     name: "Release Artifacts and Run Post-Release"
     needs: publish
-    runs-on: ubuntu-24.04
+    runs-on: ubuntu-26.04
     permissions:
       contents: write
       issues: write
