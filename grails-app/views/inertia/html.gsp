@@ -1,4 +1,4 @@
-<%@ page compileStatic="true" model="Map<String, Map<String, Object>> inertiaManifest; grails.core.GrailsApplication grailsApplication" %>
+<%@ page compileStatic="true" grailsLayoutPreprocess="false" model="Map<String, Map<String, Object>> inertiaManifest; grails.core.GrailsApplication grailsApplication" %>
 <!DOCTYPE html>
 <html lang="en">
 <head>
