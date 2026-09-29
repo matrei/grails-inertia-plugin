@@ -101,6 +101,10 @@ export default defineConfig(({ command }) => ({
   }
 }))
 ```
+> [!NOTE]
+> The plugin reads the Vite manifest from `classpath:public/dist/.vite/manifest.json`, which matches the `outDir` above.\
+> If you change `outDir`, set `inertia.manifest.location` in `application.yml` to the new location.
+
 ```javascript
 // myapp/src/main/javascript/main.js
 import { createApp, createSSRApp, h } from 'vue'

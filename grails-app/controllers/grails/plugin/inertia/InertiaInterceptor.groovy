@@ -49,6 +49,7 @@ class InertiaInterceptor implements GrailsConfigurationAware {
     private String manifestHash = 'not yet calculated'
     private volatile Object manifestObject
 
+    private static final String DEFAULT_MANIFEST_LOCATION = 'classpath:public/dist/.vite/manifest.json'
     private static final String CONTENT_TYPE_JSON = 'application/json;charset=utf-8'
     private static final String CONTENT_TYPE_HTML = 'text/html;charset=utf-8'
 
@@ -226,7 +227,11 @@ class InertiaInterceptor implements GrailsConfigurationAware {
         // Load the Javascript Manifest when in Production and Test Environments
         // In Development Environment a node server should be started to serve the javascript files (npm run serve)
         if (manifestShouldBeUsed) {
-            manifestLocation = co.getRequiredProperty('inertia.manifest.location')
+            manifestLocation = co.getProperty(
+                    'inertia.manifest.location',
+                    String,
+                    DEFAULT_MANIFEST_LOCATION
+            )
             loadManifest()
         }
     }
