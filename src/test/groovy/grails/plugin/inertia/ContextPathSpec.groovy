@@ -11,7 +11,12 @@ class ContextPathSpec extends Specification implements GrailsWebUnitTest {
     private static final Map MANIFEST = [
             'src/main/javascript/main.js': [
                     file: 'js/main-abc123.js',
+                    imports: ['_shared-ghi789.js'],
                     css: ['js/main-def456.css']
+            ],
+            '_shared-ghi789.js': [
+                    file: 'js/shared-ghi789.js',
+                    css: ['js/shared-jkl012.css']
             ]
     ]
 
@@ -30,9 +35,13 @@ class ContextPathSpec extends Specification implements GrailsWebUnitTest {
                     model: [inertiaManifest: MANIFEST]
             )
 
-        then: 'the script and stylesheet urls include the context path'
-            output.contains('<script type="module" src="/myapp/static/dist/js/main-abc123.js"></script>')
-            output.contains('<link rel="stylesheet" href="/myapp/static/dist/js/main-def456.css">')
+        then: 'the stylesheets, the script and the preloaded modules are output in order, with the context path'
+            output.readLines()*.trim().findAll { it.startsWith('<link rel="stylesheet"') || it.startsWith('<script type="module"') || it.startsWith('<link rel="modulepreload"') } == [
+                    '<link rel="stylesheet" href="/myapp/static/dist/js/main-def456.css">',
+                    '<link rel="stylesheet" href="/myapp/static/dist/js/shared-jkl012.css">',
+                    '<script type="module" src="/myapp/static/dist/js/main-abc123.js"></script>',
+                    '<link rel="modulepreload" href="/myapp/static/dist/js/shared-ghi789.js">'
+            ]
     }
 
     def 'favicon #favicon is rendered as #expected'() {

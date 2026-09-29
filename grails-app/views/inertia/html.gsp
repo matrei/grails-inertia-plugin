@@ -1,5 +1,5 @@
 <%@ page compileStatic="true" grailsLayoutPreprocess="false" model="Map<String, Map<String, Object>> inertiaManifest; grails.core.GrailsApplication grailsApplication" %>
-<%@ page import="org.springframework.web.servlet.support.RequestContextUtils" %>
+<%@ page import="org.springframework.web.servlet.support.RequestContextUtils; grails.plugin.inertia.ViteEntry" %>
 <!DOCTYPE html>
 <html lang="${RequestContextUtils.getLocale(request).toLanguageTag()}">
 <head>
@@ -10,9 +10,13 @@
         <link rel="icon" href="${favicon.startsWith('/') && !favicon.startsWith('//') ? request.contextPath + favicon : favicon}">
     </g:if>
     <g:if env="production">
-        <script type="module" src="${request.contextPath}/static/dist/${inertiaManifest['src/main/javascript/main.js']['file']}"></script>
-        <g:each in="${inertiaManifest['src/main/javascript/main.js']['css']}" var="inertiaCss">
+        <g:set var="viteEntry" value="${ViteEntry.from(inertiaManifest, 'src/main/javascript/main.js')}"/>
+        <g:each in="${viteEntry.css}" var="inertiaCss">
             <link rel="stylesheet" href="${request.contextPath}/static/dist/${inertiaCss}">
+        </g:each>
+        <script type="module" src="${request.contextPath}/static/dist/${viteEntry.file}"></script>
+        <g:each in="${viteEntry.preloads}" var="inertiaPreload">
+            <link rel="modulepreload" href="${request.contextPath}/static/dist/${inertiaPreload}">
         </g:each>
     </g:if>
     <g:else>
