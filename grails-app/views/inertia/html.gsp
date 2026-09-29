@@ -1,6 +1,7 @@
 <%@ page compileStatic="true" grailsLayoutPreprocess="false" model="Map<String, Map<String, Object>> inertiaManifest; grails.core.GrailsApplication grailsApplication" %>
+<%@ page import="org.springframework.web.servlet.support.RequestContextUtils" %>
 <!DOCTYPE html>
-<html lang="en">
+<html lang="${RequestContextUtils.getLocale(request).toLanguageTag()}">
 <head>
     <meta charset="utf-8">
     <meta name="viewport" content="width=device-width, initial-scale=1">

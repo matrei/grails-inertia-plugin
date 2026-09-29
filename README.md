@@ -234,6 +234,23 @@ inertia:
 
 The title is omitted when it is not configured, or when a server-side rendered page provides its own title.
 
+### Language
+
+The `lang` attribute of the page is the locale Grails resolves for the request, so it follows a language chosen with
+the `?lang=` parameter. By default, Grails falls back to the language of the browser when none has been chosen.
+An application in a single language should use a fixed locale instead:
+```yaml
+# myapp/grails-app/conf/application.yml
+grails:
+  i18n:
+    localeResolver: fixed
+    default:
+      locale: en
+```
+
+The `lang` attribute is set when the page is loaded. When the language is switched with an Inertia visit, the
+application needs to update `document.documentElement.lang` itself, or switch the language with a full page load.
+
 ### Context path
 
 When the application is deployed with a context path (`server.servlet.context-path`), the plugin prefixes it to
