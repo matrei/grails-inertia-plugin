@@ -91,7 +91,7 @@ class InertiaInterceptor implements GrailsConfigurationAware {
                 )
                 header(INERTIA_HEADER_VERSION, currentAssetVersion)
                 removeInertiaResponseHeader()
-                render(status: HttpStatus.CONFLICT.value())
+                response.status = HttpStatus.CONFLICT.value()
                 return false // Stop processing the request here and return the response
             }
 

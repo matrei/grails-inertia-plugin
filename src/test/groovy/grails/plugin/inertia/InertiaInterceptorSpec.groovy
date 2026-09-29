@@ -66,6 +66,24 @@ class InertiaInterceptorSpec extends Specification implements InterceptorUnitTes
             'index'   | 'PATCH'   | null       || SC_OK
     }
 
+    void 'inertia requests from stale assets get a plain conflict response'() {
+
+        given: 'a controller'
+            def controller = mockController(TestController) as TestController
+
+        when: 'an inertia request with an outdated asset version is handled'
+            request.addHeader('X-Inertia', true)
+            request.addHeader('X-Inertia-Version', 'a value that is certain to be deemed as stale')
+            withInterceptors(controller: 'test', action: 'index') {
+                controller.index()
+            }
+            interceptor.after()
+
+        then: 'the status is set without sendError, which would commit the response and forward to the error page'
+            response.status == SC_CONFLICT
+            !response.committed
+    }
+
     def 'version mismatch preserves the request query string and current version'() {
         given:
             def controller = mockController(TestController) as TestController
