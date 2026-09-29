@@ -13,4 +13,5 @@ dependencies {
     testRuntimeOnly 'org.slf4j:slf4j-nop' // Get rid of warning about missing slf4j implementation during test task
 
     testImplementation 'org.apache.grails:grails-testing-support-web'
+    testImplementation 'org.apache.grails:grails-testing-support-views-gson'
 }
