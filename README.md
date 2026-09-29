@@ -223,6 +223,17 @@ A root-relative value (starting with a single `/`) is resolved against the appli
 Any other value, such as an absolute URL, is used as-is.
 The link is omitted when no favicon is configured.
 
+### Title
+
+The page title shown until a page component sets its own can be configured:
+```yaml
+# myapp/grails-app/conf/application.yml
+inertia:
+  title: 'My App'
+```
+
+The title is omitted when it is not configured, or when a server-side rendered page provides its own title.
+
 ### Context path
 
 When the application is deployed with a context path (`server.servlet.context-path`), the plugin prefixes it to

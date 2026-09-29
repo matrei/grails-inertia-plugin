@@ -17,6 +17,8 @@ package grails.plugin.inertia
 
 import groovy.transform.CompileStatic
 
+import org.springframework.web.util.HtmlUtils
+
 import grails.gsp.Tag
 
 /**
@@ -51,15 +53,18 @@ class InertiaTagLib {
     }
 
     /**
-     * Renders the head elements of a server-side rendered page.
+     * Renders the head elements of a server-side rendered page, preceded by the title
+     * configured with {@code inertia.title} unless the page rendered a title of its own.
      */
     @Tag
     void head() {
-        def ssr = ssrResponse
-        if (ssr) {
-            ssr.head.each { headElement ->
-                out << headElement
-            }
+        def headElements = (ssrResponse?.head ?: []) as List<String>
+        def title = grailsApplication.config.getProperty('inertia.title', String)
+        if (title && !headElements.any { it.startsWith('<title') }) {
+            out << "<title>${HtmlUtils.htmlEscape(title)}</title>"
+        }
+        headElements.each { headElement ->
+            out << headElement
         }
     }
 
