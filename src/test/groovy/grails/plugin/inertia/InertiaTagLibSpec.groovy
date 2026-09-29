@@ -98,9 +98,9 @@ class InertiaTagLibSpec extends Specification implements TagLibUnitTest<InertiaT
             output == '<title>Hello</title><meta name="a" content="b">'
     }
 
-    void 'the head is empty without server-side rendering'() {
+    void 'the head only has the title without server-side rendering'() {
 
-        expect: 'no output'
-            applyTemplate('<inertia:head/>') == ''
+        expect: 'the application name, which the Grails build provides, as title'
+            applyTemplate('<inertia:head/>') == "<title>${config.getProperty('info.app.name')}</title>"
     }
 }

@@ -7,7 +7,10 @@ import grails.testing.web.taglib.TagLibUnitTest
 class InertiaTagLibTitleSpec extends Specification implements TagLibUnitTest<InertiaTagLib> {
 
     Closure doWithConfig() {
-        { it.inertia.title = 'Tom & Jerry <3' } as Closure
+        { config ->
+            config.inertia.title = 'Tom & Jerry <3'
+            config.info.app.name = 'the application name, which the configured title takes precedence over'
+        } as Closure
     }
 
     void 'the configured title is output, html encoded'() {

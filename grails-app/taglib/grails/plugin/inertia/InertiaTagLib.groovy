@@ -54,12 +54,14 @@ class InertiaTagLib {
 
     /**
      * Renders the head elements of a server-side rendered page, preceded by the title
-     * configured with {@code inertia.title} unless the page rendered a title of its own.
+     * configured with {@code inertia.title}, or else the application name from {@code info.app.name},
+     * unless the page rendered a title of its own.
      */
     @Tag
     void head() {
         def headElements = (ssrResponse?.head ?: []) as List<String>
-        def title = grailsApplication.config.getProperty('inertia.title', String)
+        def config = grailsApplication.config
+        def title = config.getProperty('inertia.title', String) ?: config.getProperty('info.app.name', String)
         if (title && !headElements.any { it.startsWith('<title') }) {
             out << "<title>${HtmlUtils.htmlEscape(title)}</title>"
         }

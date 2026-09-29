@@ -225,14 +225,15 @@ The link is omitted when no favicon is configured.
 
 ### Title
 
-The page title shown until a page component sets its own can be configured:
+The page title shown until a page component sets its own defaults to the application name (`info.app.name`),
+which the Grails build sets to the name of the project. A different title can be configured:
 ```yaml
 # myapp/grails-app/conf/application.yml
 inertia:
   title: 'My App'
 ```
 
-The title is omitted when it is not configured, or when a server-side rendered page provides its own title.
+The title is omitted when a server-side rendered page provides its own title.
 
 ### Language
 
