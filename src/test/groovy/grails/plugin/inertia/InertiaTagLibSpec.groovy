@@ -72,4 +72,35 @@ class InertiaTagLibSpec extends Specification implements TagLibUnitTest<InertiaT
             !output.contains('&lt;')
             !output.contains('</script><script>')
     }
+
+    void 'the server-side rendered body replaces the client-side markup'() {
+
+        given: 'a server-side rendered response'
+            request.setAttribute(Inertia.INERTIA_ATTRIBUTE_PAGE, '{"msg":"hello"}')
+            request.setAttribute(Inertia.INERTIA_ATTRIBUTE_SSR_RESPONSE, [head: [], body: '<div id="app" data-server-rendered="true">hello</div>'])
+
+        when: 'using it with the taglib'
+            def output = applyTemplate('<inertia:app/>')
+
+        then: 'the server-side rendered body is output as is'
+            output == '<div id="app" data-server-rendered="true">hello</div>'
+    }
+
+    void 'the server-side rendered head elements are output'() {
+
+        given: 'a server-side rendered response with head elements'
+            request.setAttribute(Inertia.INERTIA_ATTRIBUTE_SSR_RESPONSE, [head: ['<title>Hello</title>', '<meta name="a" content="b">'], body: ''])
+
+        when: 'using it with the taglib'
+            def output = applyTemplate('<inertia:head/>')
+
+        then: 'all head elements are output in order'
+            output == '<title>Hello</title><meta name="a" content="b">'
+    }
+
+    void 'the head is empty without server-side rendering'() {
+
+        expect: 'no output'
+            applyTemplate('<inertia:head/>') == ''
+    }
 }

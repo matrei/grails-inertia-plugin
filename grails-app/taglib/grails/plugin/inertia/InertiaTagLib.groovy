@@ -17,6 +17,8 @@ package grails.plugin.inertia
 
 import groovy.transform.CompileStatic
 
+import grails.gsp.Tag
+
 /**
  * Taglib for including Inertia.js in a page.
  *
@@ -28,20 +30,34 @@ class InertiaTagLib {
 
     final static String namespace = 'inertia'
 
-    Closure app = { Map<String,Object> attrs, Closure body ->
-        if (ssrResponse) {
-            out << ssrResponse.body
+    /**
+     * Renders the element the Inertia app is mounted on, together with the initial page data.
+     * When the page was rendered server-side, the rendered body is output instead.
+     *
+     * @attr id The id of the element, defaults to 'app'
+     * @attr tagName The tag name of the element, defaults to 'div'
+     */
+    @Tag
+    void app(Map<String, Object> attrs) {
+        def ssr = ssrResponse
+        if (ssr) {
+            out << ssr.body
         } else {
-            String tagName = attrs.tagName ?: 'div'
-            String id = attrs.id ?: 'app'
+            def tagName = attrs.tagName ?: 'div'
+            def id = attrs.id ?: 'app'
             out << "<script data-page=\"app\" type=\"application/json\">${pageForScriptTag}</script>"
             out << "<$tagName id=\"$id\"></$tagName>"
         }
     }
 
-    Closure head = { Map<String,Object> attrs, Closure body ->
-        if (ssrResponse) {
-            ssrResponse.head.each { headElement ->
+    /**
+     * Renders the head elements of a server-side rendered page.
+     */
+    @Tag
+    void head() {
+        def ssr = ssrResponse
+        if (ssr) {
+            ssr.head.each { headElement ->
                 out << headElement
             }
         }
