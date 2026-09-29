@@ -39,7 +39,8 @@ dependencies {
 }
 ```
 > [!NOTE]
-> For Grails 7/Java 17 - use the latest version of the plugin.\
+> For Grails 8/Java 21 - use the latest version of the plugin.\
+> For Grails 7/Java 17 - use version 3.\
 > For Grails 6/Java 11 - use version 2 (io.github.matrei:grails-inertia-plugin).\
 > For a Grails 5/Java 8 - use version 1 (io.github.matrei:grails-inertia-plugin).
 
