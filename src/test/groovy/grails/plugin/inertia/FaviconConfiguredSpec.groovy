@@ -17,6 +17,6 @@ class FaviconConfiguredSpec extends Specification implements GrailsWebUnitTest {
             )
 
         then: 'the output contains the favicon link'
-            output.contains('<link rel="icon" href="/static/favicon.svg"/>')
+            output.contains('<link rel="icon" href="/static/favicon.svg">')
     }
 }

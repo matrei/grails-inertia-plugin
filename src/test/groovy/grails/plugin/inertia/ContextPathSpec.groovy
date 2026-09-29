@@ -46,7 +46,7 @@ class ContextPathSpec extends Specification implements GrailsWebUnitTest {
             )
 
         then: 'the favicon url is resolved against the context path only when root-relative'
-            output.contains("<link rel=\"icon\" href=\"${expected}\"/>")
+            output.contains("<link rel=\"icon\" href=\"${expected}\">")
 
         where:
             favicon                               | expected
