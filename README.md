@@ -215,8 +215,22 @@ inertia:
   favicon: '/static/favicon.svg' # served from src/main/resources/public/favicon.svg
 ```
 
-The configured value is used as-is as the favicon URL in the generated HTML, so it can also be an absolute URL.
+A root-relative value (starting with a single `/`) is resolved against the application's context path.
+Any other value, such as an absolute URL, is used as-is.
 The link is omitted when no favicon is configured.
+
+### Context path
+
+When the application is deployed with a context path (`server.servlet.context-path`), the plugin prefixes it to
+the URLs of the built JavaScript and CSS files. Vite also writes the `base` path into the built files, so it must
+include the context path as well:
+```javascript
+// myapp/vite.config.js
+export default defineConfig(({ command }) => ({
+  base: command === 'serve' ? '' : '/myapp/static/dist/', // With server.servlet.context-path: /myapp
+  // ...
+}))
+```
 
 ### ⚙️ SSR
 
