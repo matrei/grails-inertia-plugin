@@ -28,8 +28,8 @@ class InertiaTagLibSpec extends Specification implements TagLibUnitTest<InertiaT
         when: 'using them with the taglib'
             def output = applyTemplate($/<inertia:app id="$id"/>/$)
 
-        then: 'the output is correct'
-            output == $/<script data-page="app" type="application/json">{"msg":"hello"}</script><div id="$id"></div>/$
+        then: 'the id is used for both the element and the page data, which the client looks up by id'
+            output == $/<script data-page="$id" type="application/json">{"msg":"hello"}</script><div id="$id"></div>/$
     }
 
     void 'changing the tagName works'() {

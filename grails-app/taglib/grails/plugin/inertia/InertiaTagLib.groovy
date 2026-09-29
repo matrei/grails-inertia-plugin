@@ -45,7 +45,7 @@ class InertiaTagLib {
         } else {
             def tagName = attrs.tagName ?: 'div'
             def id = attrs.id ?: 'app'
-            out << "<script data-page=\"app\" type=\"application/json\">${pageForScriptTag}</script>"
+            out << "<script data-page=\"$id\" type=\"application/json\">${pageForScriptTag}</script>"
             out << "<$tagName id=\"$id\"></$tagName>"
         }
     }
