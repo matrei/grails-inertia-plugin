@@ -204,6 +204,19 @@ npm run build
 ./gradlew integrationTest
 ./gradlew bootJar
 ```
+### Favicon
+
+The favicon can be configured without overriding the Inertia HTML template.
+Place the icon in `src/main/resources/public/`, which Grails serves under `/static/`, and point the config at it:
+```yaml
+# myapp/grails-app/conf/application.yml
+inertia:
+  favicon: '/static/favicon.svg' # served from src/main/resources/public/favicon.svg
+```
+
+The configured value is used as-is as the favicon URL in the generated HTML, so it can also be an absolute URL.
+The link is omitted when no favicon is configured.
+
 ### ⚙️ SSR
 
 To enable server-side rendering, make sure Node.js 22 or later is installed and available on the PATH.
