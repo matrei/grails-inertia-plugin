@@ -7,7 +7,9 @@ dependencies {
     implementation 'org.apache.grails:grails-interceptors'
     implementation 'org.apache.grails:grails-views-gson'
 
-    runtimeOnly 'org.apache.grails:grails-gsp'
+    implementation 'org.apache.grails:grails-gsp'
+    implementation 'org.apache.grails.views:grails-taglib'
+    implementation 'org.apache.grails.views:grails-web-taglib'
 
     compileOnly 'org.slf4j:slf4j-nop' // Get rid of warning about missing slf4j implementation during compileGsonViews task
     testRuntimeOnly 'org.slf4j:slf4j-nop' // Get rid of warning about missing slf4j implementation during test task
