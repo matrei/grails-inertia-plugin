@@ -209,6 +209,32 @@ npm run build
 ./gradlew integrationTest
 ./gradlew bootJar
 ```
+### Vite dev server
+
+In the `development` environment, the page loads the JavaScript from the Vite dev server. In all other environments,
+it loads the assets built by Vite, as listed in the Vite manifest. The dev server, its URL and the entry point of the
+JavaScript application can be configured:
+```yaml
+# myapp/grails-app/conf/application.yml
+inertia:
+  vite:
+    devServer:
+      enabled: true # Defaults to true in development and false otherwise
+      url: 'http://localhost:3000' # Optional, this is the default value
+    entry: 'src/main/javascript/main.js' # Optional, this is the default value
+```
+
+To use the dev server in another environment as well, for example in `test`, enable it for that environment:
+```yaml
+# myapp/grails-app/conf/application.yml
+environments:
+  test:
+    inertia:
+      vite:
+        devServer:
+          enabled: true
+```
+
 ### Favicon
 
 The favicon can be configured without overriding the Inertia HTML template.
@@ -287,6 +313,15 @@ inertia:
 
 The `@inertiajs/vite` plugin is configured with `ssr: false` in this example because the Grails adapter manages the
 production SSR process. SSR failures fall back to normal client-side rendering.
+
+## Upgrading to 4.0
+
+- Outside the `development` environment, the page now loads the built assets by default, including in `test` and in
+  custom environments. Before, it loaded the JavaScript from the Vite dev server at `http://localhost:3000` in every
+  environment except `production`. The Vite manifest was already required outside `development`, so tests that render
+  the page need the built assets, for example by making `processResources` depend on the Vite build, or they can keep
+  using the dev server by setting `inertia.vite.devServer.enabled: true` for `test`
+  (see [Vite dev server](#vite-dev-server)).
 
 ## Inertia 3 support
 

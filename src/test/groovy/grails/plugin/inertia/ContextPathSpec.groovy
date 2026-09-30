@@ -1,10 +1,8 @@
 package grails.plugin.inertia
 
 import spock.lang.Specification
-import spock.util.environment.RestoreSystemProperties
 
 import grails.testing.web.GrailsWebUnitTest
-import grails.util.Environment
 
 class ContextPathSpec extends Specification implements GrailsWebUnitTest {
 
@@ -24,15 +22,14 @@ class ContextPathSpec extends Specification implements GrailsWebUnitTest {
         request.contextPath = '/myapp'
     }
 
-    @RestoreSystemProperties
-    def 'production assets are prefixed with the context path'() {
-        given: 'the production environment'
-            System.setProperty(Environment.KEY, Environment.PRODUCTION.name)
-
-        when: 'rendering the html view'
+    def 'built assets are prefixed with the context path'() {
+        when: 'rendering the html view with the built assets'
             def output = render(
                     view: '/inertia/html',
-                    model: [inertiaManifest: MANIFEST]
+                    model: [
+                            inertiaVite: new ViteConfig(false, ViteConfig.DEFAULT_DEV_SERVER_URL, ViteConfig.DEFAULT_ENTRY),
+                            inertiaManifest: MANIFEST
+                    ]
             )
 
         then: 'the stylesheets, the script and the preloaded modules are output in order, with the context path'
@@ -51,7 +48,7 @@ class ContextPathSpec extends Specification implements GrailsWebUnitTest {
         when: 'rendering the html view'
             def output = render(
                     view: '/inertia/html',
-                    model: [inertiaManifest: [:]]
+                    model: [inertiaVite: new ViteConfig(true, ViteConfig.DEFAULT_DEV_SERVER_URL, ViteConfig.DEFAULT_ENTRY)]
             )
 
         then: 'the favicon url is resolved against the context path only when root-relative'

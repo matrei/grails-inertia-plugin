@@ -9,6 +9,14 @@
       "description": "Inertia.js Vite manifest"
     },
     {
+      "name": "inertia.vite",
+      "description": "Inertia.js Vite integration"
+    },
+    {
+      "name": "inertia.vite.devServer",
+      "description": "Inertia.js Vite dev server"
+    },
+    {
       "name": "inertia.ssr",
       "type": "grails.plugin.inertia.ssr.ServerSideRenderConfig",
       "sourceType": "grails.plugin.inertia.ssr.ServerSideRenderConfig",
@@ -31,6 +39,23 @@
       "type": "java.lang.String",
       "description": "The location of the Vite manifest, used outside the development environment to resolve the built JavaScript and CSS files.",
       "defaultValue": "classpath:public/dist/.vite/manifest.json"
+    },
+    {
+      "name": "inertia.vite.devServer.enabled",
+      "type": "java.lang.Boolean",
+      "description": "Whether the page loads the JavaScript from the Vite dev server instead of the built assets. Defaults to true in the development environment and false in all other environments."
+    },
+    {
+      "name": "inertia.vite.devServer.url",
+      "type": "java.lang.String",
+      "description": "The URL of the Vite dev server.",
+      "defaultValue": "http://localhost:3000"
+    },
+    {
+      "name": "inertia.vite.entry",
+      "type": "java.lang.String",
+      "description": "The entry point of the JavaScript application, as passed to Vite. Used to load it from the dev server and to look it up in the Vite manifest.",
+      "defaultValue": "src/main/javascript/main.js"
     },
     {
       "name": "inertia.ssr.enabled",

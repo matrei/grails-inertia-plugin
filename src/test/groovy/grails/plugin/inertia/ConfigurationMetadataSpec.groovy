@@ -42,6 +42,17 @@ class ConfigurationMetadataSpec extends Specification {
             group.sourceType == ServerSideRenderConfig.name
     }
 
+    void 'the Vite properties are documented with the defaults of ViteConfig'() {
+
+        expect: 'the dev server url and entry defaults'
+            documentedProperties[ViteConfig.DEV_SERVER_URL].defaultValue == ViteConfig.DEFAULT_DEV_SERVER_URL
+            documentedProperties[ViteConfig.ENTRY].defaultValue == ViteConfig.DEFAULT_ENTRY
+
+        and: 'no fixed default for the dev server switch, since it depends on the environment'
+            documentedProperties[ViteConfig.DEV_SERVER_ENABLED].type == 'java.lang.Boolean'
+            !documentedProperties[ViteConfig.DEV_SERVER_ENABLED].containsKey('defaultValue')
+    }
+
     void 'every property and group is described'() {
 
         expect: 'a description for each'

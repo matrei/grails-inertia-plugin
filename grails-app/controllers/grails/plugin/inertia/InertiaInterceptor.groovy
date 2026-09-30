@@ -23,11 +23,11 @@ import org.springframework.http.HttpStatus
 
 import grails.config.Config
 import grails.core.support.GrailsConfigurationAware
-import grails.util.Environment
 import grails.util.Holders
 
 import static Inertia.INERTIA_ATTRIBUTE_MANIFEST
 import static Inertia.INERTIA_ATTRIBUTE_VERSION
+import static Inertia.INERTIA_ATTRIBUTE_VITE
 import static Inertia.INERTIA_HEADER
 import static Inertia.INERTIA_HEADER_LOCATION
 import static Inertia.INERTIA_HEADER_REDIRECT
@@ -45,6 +45,7 @@ import static grails.web.http.HttpHeaders.VARY
 @CompileStatic
 class InertiaInterceptor implements GrailsConfigurationAware {
 
+    private ViteConfig viteConfig
     private String manifestLocation
     private String manifestHash = 'not yet calculated'
     private volatile Object manifestObject
@@ -108,13 +109,18 @@ class InertiaInterceptor implements GrailsConfigurationAware {
             }
         }
 
-        // Add the Javascript Manifest when not in Development Environment
-        // In Development Environment a node server should be started to serve the javascript files (npm run serve)
-        if (isInertiaHtmlView && manifestShouldBeUsed) {
+        // The page loads the JavaScript from the Vite dev server, or from the built assets listed in the manifest
+        if (isInertiaHtmlView) {
             model.put(
-                    INERTIA_ATTRIBUTE_MANIFEST,
-                    manifest
+                    INERTIA_ATTRIBUTE_VITE,
+                    viteConfig
             )
+            if (manifestShouldBeUsed) {
+                model.put(
+                        INERTIA_ATTRIBUTE_MANIFEST,
+                        manifest
+                )
+            }
         }
 
         true // Continue to process the request
@@ -166,7 +172,7 @@ class InertiaInterceptor implements GrailsConfigurationAware {
     }
 
     boolean getManifestShouldBeUsed() {
-        Environment.current != Environment.DEVELOPMENT
+        !viteConfig.devServerEnabled
     }
 
     boolean getIsGetRequest() {
@@ -224,8 +230,8 @@ class InertiaInterceptor implements GrailsConfigurationAware {
 
     @Override
     void setConfiguration(Config co) {
-        // Load the Javascript Manifest when in Production and Test Environments
-        // In Development Environment a node server should be started to serve the javascript files (npm run serve)
+        // Load the Javascript Manifest unless the JavaScript is served by the Vite dev server (npm run serve)
+        viteConfig = ViteConfig.from(co)
         if (manifestShouldBeUsed) {
             manifestLocation = co.getProperty(
                     'inertia.manifest.location',

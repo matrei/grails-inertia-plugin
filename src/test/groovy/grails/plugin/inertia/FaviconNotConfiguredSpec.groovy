@@ -10,7 +10,7 @@ class FaviconNotConfiguredSpec extends Specification implements GrailsWebUnitTes
         when: 'rendering the html view without a configured favicon'
             def output = render(
                     view: '/inertia/html',
-                    model: [inertiaManifest: [:]]
+                    model: [inertiaVite: new ViteConfig(true, ViteConfig.DEFAULT_DEV_SERVER_URL, ViteConfig.DEFAULT_ENTRY)]
             )
 
         then: 'the output does not contain a favicon link'

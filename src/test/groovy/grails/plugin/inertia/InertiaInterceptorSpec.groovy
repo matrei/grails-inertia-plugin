@@ -1,9 +1,11 @@
 package grails.plugin.inertia
 
+import org.springframework.web.servlet.ModelAndView
 import spock.lang.Specification
 
 import grails.testing.web.interceptor.InterceptorUnitTest
 import grails.web.Controller
+import org.grails.web.util.GrailsApplicationAttributes
 
 import static jakarta.servlet.http.HttpServletResponse.SC_CONFLICT
 import static jakarta.servlet.http.HttpServletResponse.SC_FOUND
@@ -82,6 +84,20 @@ class InertiaInterceptorSpec extends Specification implements InterceptorUnitTes
         then: 'the status is set without sendError, which would commit the response and forward to the error page'
             response.status == SC_CONFLICT
             !response.committed
+    }
+
+    void 'outside development the page gets the built assets by default'() {
+
+        given: 'the html view is rendered'
+            def modelAndView = new ModelAndView(Inertia.INERTIA_VIEW_HTML, [:])
+            request.setAttribute(GrailsApplicationAttributes.MODEL_AND_VIEW, modelAndView)
+
+        when: 'the interceptor handles the response'
+            interceptor.after()
+
+        then: 'the dev server is not used, and the manifest is passed on'
+            !(modelAndView.model[Inertia.INERTIA_ATTRIBUTE_VITE] as ViteConfig).devServerEnabled
+            modelAndView.model[Inertia.INERTIA_ATTRIBUTE_MANIFEST] == [:]
     }
 
     def 'version mismatch preserves the request query string and current version'() {

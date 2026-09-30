@@ -16,7 +16,7 @@ class HtmlLangSpec extends Specification implements GrailsWebUnitTest {
         when: 'rendering the html view'
             def output = render(
                     view: '/inertia/html',
-                    model: [inertiaManifest: [:]]
+                    model: [inertiaVite: new ViteConfig(true, ViteConfig.DEFAULT_DEV_SERVER_URL, ViteConfig.DEFAULT_ENTRY)]
             )
 
         then: 'the language tag uses a hyphen'
@@ -32,7 +32,7 @@ class HtmlLangSpec extends Specification implements GrailsWebUnitTest {
         when: 'rendering the html view'
             def output = render(
                     view: '/inertia/html',
-                    model: [inertiaManifest: [:]]
+                    model: [inertiaVite: new ViteConfig(true, ViteConfig.DEFAULT_DEV_SERVER_URL, ViteConfig.DEFAULT_ENTRY)]
             )
 
         then: 'the locale resolved by the application is used'

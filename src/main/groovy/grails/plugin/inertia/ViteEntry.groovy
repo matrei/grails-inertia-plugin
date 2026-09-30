@@ -42,9 +42,12 @@ class ViteEntry {
     }
 
     static ViteEntry from(Map<String, Map<String, Object>> manifest, String name) {
-        def entry = manifest[name]
+        def entry = manifest?.get(name)
         if (entry == null) {
-            throw new IllegalArgumentException("Entry point [$name] not found in the Vite manifest")
+            throw new IllegalArgumentException(
+                    "Entry point [$name] not found in the Vite manifest. Build the assets, for example with " +
+                    "'vite build', or use the Vite dev server by setting ${ViteConfig.DEV_SERVER_ENABLED} to true."
+            )
         }
         def importedChunks = importedChunks(manifest, entry, [] as Set<String>)
         def css = [] as LinkedHashSet<String>
