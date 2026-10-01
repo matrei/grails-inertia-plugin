@@ -1,5 +1,7 @@
 package grails.plugin.inertia
 
+import java.lang.reflect.Modifier
+
 import groovy.json.JsonSlurper
 import org.springframework.util.ClassUtils
 import spock.lang.Shared
@@ -19,7 +21,7 @@ class ConfigurationMetadataSpec extends Specification {
 
         given: 'the defaults of the configuration class'
             def defaults = new ServerSideRenderConfig()
-            def configProperties = ServerSideRenderConfig.metaClass.properties.findAll { it.name != 'class' }
+            def configProperties = ServerSideRenderConfig.metaClass.properties.findAll { it.name != 'class' && !Modifier.isStatic(it.modifiers) }
 
         expect: 'each property is documented under its kebab-case name'
             configProperties.each { property ->

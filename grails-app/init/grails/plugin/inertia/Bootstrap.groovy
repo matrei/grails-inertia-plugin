@@ -15,12 +15,15 @@
  */
 package grails.plugin.inertia
 
+import java.util.concurrent.TimeUnit
+
 import groovy.transform.CompileStatic
 import groovy.util.logging.Slf4j
 
 import grails.core.GrailsApplication
 
 import grails.plugin.inertia.ssr.BundleDetector
+import grails.plugin.inertia.ssr.ServerSideRenderConfig
 
 /**
  * A class that handles startup and shutdown tasks.
@@ -32,78 +35,100 @@ import grails.plugin.inertia.ssr.BundleDetector
 @CompileStatic
 class BootStrap {
 
+    private static final long STOP_TIMEOUT_SECONDS = 5
+
     GrailsApplication grailsApplication
 
-    private boolean ssrEnabled = false
     private Process ssrProcess
 
     def init = {
-        ssrEnabled = grailsApplication.config.getProperty(
-                'inertia.ssr.enabled',
-                Boolean,
-                false
-        )
-        if (ssrEnabled) {
-            startSSR()
+        var ssr = ssrConfig
+        if (ssr.enabled) {
+            // Registered before the process is started, so that it is stopped whatever happens after
             addShutdownHook {
                 stopSSR()
             }
+            startSSR(ssr)
         }
     }
 
-    void startSSR() {
+    def destroy = {
+        stopSSR()
+    }
+
+    ServerSideRenderConfig getSsrConfig() {
+        grailsApplication.mainContext.getBean(ServerSideRenderConfig)
+    }
+
+    void startSSR(ServerSideRenderConfig ssr) {
 
         log.debug('Trying to start SSR process...')
 
-        def bundle = BundleDetector.detect(grailsApplication.config)
-        def configuredBundle = grailsApplication.config.getProperty(
-                'inertia.ssr.bundle',
-                String,
-                null
-        )
+        // Parsed before the process is started, so that an invalid URL does not leave a process behind
+        var url = parseUrl(ssr.url)
+        var bundle = BundleDetector.detect(ssr.bundle)
+        var bundleConfigured = ssr.bundle && ssr.bundle != ServerSideRenderConfig.DEFAULT_BUNDLE
 
         if (!bundle) {
             log.error(
-                    (configuredBundle ?
-                            /Inertia SSR bundle not found at configured path: "$configuredBundle"/ :
+                    (bundleConfigured ?
+                            /Inertia SSR bundle not found at configured path: "${ssr.bundle}"/ :
                             'Inertia SSR bundle not found. Set the correct Inertia SSR bundle path ' +
-                            'in you inertia.ssr.bundle config.'
+                            'in your inertia.ssr.bundle config.'
                     ) as String
             )
             return
         }
-        else if (configuredBundle && bundle != configuredBundle) {
+        if (bundleConfigured && bundle != ssr.bundle) {
             log.warn(
-                    /Inertia SSR bundle found at configured path: "{}", / +
+                    /Inertia SSR bundle not found at configured path: "{}", / +
                     /using a default bundle instead: "{}"/,
-                    configuredBundle, bundle
+                    ssr.bundle, bundle
             )
         }
 
-        ssrProcess = new ProcessBuilder()
-                .inheritIO()
-                .command('node',  bundle)
-                .start()
-
-        def url = new URL(
-                grailsApplication.config.getProperty(
-                    'inertia.ssr.url',
-                    String
-                )
-        )
-        waitForSsrServer(url.host, url.port)
+        ssrProcess = startProcess(bundle)
+        try {
+            waitForSsrServer(url.host, url.port != -1 ? url.port : url.defaultPort)
+        } catch (Throwable e) {
+            stopSSR()
+            throw e
+        }
         log.debug(
                 'SSR process started with pid: {}',
                 ssrProcess.pid()
         )
     }
 
+    Process startProcess(String bundle) {
+        new ProcessBuilder()
+                .inheritIO()
+                .command('node', bundle)
+                .start()
+    }
+
     void stopSSR() {
-        log.debug(
-                'Stopping SSR process with pid: {}',
-                ssrProcess?.pid()
-        )
-        ssrProcess?.destroy()
+        var process = ssrProcess
+        ssrProcess = null
+        if (process) {
+            log.debug(
+                    'Stopping SSR process with pid: {}',
+                    process.pid()
+            )
+            process.destroy()
+            if (!process.waitFor(STOP_TIMEOUT_SECONDS, TimeUnit.SECONDS)) {
+                log.debug('SSR process did not stop, stopping it forcibly')
+                process.destroyForcibly()
+            }
+        }
+    }
+
+    private static URL parseUrl(String url) {
+        try {
+            URI.create(url).toURL()
+        } catch (IllegalArgumentException | MalformedURLException e) {
+            throw new IllegalArgumentException("Invalid Inertia SSR URL in inertia.ssr.url: \"$url\" (${e.message})", e)
+        }
     }
 
     void waitForSsrServer(String host, int port, int timeoutMs = 1000, int maxRetries = 10) {

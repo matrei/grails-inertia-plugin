@@ -29,9 +29,11 @@ import org.springframework.boot.context.properties.ConfigurationProperties
 @ConfigurationProperties('inertia.ssr')
 class ServerSideRenderConfig {
 
+    public static final String DEFAULT_BUNDLE = 'src/main/resources/ssr/ssr.mjs'
+
     boolean enabled = false
     String url = 'http://localhost:13714/render'
-    String bundle = 'src/main/resources/ssr/ssr.mjs'
+    String bundle = DEFAULT_BUNDLE
     int connectTimeout = 1000
     int readTimeout = 5000
 }

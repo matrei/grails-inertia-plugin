@@ -29,8 +29,18 @@ import grails.config.Config
 class BundleDetector {
 
     static String detect(Config config) {
+        detect(config.getProperty('inertia.ssr.bundle', String))
+    }
+
+    /**
+     * Finds the SSR bundle: the configured one, or else one of the default locations.
+     *
+     * @param configuredBundle the configured path of the bundle, or null
+     * @return the path of the first bundle that exists, or null when there is none
+     */
+    static String detect(String configuredBundle) {
         [
-                config.getProperty('inertia.ssr.bundle', String),
+                configuredBundle,
                 './src/main/resources/ssr/ssr.mjs',
                 './src/main/resources/ssr/ssr.js'
         ].find {
