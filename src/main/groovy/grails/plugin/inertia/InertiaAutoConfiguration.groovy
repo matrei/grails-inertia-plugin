@@ -10,6 +10,7 @@ import org.springframework.context.annotation.Bean
 import org.springframework.context.annotation.Configuration
 
 import grails.plugin.inertia.ssr.ServerSideRenderConfig
+import grails.plugin.inertia.ssr.ServerSideRenderProcess
 import grails.plugin.inertia.ssr.ServerSideRenderer
 
 @CompileStatic
@@ -23,5 +24,12 @@ class InertiaAutoConfiguration {
     @ConditionalOnBooleanProperty('inertia.ssr.enabled')
     ServerSideRenderer serverSideRenderer(ServerSideRenderConfig ssrConfig) {
         new ServerSideRenderer(ssrConfig)
+    }
+
+    @Bean
+    @ConditionalOnMissingBean
+    @ConditionalOnBooleanProperty('inertia.ssr.enabled')
+    ServerSideRenderProcess serverSideRenderProcess(ServerSideRenderConfig ssrConfig) {
+        new ServerSideRenderProcess(ssrConfig)
     }
 }

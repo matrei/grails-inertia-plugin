@@ -1,5 +1,5 @@
 /*
- * Copyright 2022-present original authors
+ * Copyright 2026-present original authors
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -13,54 +13,44 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-package grails.plugin.inertia
+package grails.plugin.inertia.ssr
 
 import java.util.concurrent.TimeUnit
 
 import groovy.transform.CompileStatic
 import groovy.util.logging.Slf4j
 
-import grails.core.GrailsApplication
-
-import grails.plugin.inertia.ssr.BundleDetector
-import grails.plugin.inertia.ssr.ServerSideRenderConfig
+import org.springframework.beans.factory.DisposableBean
+import org.springframework.boot.web.server.context.WebServerApplicationContext
+import org.springframework.context.SmartLifecycle
 
 /**
- * A class that handles startup and shutdown tasks.
+ * Runs the Inertia SSR server as a {@code node} process for as long as the application context runs.
  *
- * @author Mattias Reichel
- * @since 1.0.0
+ * <p>It is started before the web server and stopped after it, so that no request is rendered while the SSR server
+ * is unavailable.</p>
+ *
+ * @since 4.0
  */
 @Slf4j
 @CompileStatic
-class BootStrap {
+class ServerSideRenderProcess implements SmartLifecycle, DisposableBean {
+
+    /** Just before the web server, which is started later and stopped earlier. */
+    public static final int PHASE = WebServerApplicationContext.START_STOP_LIFECYCLE_PHASE - 1
 
     private static final long STOP_TIMEOUT_SECONDS = 5
 
-    GrailsApplication grailsApplication
+    private final ServerSideRenderConfig ssr
 
-    private Process ssrProcess
+    private volatile Process process
 
-    def init = {
-        var ssr = ssrConfig
-        if (ssr.enabled) {
-            // Registered before the process is started, so that it is stopped whatever happens after
-            addShutdownHook {
-                stopSSR()
-            }
-            startSSR(ssr)
-        }
+    ServerSideRenderProcess(ServerSideRenderConfig ssr) {
+        this.ssr = ssr
     }
 
-    def destroy = {
-        stopSSR()
-    }
-
-    ServerSideRenderConfig getSsrConfig() {
-        grailsApplication.mainContext.getBean(ServerSideRenderConfig)
-    }
-
-    void startSSR(ServerSideRenderConfig ssr) {
+    @Override
+    void start() {
 
         log.debug('Trying to start SSR process...')
 
@@ -87,40 +77,62 @@ class BootStrap {
             )
         }
 
-        ssrProcess = startProcess(bundle)
+        process = startProcess(bundle)
         try {
             waitForSsrServer(url.host, url.port != -1 ? url.port : url.defaultPort)
         } catch (Throwable e) {
-            stopSSR()
+            // The context fails to start, and does not stop a lifecycle that failed to start
+            stop()
             throw e
         }
         log.debug(
                 'SSR process started with pid: {}',
-                ssrProcess.pid()
+                process.pid()
         )
     }
 
+    @Override
+    void stop() {
+        var stopping = process
+        process = null
+        if (stopping) {
+            log.debug(
+                    'Stopping SSR process with pid: {}',
+                    stopping.pid()
+            )
+            stopping.destroy()
+            if (!stopping.waitFor(STOP_TIMEOUT_SECONDS, TimeUnit.SECONDS)) {
+                log.debug('SSR process did not stop, stopping it forcibly')
+                stopping.destroyForcibly()
+            }
+        }
+    }
+
+    @Override
+    boolean isRunning() {
+        process != null
+    }
+
+    @Override
+    int getPhase() {
+        PHASE
+    }
+
+    /**
+     * Stops the process when the context is destroyed without being stopped, which is the case when it fails to
+     * start after this lifecycle was started.
+     */
+    @Override
+    void destroy() {
+        stop()
+    }
+
+    @SuppressWarnings('GrMethodMayBeStatic') // Not static, so that tests and subclasses can replace it
     Process startProcess(String bundle) {
         new ProcessBuilder()
                 .inheritIO()
                 .command('node', bundle)
                 .start()
-    }
-
-    void stopSSR() {
-        var process = ssrProcess
-        ssrProcess = null
-        if (process) {
-            log.debug(
-                    'Stopping SSR process with pid: {}',
-                    process.pid()
-            )
-            process.destroy()
-            if (!process.waitFor(STOP_TIMEOUT_SECONDS, TimeUnit.SECONDS)) {
-                log.debug('SSR process did not stop, stopping it forcibly')
-                process.destroyForcibly()
-            }
-        }
     }
 
     private static URL parseUrl(String url) {
@@ -131,6 +143,7 @@ class BootStrap {
         }
     }
 
+    @SuppressWarnings('GrMethodMayBeStatic') // Not static, so that tests and subclasses can replace it
     void waitForSsrServer(String host, int port, int timeoutMs = 1000, int maxRetries = 10) {
         boolean portOpen = false
         int tryNumber = 0
@@ -139,8 +152,9 @@ class BootStrap {
                     'Checking if SSR server is up on {}:{} ({}/{})...',
                     host, port, tryNumber, maxRetries
             )
-            try (Socket ignore = new Socket(host, port)) {
-                // If the socket is successfully created, the port is open
+            try {
+                new Socket(host, port).close()
+                // If the socket could be opened, the server is up
                 log.debug('SSR server is up!')
                 portOpen = true
             } catch (IOException ignore) {
