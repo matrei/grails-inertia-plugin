@@ -17,7 +17,14 @@ package grails.plugin.inertia
 
 import groovy.transform.CompileStatic
 
+import org.springframework.boot.autoconfigure.AutoConfiguration
+import org.springframework.boot.context.properties.EnableConfigurationProperties
+
 import grails.plugins.Plugin
+
+import grails.plugin.inertia.ssr.ServerSideRenderConfig
+import grails.plugin.inertia.ssr.ServerSideRenderProcess
+import grails.plugin.inertia.ssr.ServerSideRenderer
 
 /**
  * Grails plugin descriptor class.
@@ -26,7 +33,9 @@ import grails.plugins.Plugin
  * @since 1.0.0
  */
 @CompileStatic
+@AutoConfiguration
 @SuppressWarnings('unused')
+@EnableConfigurationProperties(ServerSideRenderConfig)
 class InertiaGrailsPlugin extends Plugin {
 
     def grailsVersion = '8.0.0 > *'
@@ -41,4 +50,11 @@ class InertiaGrailsPlugin extends Plugin {
             url: 'https://github.com/matrei/inertia-grails-plugin/issues'
     ]
     def scm = [url: 'https://github.com/matrei/inertia-grails-plugin']
+
+    def beans = {
+        group('serverSideRendering').conditionalOnProperty('inertia.ssr.enabled', havingValue: 'true') {
+            bean(ServerSideRenderer).conditionalOnMissingBean() { ServerSideRenderConfig ssrConfig -> }
+            bean(ServerSideRenderProcess).conditionalOnMissingBean() { ServerSideRenderConfig ssrConfig -> }
+        }
+    }
 }
