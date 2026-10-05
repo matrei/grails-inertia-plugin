@@ -23,7 +23,7 @@ jobs:
           echo "Release version: ${TAG#v}"
           echo "VERSION=${TAG#v}" >> "$GITHUB_ENV"
       - name: "📥 Checkout the repository"
-        uses: actions/checkout@v6
+        uses: actions/checkout@v7
         with:
           ref: ${{ env.TAG }}
           token: ${{ secrets.GITHUB_TOKEN }}
@@ -32,12 +32,12 @@ jobs:
       - name: "📅 Ensure source files use common date"
         run: find . -depth \( -type f -o -type d \) -exec touch -d "@${SOURCE_DATE_EPOCH}" {} +
       - name: "☕️ Setup JDK"
-        uses: actions/setup-java@v5
+        uses: actions/setup-java@v6
         with:
           distribution: ${{ env.JAVA_DISTRIBUTION }}
           java-version: ${{ env.JAVA_VERSION }}
       - name: "🐘 Setup Gradle"
-        uses: gradle/actions/setup-gradle@v5
+        uses: gradle/actions/setup-gradle@v6
         with:
           build-scan-publish: true
           build-scan-terms-of-use-url: https://gradle.com/terms-of-service
@@ -69,7 +69,7 @@ jobs:
           mkdir -p build
           echo "$SOURCE_DATE_EPOCH" >> build/BUILD_DATE.txt
       - name: "📤 Upload Build Date file"
-        uses: softprops/action-gh-release@v2
+        uses: softprops/action-gh-release@v3
         with:
           tag_name: ${{ env.TAG }}
           files: build/BUILD_DATE.txt
@@ -87,17 +87,17 @@ jobs:
           echo "Release version: ${TAG#v}"
           echo "VERSION=${TAG#v}" >> "$GITHUB_ENV"
       - name: "📥 Checkout repository"
-        uses: actions/checkout@v6
+        uses: actions/checkout@v7
         with:
           ref: ${{ env.TAG }}
           token: ${{ secrets.GITHUB_TOKEN }}
       - name: "☕️ Setup JDK"
-        uses: actions/setup-java@v5
+        uses: actions/setup-java@v6
         with:
           distribution: ${{ env.JAVA_DISTRIBUTION }}
           java-version: ${{ env.JAVA_VERSION }}
       - name: "🐘 Setup Gradle"
-        uses: gradle/actions/setup-gradle@v5
+        uses: gradle/actions/setup-gradle@v6
         with:
           build-scan-publish: true
           build-scan-terms-of-use-url: https://gradle.com/terms-of-service
