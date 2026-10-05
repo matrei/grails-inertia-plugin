@@ -106,7 +106,11 @@ import { createInertiaApp } from '@inertiajs/vue3'
 createInertiaApp({
   resolve: async (name) => {
     const pages = import.meta.glob('./Pages/**/*.vue')
-    return (await pages[`./Pages/${name}.vue`]()).default
+    const page = pages[`./Pages/${name}.vue`]
+    if (!page) {
+      throw new Error(`Page not found: ${name}`)
+    }
+    return (await page()).default
   },
   setup ({el, App, props, plugin}) {
     createApp({ render: () => h(App, props) })
@@ -128,7 +132,11 @@ createServer(page =>
         render: renderToString,
         resolve: async (name) => {
             const pages = import.meta.glob('./Pages/**/*.vue')
-            return (await pages[`./Pages/${name}.vue`]()).default
+            const page = pages[`./Pages/${name}.vue`]
+            if (!page) {
+                throw new Error(`Page not found: ${name}`)
+            }
+            return (await page()).default
         },
         setup({ App, props, plugin }) {
             return createSSRApp({
@@ -168,6 +176,11 @@ class BookController {
     }
 }
 ```
+The name of the page component is its path below `src/main/javascript/Pages`, without the `.vue` extension, so
+`Books/Index` renders `src/main/javascript/Pages/Books/Index.vue`. The name must match the file name exactly,
+including upper and lower case, also on file systems that ignore case. A page that does not exist fails with
+`Page not found: Books/Index`.
+
 Here is an example Vue 3 Single File Component to that will render the books as a list.
 ```vue
 <!-- myapp/src/main/javascript/Pages/Books/Index.vue -->
