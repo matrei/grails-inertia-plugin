@@ -1,5 +1,5 @@
 /*
- * Copyright 2023-present original authors
+ * Copyright 2026-present original authors
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -13,27 +13,22 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-package grails.plugin.inertia.ssr
+package grails.plugin.inertia
 
 import groovy.transform.CompileStatic
 
-import org.springframework.boot.context.properties.ConfigurationProperties
-
 /**
- * Configuration properties for server-side rendering.
+ * Encodes JSON for safe embedding in an HTML script element.
  *
- * @author Mattias Reichel
- * @since 2.0.0
+ * @since 4.0
  */
 @CompileStatic
-@ConfigurationProperties('inertia.ssr')
-class ServerSideRenderConfig {
+class InertiaScriptJsonEncoder {
 
-    public static final String DEFAULT_BUNDLE = 'src/main/resources/ssr/ssr.mjs'
-
-    boolean enabled = false
-    String url = 'http://localhost:13714/render'
-    String bundle = DEFAULT_BUNDLE
-    int connectTimeout = 1000
-    int readTimeout = 5000
+    static String encode(String json) {
+        json
+                ?.replace('/', '\\/')
+                ?.replace('\u2028', '\\u2028')
+                ?.replace('\u2029', '\\u2029')
+    }
 }

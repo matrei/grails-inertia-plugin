@@ -32,5 +32,18 @@ class InertiaPage {
     Map props
     String url
     String version
+    Map flash = [:]
+    Boolean clearHistory = false
+    Boolean encryptHistory = false
+    Boolean preserveFragment = false
+    List<String> mergeProps = []
+    List<String> prependProps = []
+    List<String> deepMergeProps = []
+    List<String> matchPropsOn = []
+    Map scrollProps = [:]
+    Map deferredProps = [:]
+    List<String> rescuedProps = []
+    List<String> sharedProps = []
+    Map onceProps = [:]
 
 }

@@ -1,11 +1,14 @@
 package grails.plugin.inertia
 
+import org.springframework.web.servlet.ModelAndView
 import spock.lang.Specification
 
 import grails.testing.web.interceptor.InterceptorUnitTest
 import grails.web.Controller
+import org.grails.web.util.GrailsApplicationAttributes
 
 import static jakarta.servlet.http.HttpServletResponse.SC_CONFLICT
+import static jakarta.servlet.http.HttpServletResponse.SC_FOUND
 import static jakarta.servlet.http.HttpServletResponse.SC_OK
 
 class InertiaInterceptorSpec extends Specification implements InterceptorUnitTest<InertiaInterceptor> {
@@ -65,6 +68,89 @@ class InertiaInterceptorSpec extends Specification implements InterceptorUnitTes
             'index'   | 'PATCH'   | null       || SC_OK
     }
 
+    void 'inertia requests from stale assets get a plain conflict response'() {
+
+        given: 'a controller'
+            def controller = mockController(TestController) as TestController
+
+        when: 'an inertia request with an outdated asset version is handled'
+            request.addHeader('X-Inertia', true)
+            request.addHeader('X-Inertia-Version', 'a value that is certain to be deemed as stale')
+            withInterceptors(controller: 'test', action: 'index') {
+                controller.index()
+            }
+            interceptor.after()
+
+        then: 'the status is set without sendError, which would commit the response and forward to the error page'
+            response.status == SC_CONFLICT
+            !response.committed
+    }
+
+    void 'outside development the page gets the built assets by default'() {
+
+        given: 'the html view is rendered'
+            def modelAndView = new ModelAndView(Inertia.INERTIA_VIEW_HTML, [:])
+            request.setAttribute(GrailsApplicationAttributes.MODEL_AND_VIEW, modelAndView)
+
+        when: 'the interceptor handles the response'
+            interceptor.after()
+
+        then: 'the dev server is not used, and the manifest is passed on'
+            !(modelAndView.model[Inertia.INERTIA_ATTRIBUTE_VITE] as ViteConfig).devServerEnabled
+            modelAndView.model[Inertia.INERTIA_ATTRIBUTE_MANIFEST] == [:]
+    }
+
+    def 'version mismatch preserves the request query string and current version'() {
+        given:
+            def controller = mockController(TestController) as TestController
+            request.addHeader('X-Inertia', true)
+            request.addHeader('X-Inertia-Version', 'stale')
+            request.setRequestURI('/users')
+            request.setQueryString('page=2&active=true')
+            request.method = 'GET'
+            interceptor.before()
+            withInterceptors(controller: 'test', action: 'testing', httpMethod: 'GET') {
+                controller.testing()
+            }
+
+        when:
+            interceptor.after()
+
+        then:
+            response.status == SC_CONFLICT
+            response.getHeader('X-Inertia-Location') == '/users?page=2&active=true'
+            response.getHeader('X-Inertia-Version') == request.getAttribute(Inertia.INERTIA_ATTRIBUTE_VERSION)
+            response.getHeader('X-Inertia') == null
+    }
+
+    def 'version mismatch reflashes data for the follow-up request'() {
+        given:
+            def controller = mockController(TestController) as TestController
+            Inertia.flash.put('notice', 'Saved')
+            request.addHeader('X-Inertia', true)
+            request.addHeader('X-Inertia-Version', 'stale')
+            request.method = 'GET'
+            interceptor.before()
+            withInterceptors(controller: 'test', action: 'testing', httpMethod: 'GET') {
+                controller.testing()
+            }
+
+        when:
+            interceptor.after()
+
+        then:
+            response.status == SC_CONFLICT
+            Inertia.flash.get('notice') == 'Saved'
+    }
+
+    def 'Inertia request header matching ignores case and surrounding whitespace'() {
+        given:
+            request.addHeader('X-Inertia', ' TRUE ')
+
+        expect:
+            interceptor.isInertiaRequest
+    }
+
     void 'the http headers are correct for html responses'() {
 
         given: 'a controller'
@@ -96,6 +182,44 @@ class InertiaInterceptorSpec extends Specification implements InterceptorUnitTes
         then: 'X-Inertia is one of the Vary header values'
             response.contentType.equalsIgnoreCase('application/json;charset=UTF-8')
             'X-Inertia' in response.getHeaders('Vary')
+    }
+
+    def 'an Inertia partial request produces a filtered page response'() {
+        given:
+            def controller = mockController(TestController) as TestController
+            request.addHeader('X-Inertia', true)
+            request.addHeader('X-Inertia-Version', '0')
+            request.addHeader('X-Inertia-Partial-Component', 'partial')
+            request.addHeader('X-Inertia-Partial-Data', 'users')
+
+        when:
+            withInterceptors(controller: 'test', action: 'partial', httpMethod: 'GET') {
+                controller.partial()
+            }
+            interceptor.after()
+
+        then:
+            response.contentType.equalsIgnoreCase('application/json;charset=UTF-8')
+            response.getHeader('X-Inertia') == 'true'
+            'X-Inertia' in response.getHeaders('Vary')
+    }
+
+    def 'page factory accepts immutable resolved props when adding defaults'() {
+        given:
+            def controller = mockController(TestController) as TestController
+            def holder = [:]
+
+        when:
+            withInterceptors(controller: 'test', action: 'testing', httpMethod: 'GET') {
+                holder.page = InertiaResponseFactory.createPage(
+                        'Dashboard',
+                        [title: 'Dashboard']
+                )
+            }
+
+        then:
+            holder.page.props.title == 'Dashboard'
+            holder.page.props.errors == []
     }
 
     def 'canceling Inertia request works'() {
@@ -132,6 +256,67 @@ class InertiaInterceptorSpec extends Specification implements InterceptorUnitTes
             ! response.containsHeader('X-Inertia')
             ! ('X-Inertia' in response.getHeaders('Vary'))
     }
+
+    def 'page history controls are exposed through the Inertia facade'() {
+        given:
+            def controller = (TestController) mockController(TestController)
+            request.addHeader('X-Inertia', true)
+            request.addHeader('X-Inertia-Version', '0')
+
+        when:
+            withInterceptors(controller: 'test', httpMethod: 'GET') {
+                controller.pageControlsAction()
+            }
+
+        then:
+            request.getAttribute(Inertia.INERTIA_ATTRIBUTE_CLEAR_HISTORY)
+            request.getAttribute(Inertia.INERTIA_ATTRIBUTE_ENCRYPT_HISTORY)
+            request.getAttribute(Inertia.INERTIA_ATTRIBUTE_PRESERVE_FRAGMENT)
+    }
+
+    def 'redirects with fragments use the Inertia redirect header'() {
+        given:
+            def controller = mockController(TestController) as TestController
+            request.addHeader('X-Inertia', true)
+            request.method = 'GET'
+            interceptor.before()
+            request.addHeader('X-Inertia-Version', request.getAttribute(Inertia.INERTIA_ATTRIBUTE_VERSION))
+            withInterceptors(controller: 'test', httpMethod: 'GET') {
+                controller.index()
+            }
+            response.setHeader('Location', '/users#details')
+            response.status = 302
+
+        when:
+            interceptor.after()
+
+        then:
+            response.status == SC_CONFLICT
+            response.getHeader('X-Inertia-Redirect') == '/users#details'
+    }
+
+    def 'prefetch redirects with fragments are not converted'() {
+        given:
+            def controller = mockController(TestController) as TestController
+            request.addHeader('X-Inertia', true)
+            request.addHeader('Purpose', 'prefetch')
+            request.method = 'GET'
+            interceptor.before()
+            request.addHeader('X-Inertia-Version', request.getAttribute(Inertia.INERTIA_ATTRIBUTE_VERSION))
+            withInterceptors(controller: 'test', httpMethod: 'GET') {
+                controller.index()
+            }
+            response.setHeader('Location', '/users#details')
+            response.status = 302
+
+        when:
+            interceptor.after()
+
+        then:
+            response.status == SC_FOUND
+            response.getHeader('Location') == '/users#details'
+            response.getHeader('X-Inertia-Redirect') == null
+    }
 }
 
 @Controller
@@ -145,6 +330,20 @@ class TestController {
     def cancelInertiaAction() {
         Inertia.cancel()
         render('cancelInertiaAction')
+    }
+
+    def pageControlsAction() {
+        Inertia.clearHistory()
+        Inertia.encryptHistory()
+        Inertia.preserveFragment()
+        renderInertia('controls')
+    }
+
+    def partial() {
+        renderInertia('partial', [
+                users: ['Mattias'],
+                companies: ['Acme']
+        ])
     }
 
     def testing() {

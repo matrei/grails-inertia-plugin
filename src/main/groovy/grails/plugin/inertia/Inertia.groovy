@@ -47,17 +47,31 @@ class Inertia {
     public static final String INERTIA_ATTRIBUTE_PAGE = 'grails.plugin.inertia.InertiaPage'
     public static final String INERTIA_ATTRIBUTE_SSR_RESPONSE = 'grails.plugin.inertia.InertiaSsrResponse'
     public static final String INERTIA_ATTRIBUTE_CANCEL_INERTIA = 'grails.plugin.inertia.CancelInertia'
+    public static final String INERTIA_ATTRIBUTE_CLEAR_HISTORY = 'grails.plugin.inertia.ClearHistory'
+    public static final String INERTIA_ATTRIBUTE_ENCRYPT_HISTORY = 'grails.plugin.inertia.EncryptHistory'
+    public static final String INERTIA_ATTRIBUTE_PRESERVE_FRAGMENT = 'grails.plugin.inertia.PreserveFragment'
     public static final String INERTIA_ATTRIBUTE_MANIFEST = 'inertiaManifest'
+    public static final String INERTIA_ATTRIBUTE_VITE = 'inertiaVite'
     public static final String INERTIA_HEADER = 'X-Inertia'
     public static final String INERTIA_HEADER_VERSION = 'X-Inertia-Version'
     public static final String INERTIA_HEADER_LOCATION = 'X-Inertia-Location'
+    public static final String INERTIA_HEADER_REDIRECT = 'X-Inertia-Redirect'
+    public static final String INERTIA_HEADER_PARTIAL_COMPONENT = 'X-Inertia-Partial-Component'
+    public static final String INERTIA_HEADER_PARTIAL_DATA = 'X-Inertia-Partial-Data'
+    public static final String INERTIA_HEADER_PARTIAL_EXCEPT = 'X-Inertia-Partial-Except'
+    public static final String INERTIA_HEADER_RESET = 'X-Inertia-Reset'
+    public static final String INERTIA_HEADER_ERROR_BAG = 'X-Inertia-Error-Bag'
+    public static final String INERTIA_HEADER_INFINITE_SCROLL_MERGE_INTENT =
+            'X-Inertia-Infinite-Scroll-Merge-Intent'
+    public static final String INERTIA_HEADER_EXCEPT_ONCE_PROPS = 'X-Inertia-Except-Once-Props'
+    public static final String INERTIA_HEADER_PURPOSE = 'Purpose'
 
     protected static final String INERTIA_VIEW_HTML = '/inertia/html'
     protected static final String INERTIA_VIEW_JSON = '/inertia/json'
 
     private static final String JSON_VIEW_TEMPLATE_ENGINE_BEAN_NAME = 'jsonTemplateEngine'
     private static final String SSR_RENDERER_BEAN_NAME = 'serverSideRenderer'
-    private static final String INERTIA_PAGE_MODEL_KEY = 'inertiaPage'
+    static final String INERTIA_PAGE_MODEL_KEY = 'inertiaPage'
 
 
     @SuppressWarnings('unused')
@@ -70,7 +84,14 @@ class Inertia {
     }
     static ModelAndView render(String component, Map props, Map viewData) {
         request.setAttribute(INERTIA_ATTRIBUTE_NAME, true)
-        renderInternal(component, chainModel + sharedData + props, viewData)
+        Map shared = sharedData
+        Map chain = chainModel
+        renderInternal(
+                component,
+                chain + shared + props,
+                viewData,
+                sharedPropNames(chain, shared)
+        )
     }
 
 /*
@@ -82,30 +103,101 @@ class Inertia {
         response.status = SC_CONFLICT
     }
 
+    static InertiaProp always(Object value) {
+        InertiaProp.always(value)
+    }
+
+    static InertiaProp optional(Object value) {
+        InertiaProp.optional(value)
+    }
+
+    static InertiaProp defer(Object value, String group = 'default', boolean rescue = false) {
+        InertiaProp.deferred(value, group, rescue)
+    }
+
+    static InertiaProp merge(Object value) {
+        InertiaProp.merge(value)
+    }
+
+    static InertiaProp merge(Object value, String matchOn) {
+        InertiaProp.merge(value, matchOn)
+    }
+
+    static InertiaProp prepend(Object value) {
+        InertiaProp.prepend(value)
+    }
+
+    static InertiaProp prepend(Object value, String matchOn) {
+        InertiaProp.prepend(value, matchOn)
+    }
+
+    static InertiaProp deepMerge(Object value) {
+        InertiaProp.deepMerge(value)
+    }
+
+    static InertiaProp deepMerge(Object value, String matchOn) {
+        InertiaProp.deepMerge(value, matchOn)
+    }
+
+    static InertiaProp once(Object value, String key = null, Long expiresAt = null) {
+        InertiaProp.once(value, key, expiresAt)
+    }
+
+    static InertiaProp scroll(
+            Object value,
+            String mergePath,
+            Map scrollProps,
+            String matchOn = null
+    ) {
+        InertiaProp.scroll(value, mergePath, scrollProps, matchOn)
+    }
+
     @SuppressWarnings('unused')
     static void cancel() {
         request.setAttribute(INERTIA_ATTRIBUTE_CANCEL_INERTIA, true)
+    }
+
+    static void clearHistory() {
+        request.setAttribute(INERTIA_ATTRIBUTE_CLEAR_HISTORY, true)
+    }
+
+    static void encryptHistory() {
+        request.setAttribute(INERTIA_ATTRIBUTE_ENCRYPT_HISTORY, true)
+    }
+
+    static void preserveFragment() {
+        request.setAttribute(INERTIA_ATTRIBUTE_PRESERVE_FRAGMENT, true)
     }
 
     static boolean getIsCanceled() {
         request.getAttribute(INERTIA_ATTRIBUTE_CANCEL_INERTIA)
     }
 
-    private static ModelAndView renderInternal(String component, Map props, Map viewData) {
+    private static ModelAndView renderInternal(
+            String component,
+            Map props,
+            Map viewData,
+            List<String> sharedProps
+    ) {
         isInertiaRequest ?
-            renderJson(component, props) :
-            renderHtml(component, props, viewData)
+            renderJson(component, props, sharedProps) :
+            renderHtml(component, props, viewData, sharedProps)
     }
 
-    private static ModelAndView renderJson(String component, Map model) {
-        def jsonModel = createJsonModel(component, model)
+    private static ModelAndView renderJson(String component, Map model, List<String> sharedProps) {
+        def jsonModel = createJsonModel(component, model, sharedProps)
         new ModelAndView(INERTIA_VIEW_JSON, jsonModel)
     }
 
-    private static ModelAndView renderHtml(String component, Map props, Map viewData) {
+    private static ModelAndView renderHtml(
+            String component,
+            Map props,
+            Map viewData,
+            List<String> sharedProps
+    ) {
 
         if (ssrEnabled) {
-            def page = createInertiaPageModel(component, props)
+            def page = createInertiaPageModel(component, props, sharedProps)
             def ssrResult = ssrRenderer.render(page)
             if (ssrResult) {
                 def ssrResultJson = new JsonSlurper().parseText(ssrResult)
@@ -115,21 +207,18 @@ class Inertia {
         }
 
         def jsonTemplate = jsonViewTemplateEngine.resolveTemplate(INERTIA_VIEW_JSON)
-        def jsonModel = createJsonModel(component, props)
+        def jsonModel = createJsonModel(component, props, sharedProps)
         def jsonString = jsonTemplate.make(jsonModel).writeTo(new StringWriter()).toString()
         request.setAttribute(INERTIA_ATTRIBUTE_PAGE, jsonString)
         new ModelAndView(INERTIA_VIEW_HTML, (viewData ?: [:]))
     }
 
-    private static InertiaPage createInertiaPageModel(String component, Map model) {
-        if (!model.errors) model.errors = []
-        if (!model.flash) model.flash = flash
-        new InertiaPage(
-            component: component,
-            props: model,
-            url: forwardURI ?: requestURI,
-            version: inertiaAssetVersion
-        )
+    private static InertiaPage createInertiaPageModel(
+            String component,
+            Map model,
+            List<String> sharedProps
+    ) {
+        InertiaResponseFactory.createPage(component, model, sharedProps)
     }
 
     static Map getSharedData() {
@@ -144,8 +233,26 @@ class Inertia {
         (flash['chainModel'] ?: [:]) as Map
     }
 
+    private static List<String> sharedPropNames(Map chain, Map shared) {
+        List<String> names = []
+        names.addAll(chain.keySet().collect { it as String })
+        shared.keySet().each { key ->
+            String name = key as String
+            if (!names.contains(name)) names << name
+        }
+        names
+    }
+
     static Map<String,InertiaPage> createJsonModel(String component, Map model) {
-        [(INERTIA_PAGE_MODEL_KEY): createInertiaPageModel(component, model)]
+        InertiaResponseFactory.createJsonModel(component, model)
+    }
+
+    static Map<String,InertiaPage> createJsonModel(
+            String component,
+            Map model,
+            List<String> sharedProps
+    ) {
+        InertiaResponseFactory.createJsonModel(component, model, sharedProps)
     }
 
     static JsonViewTemplateEngine getJsonViewTemplateEngine() {
@@ -188,6 +295,10 @@ class Inertia {
 
     static boolean getIsInertiaRequest() {
         request.getHeader(INERTIA_HEADER)
+    }
+
+    static InertiaRequestContext getRequestContext() {
+        InertiaRequestContext.from(request)
     }
 
     static HttpServletRequest getRequest() {

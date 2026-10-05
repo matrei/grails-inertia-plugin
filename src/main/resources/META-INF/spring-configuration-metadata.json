@@ -1,22 +1,96 @@
 {
+  "groups": [
+    {
+      "name": "inertia",
+      "description": "Inertia.js"
+    },
+    {
+      "name": "inertia.manifest",
+      "description": "Inertia.js Vite manifest"
+    },
+    {
+      "name": "inertia.vite",
+      "description": "Inertia.js Vite integration"
+    },
+    {
+      "name": "inertia.vite.devServer",
+      "description": "Inertia.js Vite dev server"
+    },
+    {
+      "name": "inertia.ssr",
+      "type": "grails.plugin.inertia.ssr.ServerSideRenderConfig",
+      "sourceType": "grails.plugin.inertia.ssr.ServerSideRenderConfig",
+      "description": "Inertia.js server-side rendering"
+    }
+  ],
   "properties": [
+    {
+      "name": "inertia.favicon",
+      "type": "java.lang.String",
+      "description": "The URL of the favicon of the page. A root-relative URL is resolved against the context path. No favicon is linked when not set."
+    },
+    {
+      "name": "inertia.title",
+      "type": "java.lang.String",
+      "description": "The title of the page until a page component sets its own. Defaults to the application name (`info.app.name`)."
+    },
+    {
+      "name": "inertia.manifest.location",
+      "type": "java.lang.String",
+      "description": "The location of the Vite manifest, used outside the development environment to resolve the built JavaScript and CSS files.",
+      "defaultValue": "classpath:public/dist/.vite/manifest.json"
+    },
+    {
+      "name": "inertia.vite.devServer.enabled",
+      "type": "java.lang.Boolean",
+      "description": "Whether the page loads the JavaScript from the Vite dev server instead of the built assets. Defaults to true in the development environment and false in all other environments."
+    },
+    {
+      "name": "inertia.vite.devServer.url",
+      "type": "java.lang.String",
+      "description": "The URL of the Vite dev server.",
+      "defaultValue": "http://localhost:3000"
+    },
+    {
+      "name": "inertia.vite.entry",
+      "type": "java.lang.String",
+      "description": "The entry point of the JavaScript application, as passed to Vite. Used to load it from the dev server and to look it up in the Vite manifest.",
+      "defaultValue": "src/main/javascript/main.js"
+    },
     {
       "name": "inertia.ssr.enabled",
       "type": "java.lang.Boolean",
-      "description": "Whether server-side rendering is enabled. Defaults to false.",
+      "sourceType": "grails.plugin.inertia.ssr.ServerSideRenderConfig",
+      "description": "Whether server-side rendering is enabled.",
       "defaultValue": false
     },
     {
       "name": "inertia.ssr.url",
       "type": "java.lang.String",
-      "description": "The URL of the server-side rendering service. Defaults to 'http://localhost:13714/render'.",
+      "sourceType": "grails.plugin.inertia.ssr.ServerSideRenderConfig",
+      "description": "The URL of the server-side rendering service.",
       "defaultValue": "http://localhost:13714/render"
     },
     {
       "name": "inertia.ssr.bundle",
       "type": "java.lang.String",
+      "sourceType": "grails.plugin.inertia.ssr.ServerSideRenderConfig",
       "description": "The path to the server-side rendering bundle file.",
       "defaultValue": "src/main/resources/ssr/ssr.mjs"
+    },
+    {
+      "name": "inertia.ssr.connect-timeout",
+      "type": "java.lang.Integer",
+      "sourceType": "grails.plugin.inertia.ssr.ServerSideRenderConfig",
+      "description": "Maximum time in milliseconds to establish a connection to the server-side rendering service.",
+      "defaultValue": 1000
+    },
+    {
+      "name": "inertia.ssr.read-timeout",
+      "type": "java.lang.Integer",
+      "sourceType": "grails.plugin.inertia.ssr.ServerSideRenderConfig",
+      "description": "Maximum time in milliseconds to read a response from the server-side rendering service.",
+      "defaultValue": 5000
     }
   ]
 }

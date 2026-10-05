@@ -23,13 +23,14 @@ import org.springframework.http.HttpStatus
 
 import grails.config.Config
 import grails.core.support.GrailsConfigurationAware
-import grails.util.Environment
 import grails.util.Holders
 
 import static Inertia.INERTIA_ATTRIBUTE_MANIFEST
 import static Inertia.INERTIA_ATTRIBUTE_VERSION
+import static Inertia.INERTIA_ATTRIBUTE_VITE
 import static Inertia.INERTIA_HEADER
 import static Inertia.INERTIA_HEADER_LOCATION
+import static Inertia.INERTIA_HEADER_REDIRECT
 import static Inertia.INERTIA_HEADER_VERSION
 import static Inertia.INERTIA_VIEW_HTML
 import static grails.web.http.HttpHeaders.VARY
@@ -44,10 +45,12 @@ import static grails.web.http.HttpHeaders.VARY
 @CompileStatic
 class InertiaInterceptor implements GrailsConfigurationAware {
 
+    private ViteConfig viteConfig
     private String manifestLocation
     private String manifestHash = 'not yet calculated'
     private volatile Object manifestObject
 
+    private static final String DEFAULT_MANIFEST_LOCATION = 'classpath:public/dist/.vite/manifest.json'
     private static final String CONTENT_TYPE_JSON = 'application/json;charset=utf-8'
     private static final String CONTENT_TYPE_HTML = 'text/html;charset=utf-8'
 
@@ -82,12 +85,21 @@ class InertiaInterceptor implements GrailsConfigurationAware {
                         'Inertia asset version has changed, notifying Inertia client ' +
                         'and aborting request processing to force full page reload!'
                 )
+                reflashData()
                 header(
                         INERTIA_HEADER_LOCATION,
-                        webRequest.currentRequest.forwardURI
+                        versionMismatchLocation
                 )
-                render(status: HttpStatus.CONFLICT.value())
+                header(INERTIA_HEADER_VERSION, currentAssetVersion)
+                removeInertiaResponseHeader()
+                response.status = HttpStatus.CONFLICT.value()
                 return false // Stop processing the request here and return the response
+            }
+
+            if (redirectWithFragmentShouldBeHandled) {
+                header(INERTIA_HEADER_REDIRECT, response.getHeader('Location'))
+                response.status = HttpStatus.CONFLICT.value()
+                removeInertiaResponseHeader()
             }
 
             // Changes the status code during redirects, ensuring they are made as
@@ -97,13 +109,18 @@ class InertiaInterceptor implements GrailsConfigurationAware {
             }
         }
 
-        // Add the Javascript Manifest when not in Development Environment
-        // In Development Environment a node server should be started to serve the javascript files (npm run serve)
-        if (isInertiaHtmlView && manifestShouldBeUsed) {
+        // The page loads the JavaScript from the Vite dev server, or from the built assets listed in the manifest
+        if (isInertiaHtmlView) {
             model.put(
-                    INERTIA_ATTRIBUTE_MANIFEST,
-                    manifest
+                    INERTIA_ATTRIBUTE_VITE,
+                    viteConfig
             )
+            if (manifestShouldBeUsed) {
+                model.put(
+                        INERTIA_ATTRIBUTE_MANIFEST,
+                        manifest
+                )
+            }
         }
 
         true // Continue to process the request
@@ -155,7 +172,7 @@ class InertiaInterceptor implements GrailsConfigurationAware {
     }
 
     boolean getManifestShouldBeUsed() {
-        Environment.current != Environment.DEVELOPMENT
+        !viteConfig.devServerEnabled
     }
 
     boolean getIsGetRequest() {
@@ -168,12 +185,18 @@ class InertiaInterceptor implements GrailsConfigurationAware {
                 request.method in ['PUT', 'PATCH', 'DELETE']
     }
 
+    boolean getRedirectWithFragmentShouldBeHandled() {
+        response.status in [HttpStatus.FOUND.value(), HttpStatus.SEE_OTHER.value()] &&
+                response.getHeader('Location')?.contains('#') &&
+                !Inertia.requestContext.prefetch
+    }
+
     boolean getIsInertiaHtmlView() {
         modelAndView?.viewName == INERTIA_VIEW_HTML
     }
 
     boolean getIsInertiaRequest() {
-        request.getHeader(INERTIA_HEADER) == 'true'
+        'true'.equalsIgnoreCase(request.getHeader(INERTIA_HEADER)?.trim())
     }
 
     boolean getIsAssetsCurrent() {
@@ -182,16 +205,39 @@ class InertiaInterceptor implements GrailsConfigurationAware {
         requestedVersion == currentVersion
     }
 
+    String getCurrentAssetVersion() {
+        request.getAttribute(INERTIA_ATTRIBUTE_VERSION) as String
+    }
+
+    String getVersionMismatchLocation() {
+        def query = request.queryString
+        def uri = request.forwardURI ?: request.requestURI
+        query ? "${uri}?$query" : uri
+    }
+
+    private void removeInertiaResponseHeader() {
+        response.setHeader(INERTIA_HEADER, null)
+    }
+
+    private static void reflashData() {
+        def flashData = new LinkedHashMap<String, Object>(Inertia.flash)
+        if (!flashData.empty) Inertia.flash.putAll(flashData)
+    }
+
     boolean getIsAssetsOutOfDate() {
         !isAssetsCurrent
     }
 
     @Override
     void setConfiguration(Config co) {
-        // Load the Javascript Manifest when in Production and Test Environments
-        // In Development Environment a node server should be started to serve the javascript files (npm run serve)
+        // Load the Javascript Manifest unless the JavaScript is served by the Vite dev server (npm run serve)
+        viteConfig = ViteConfig.from(co)
         if (manifestShouldBeUsed) {
-            manifestLocation = co.getRequiredProperty('inertia.manifest.location')
+            manifestLocation = co.getProperty(
+                    'inertia.manifest.location',
+                    String,
+                    DEFAULT_MANIFEST_LOCATION
+            )
             loadManifest()
         }
     }

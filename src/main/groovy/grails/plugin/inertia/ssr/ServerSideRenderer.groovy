@@ -17,6 +17,7 @@ package grails.plugin.inertia.ssr
 
 import groovy.json.JsonOutput
 import groovy.transform.CompileStatic
+import groovy.util.logging.Slf4j
 
 import grails.plugin.inertia.InertiaPage
 
@@ -26,6 +27,7 @@ import grails.plugin.inertia.InertiaPage
  * @author Mattias Reichel
  * @since 2.0.0
  */
+@Slf4j
 @CompileStatic
 class ServerSideRenderer {
 
@@ -37,15 +39,56 @@ class ServerSideRenderer {
 
     String render(InertiaPage page) {
         if (!ssr.enabled) return null
-        // Pass the page to the Inertia SSR Node Server
-        String ssrResult = ((HttpURLConnection) new URL(ssr.url).openConnection()).with {
-            requestMethod = 'POST'
-            doOutput = true
-            outputStream.withWriter {
+        HttpURLConnection connection = null
+        try {
+            connection = (HttpURLConnection) new URI(ssr.url).toURL().openConnection()
+            connection.connectTimeout = ssr.connectTimeout
+            connection.readTimeout = ssr.readTimeout
+            connection.requestMethod = 'POST'
+            connection.doOutput = true
+            connection.setRequestProperty('Content-Type', 'application/json')
+            connection.setRequestProperty('Accept', 'application/json')
+            connection.outputStream.withWriter('UTF-8') {
                 it << JsonOutput.toJson(page)
             }
-            inputStream.text
+            int responseCode = connection.responseCode
+            if (isUnsuccessfulResponse(responseCode)) {
+                log.warn(
+                        'Inertia SSR render failed: service returned HTTP {} [url={}, component={}, pageUrl={}]',
+                        responseCode,
+                        ssr.url,
+                        page.component,
+                        page.url
+                )
+                return null
+            }
+            def result = connection.inputStream.getText('UTF-8')
+            if (!result?.trim()) {
+                log.warn(
+                        'Inertia SSR render failed: service returned an empty response ' +
+                        '[url={}, component={}, pageUrl={}]',
+                        ssr.url,
+                        page.component,
+                        page.url
+                )
+                return null
+            }
+            result
+        } catch (IOException failure) {
+            log.warn(
+                    'Inertia SSR render failed: service unavailable [url={}, component={}, pageUrl={}]',
+                    ssr.url,
+                    page.component,
+                    page.url,
+                    failure
+            )
+            null
+        } finally {
+            connection?.disconnect()
         }
-        return ssrResult
+    }
+
+    private static boolean isUnsuccessfulResponse(int responseCode) {
+        responseCode < 200 || responseCode >= 300
     }
 }

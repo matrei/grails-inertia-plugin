@@ -4,6 +4,8 @@ import groovy.transform.CompileStatic
 
 import org.gradle.api.Plugin
 import org.gradle.api.Project
+import org.gradle.api.publish.maven.tasks.GenerateMavenPom
+import org.gradle.api.publish.tasks.GenerateModuleMetadata
 
 import org.apache.grails.gradle.publish.GrailsPublishExtension
 
@@ -22,6 +24,15 @@ class Publish implements Plugin<Project> {
             it.developers = [
                     matrei: 'Mattias Reichel',
             ]
+        }
+
+        // grails-publish uses the project while generating the POM and the module metadata,
+        // so builds that publish run without the configuration cache
+        project.tasks.withType(GenerateMavenPom).configureEach {
+            it.notCompatibleWithConfigurationCache('grails-publish uses the project while generating the POM')
+        }
+        project.tasks.withType(GenerateModuleMetadata).configureEach {
+            it.notCompatibleWithConfigurationCache('grails-publish uses the project while generating the module metadata')
         }
     }
 }

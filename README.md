@@ -39,14 +39,15 @@ dependencies {
 }
 ```
 > [!NOTE]
-> For Grails 7/Java 17 - use the latest version of the plugin.\
+> For Grails 8/Java 21 - use the latest version of the plugin.\
+> For Grails 7/Java 17 - use version 3.\
 > For Grails 6/Java 11 - use version 2 (io.github.matrei:grails-inertia-plugin).\
 > For a Grails 5/Java 8 - use version 1 (io.github.matrei:grails-inertia-plugin).
 
 \
 To add the client dependencies and workflow to a Grails project, create the following files: **(Vue 3 example)**
 ```javascript
-// myapp/package.json (versions @ 2025-12-30) 
+// myapp/package.json (versions checked 2026-08-20)
 ```
 ```json
 {
@@ -58,12 +59,13 @@ To add the client dependencies and workflow to a Grails project, create the foll
     "build": "vite build && vite build --outDir src/main/resources/ssr --ssr src/main/javascript/ssr.js"
   },
   "dependencies": {
-    "vue": "^3.5.26",
-    "@inertiajs/vue3": "^2.3.4"
+    "vue": "^3.5.41",
+    "@inertiajs/vue3": "^3.7.0"
   },
   "devDependencies": {
-    "@vitejs/plugin-vue": "^5.2.4",
-    "vite": "^6.4.1"
+    "@vitejs/plugin-vue": "^6.0.8",
+    "@inertiajs/vite": "^3.7.0",
+    "vite": "^8.2.2"
   }
 }
 ```
@@ -71,6 +73,7 @@ To add the client dependencies and workflow to a Grails project, create the foll
 // myapp/vite.config.js
 import { fileURLToPath, URL } from 'node:url'
 import { defineConfig } from 'vite'
+import inertia from '@inertiajs/vite'
 import vue from '@vitejs/plugin-vue'
 
 export default defineConfig(({ command }) => ({
@@ -84,7 +87,7 @@ export default defineConfig(({ command }) => ({
       input: 'src/main/javascript/main.js'
     }
   },
-  plugins: [vue()],
+  plugins: [vue(), inertia({ ssr: false })],
   resolve: {
     alias: {
       '@': fileURLToPath(new URL('./src/main/javascript', import.meta.url))
@@ -98,9 +101,13 @@ export default defineConfig(({ command }) => ({
   }
 }))
 ```
+> [!NOTE]
+> The plugin reads the Vite manifest from `classpath:public/dist/.vite/manifest.json`, which matches the `outDir` above.\
+> If you change `outDir`, set `inertia.manifest.location` in `application.yml` to the new location.
+
 ```javascript
 // myapp/src/main/javascript/main.js
-import { createApp, h } from 'vue'
+import { createApp, createSSRApp, h } from 'vue'
 import { createInertiaApp } from '@inertiajs/vue3'
 
 createInertiaApp({
@@ -109,7 +116,10 @@ createInertiaApp({
     return (await pages[`./Pages/${name}.vue`]()).default
   },
   setup ({el, App, props, plugin}) {
-    createApp({ render: () => h(App, props) })
+    const app = el.dataset.serverRendered === 'true'
+      ? createSSRApp({ render: () => h(App, props) })
+      : createApp({ render: () => h(App, props) })
+    app
       .use(plugin)
       .mount(el)
   }
@@ -199,14 +209,168 @@ npm run build
 ./gradlew integrationTest
 ./gradlew bootJar
 ```
+### Vite dev server
+
+In the `development` environment, the page loads the JavaScript from the Vite dev server. In all other environments,
+it loads the assets built by Vite, as listed in the Vite manifest. The dev server, its URL and the entry point of the
+JavaScript application can be configured:
+```yaml
+# myapp/grails-app/conf/application.yml
+inertia:
+  vite:
+    devServer:
+      enabled: true # Defaults to true in development and false otherwise
+      url: 'http://localhost:3000' # Optional, this is the default value
+    entry: 'src/main/javascript/main.js' # Optional, this is the default value
+```
+
+To use the dev server in another environment as well, for example in `test`, enable it for that environment:
+```yaml
+# myapp/grails-app/conf/application.yml
+environments:
+  test:
+    inertia:
+      vite:
+        devServer:
+          enabled: true
+```
+
+### Favicon
+
+The favicon can be configured without overriding the Inertia HTML template.
+Place the icon in `src/main/resources/public/`, which Grails serves under `/static/`, and point the config at it:
+```yaml
+# myapp/grails-app/conf/application.yml
+inertia:
+  favicon: '/static/favicon.svg' # served from src/main/resources/public/favicon.svg
+```
+
+A root-relative value (starting with a single `/`) is resolved against the application's context path.
+Any other value, such as an absolute URL, is used as-is.
+The link is omitted when no favicon is configured.
+
+### Title
+
+The page title shown until a page component sets its own defaults to the application name (`info.app.name`),
+which the Grails build sets to the name of the project. A different title can be configured:
+```yaml
+# myapp/grails-app/conf/application.yml
+inertia:
+  title: 'My App'
+```
+
+The title is omitted when a server-side rendered page provides its own title.
+
+### Language
+
+The `lang` attribute of the page is the locale Grails resolves for the request, so it follows a language chosen with
+the `?lang=` parameter. By default, Grails falls back to the language of the browser when none has been chosen.
+An application in a single language should use a fixed locale instead:
+```yaml
+# myapp/grails-app/conf/application.yml
+grails:
+  i18n:
+    localeResolver: fixed
+    default:
+      locale: en
+```
+
+The `lang` attribute is set when the page is loaded. When the language is switched with an Inertia visit, the
+application needs to update `document.documentElement.lang` itself, or switch the language with a full page load.
+
+### Context path
+
+When the application is deployed with a context path (`server.servlet.context-path`), the plugin prefixes it to
+the URLs of the built JavaScript and CSS files. Vite also writes the `base` path into the built files, so it must
+include the context path as well:
+```javascript
+// myapp/vite.config.js
+export default defineConfig(({ command }) => ({
+  base: command === 'serve' ? '' : '/myapp/static/dist/', // With server.servlet.context-path: /myapp
+  // ...
+}))
+```
+
 ### ⚙️ SSR
 
-To enable server-side rendering, make sure a Node.js version compatible with your client-side app is installed and added
-to the PATH on your system and add the following to your `application.yml`:
+To enable server-side rendering, make sure Node.js 22 or later is installed and available on the PATH.
+The Grails adapter starts the production SSR bundle when `inertia.ssr.enabled` is true. Build the client and SSR
+bundles before starting the Grails application:
+```shell
+npm run build
+```
+
+Then add the following to your `application.yml`:
 ```yaml
 inertia:
   ssr:
     enabled: true # Defaults to false
-    url: 'http://localhost:13714/render' # Not needed, this is already the default value
-    bundle: 'src/main/resources/ssr/ssr.mjs' # Not needed, this is already the default value
+    url: 'http://localhost:13714/render' # Optional, this is the default value
+    bundle: 'src/main/resources/ssr/ssr.mjs' # Optional, this is the default value
+    connect-timeout: 1000 # Optional, this is the default value, in milliseconds
+    read-timeout: 5000 # Optional, this is the default value, in milliseconds
 ```
+
+The `@inertiajs/vite` plugin is configured with `ssr: false` in this example because the Grails adapter manages the
+production SSR process. SSR failures fall back to normal client-side rendering.
+
+## Upgrading to 4.0
+
+- Outside the `development` environment, the page now loads the built assets by default, including in `test` and in
+  custom environments. Before, it loaded the JavaScript from the Vite dev server at `http://localhost:3000` in every
+  environment except `production`. The Vite manifest was already required outside `development`, so tests that render
+  the page need the built assets, for example by making `processResources` depend on the Vite build, or they can keep
+  using the dev server by setting `inertia.vite.devServer.enabled: true` for `test`
+  (see [Vite dev server](#vite-dev-server)).
+
+## Inertia 3 support
+
+The adapter supports the Inertia v3 page protocol, including:
+
+- Partial reloads with `only`, `except`, and nested dot-notation paths.
+- Lazy, optional, always, and deferred props.
+- Merge, prepend, deep-merge, and once props.
+- Infinite-scroll metadata and matching keys.
+- Shared props, flash data, and page metadata.
+- Fragment redirects and asset-version mismatch responses.
+
+For example:
+```groovy
+renderInertia('Users/Index', [
+    users: Inertia.merge({ loadUsers() }),
+    permissions: Inertia.defer({ loadPermissions() }),
+    settings: Inertia.once(loadSettings())
+])
+```
+
+Inertia 3 also removes Axios from the client package, renames several client events, and replaces
+`router.cancel()` with `router.cancelAll()`. See the [Inertia upgrade guide](https://inertiajs.com/docs/v3/getting-started/upgrade-guide)
+when upgrading an existing frontend.
+
+### Page controls
+
+Page history and redirect behavior can be controlled from a Grails controller. These controls apply to the page
+returned by the current request:
+
+```groovy
+class AccountController {
+    def settings() {
+        encryptInertiaHistory()
+        renderInertia('Account/Settings', [account: currentAccount()])
+    }
+
+    def reset() {
+        clearInertiaHistory()
+        renderInertia('Account/Reset')
+    }
+
+    def rename() {
+        preserveInertiaFragment()
+        redirect(uri: '/account/settings')
+    }
+}
+```
+
+The equivalent static methods are `Inertia.encryptHistory()`, `Inertia.clearHistory()`, and
+`Inertia.preserveFragment()`. They emit the v3 `encryptHistory`, `clearHistory`, and `preserveFragment` page
+properties when enabled. Empty or disabled properties are omitted from the JSON response.

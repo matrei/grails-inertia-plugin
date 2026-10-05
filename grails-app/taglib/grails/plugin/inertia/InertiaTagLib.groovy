@@ -17,7 +17,9 @@ package grails.plugin.inertia
 
 import groovy.transform.CompileStatic
 
-import org.grails.encoder.CodecLookup
+import org.springframework.web.util.HtmlUtils
+
+import grails.gsp.Tag
 
 /**
  * Taglib for including Inertia.js in a page.
@@ -28,31 +30,52 @@ import org.grails.encoder.CodecLookup
 @CompileStatic
 class InertiaTagLib {
 
-    CodecLookup codecLookup
-
     final static String namespace = 'inertia'
 
-    Closure app = { Map<String,Object> attrs, Closure body ->
-        if (ssrResponse) {
-            out << ssrResponse.body
+    /**
+     * Renders the element the Inertia app is mounted on, together with the initial page data.
+     * When the page was rendered server-side, the rendered body is output instead.
+     *
+     * @attr id The id of the element, defaults to 'app'
+     * @attr tagName The tag name of the element, defaults to 'div'
+     */
+    @Tag
+    void app(Map<String, Object> attrs) {
+        def ssr = ssrResponse
+        if (ssr) {
+            out << ssr.body
         } else {
-            String tagName = attrs.tagName ?: 'div'
-            String id = attrs.id ?: 'app'
-            def htmlEncoder = codecLookup.lookupEncoder('HTML')
-            out << "<$tagName id=\"$id\" data-page=\"${htmlEncoder.encode(page)}\"></$tagName>"
+            def tagName = attrs.tagName ?: 'div'
+            def id = attrs.id ?: 'app'
+            out << "<script data-page=\"$id\" type=\"application/json\">${pageForScriptTag}</script>"
+            out << "<$tagName id=\"$id\"></$tagName>"
         }
     }
 
-    Closure head = { Map<String,Object> attrs, Closure body ->
-        if (ssrResponse) {
-            ssrResponse.head.each { headElement ->
-                out << headElement
-            }
+    /**
+     * Renders the head elements of a server-side rendered page, preceded by the title
+     * configured with {@code inertia.title}, or else the application name from {@code info.app.name},
+     * unless the page rendered a title of its own.
+     */
+    @Tag
+    void head() {
+        def headElements = (ssrResponse?.head ?: []) as List<String>
+        def config = grailsApplication.config
+        def title = config.getProperty('inertia.title', String) ?: config.getProperty('info.app.name', String)
+        if (title && !headElements.any { it.startsWith('<title') }) {
+            out << "<title>${HtmlUtils.htmlEscape(title)}</title>"
+        }
+        headElements.each { headElement ->
+            out << headElement
         }
     }
 
     private String getPage() {
         request.getAttribute(Inertia.INERTIA_ATTRIBUTE_PAGE) as String
+    }
+
+    private String getPageForScriptTag() {
+        InertiaScriptJsonEncoder.encode(page)
     }
 
     private Map<String,Object> getSsrResponse() {
