@@ -18,20 +18,23 @@ package grails.plugin.inertia.routes
 import groovy.json.JsonOutput
 import groovy.transform.CompileStatic
 
+import grails.util.GrailsNameUtils
+
 /**
- * Writes the routes as a JavaScript module with an object for each controller and a function for each action.
+ * Writes the routes as a JavaScript module with an object for each controller, named after its class, and a function for
+ * each action.
  *
  * <p>An action function takes the URL parameters, as a single value, an array in the order of the template, or an
  * object by name, where the names that are not in the template become the query string. It returns the URL and the
  * default method of the action, which Inertia accepts wherever it takes a URL:</p>
  *
  * <pre>
- * import { organizations } from './routes'
+ * import { OrganizationsController } from './routes'
  *
- * organizations.update(1)          // { url: '/organizations/1', method: 'put' }
- * organizations.update.post(1)     // { url: '/organizations/1', method: 'post' }
- * organizations.update.url(1)      // '/organizations/1'
- * organizations.index({ page: 2 }) // { url: '/organizations?page=2', method: 'get' }
+ * OrganizationsController.update(1)          // { url: '/organizations/1', method: 'put' }
+ * OrganizationsController.update.post(1)     // { url: '/organizations/1', method: 'post' }
+ * OrganizationsController.update.url(1)      // '/organizations/1'
+ * OrganizationsController.index({ page: 2 }) // { url: '/organizations?page=2', method: 'get' }
  * </pre>
  *
  * <p>The routes of named URL mappings are exported by name in {@code named}, such as {@code named.showBook(1)}.</p>
@@ -90,7 +93,7 @@ const route = (template, methods) => {
         source << "const contextPath = ${JsonOutput.toJson(contextPath ?: '')}\n\n"
         source << RUNTIME
         routes.findAll { !it.name }.groupBy { it.controller }.each { String controller, List<Route> controllerRoutes ->
-            writeExport(source, controller, controllerRoutes.collectEntries { [(it.action): it] })
+            writeExport(source, GrailsNameUtils.getClassName(controller, 'Controller'), controllerRoutes.collectEntries { [(it.action): it] })
         }
         final namedRoutes = routes.findAll { it.name }
         if (namedRoutes) {
