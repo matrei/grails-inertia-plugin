@@ -17,6 +17,10 @@
       "description": "Inertia.js Vite dev server"
     },
     {
+      "name": "inertia.routes",
+      "description": "Inertia.js routes for the page components"
+    },
+    {
       "name": "inertia.ssr",
       "type": "grails.plugin.inertia.ssr.ServerSideRenderConfig",
       "sourceType": "grails.plugin.inertia.ssr.ServerSideRenderConfig",
@@ -56,6 +60,28 @@
       "type": "java.lang.String",
       "description": "The entry point of the JavaScript application, as passed to Vite. Used to load it from the dev server and to look it up in the Vite manifest.",
       "defaultValue": "src/main/javascript/main.js"
+    },
+    {
+      "name": "inertia.routes.generate",
+      "type": "java.lang.Boolean",
+      "description": "Whether the routes of the controller actions are written as a JavaScript module when the application has started.",
+      "defaultValue": false
+    },
+    {
+      "name": "inertia.routes.output",
+      "type": "java.lang.String",
+      "description": "The file the routes are written to.",
+      "defaultValue": "src/main/javascript/routes.js"
+    },
+    {
+      "name": "inertia.routes.only",
+      "type": "java.util.List<java.lang.String>",
+      "description": "Patterns of the routes to write, as controller.action names in which * matches any characters. When set, only the matching routes are written."
+    },
+    {
+      "name": "inertia.routes.except",
+      "type": "java.util.List<java.lang.String>",
+      "description": "Patterns of the routes to leave out, as controller.action names in which * matches any characters. Applied after inertia.routes.only."
     },
     {
       "name": "inertia.ssr.enabled",

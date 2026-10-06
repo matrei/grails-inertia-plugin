@@ -19,9 +19,13 @@ import groovy.transform.CompileStatic
 
 import org.springframework.boot.autoconfigure.AutoConfiguration
 import org.springframework.boot.context.properties.EnableConfigurationProperties
+import org.springframework.core.env.Environment
 
+import grails.core.GrailsApplication
 import grails.plugins.Plugin
+import grails.web.mapping.UrlMappingsHolder
 
+import grails.plugin.inertia.routes.RoutesGenerator
 import grails.plugin.inertia.ssr.ServerSideRenderConfig
 import grails.plugin.inertia.ssr.ServerSideRenderProcess
 import grails.plugin.inertia.ssr.ServerSideRenderer
@@ -56,5 +60,7 @@ class InertiaGrailsPlugin extends Plugin {
             bean(ServerSideRenderer).conditionalOnMissingBean() { ServerSideRenderConfig ssrConfig -> }
             bean(ServerSideRenderProcess).conditionalOnMissingBean() { ServerSideRenderConfig ssrConfig -> }
         }
+        bean(RoutesGenerator).conditionalOnProperty('inertia.routes.generate', havingValue: 'true')
+                .conditionalOnMissingBean() { UrlMappingsHolder grailsUrlMappingsHolder, GrailsApplication grailsApplication, Environment environment -> }
     }
 }
