@@ -63,6 +63,7 @@ jobs:
           -Psigning.keyId=${SIGNING_KEY}
           -Psigning.secretKeyRingFile=${{ github.workspace }}/secring.gpg
           publishMavenPublicationToSonatypeRepository
+          publishCliPublicationToSonatypeRepository
           closeSonatypeStagingRepository
       - name: "📅 Generate Build Date file"
         run: |

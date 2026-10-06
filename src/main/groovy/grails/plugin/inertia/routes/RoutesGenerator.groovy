@@ -25,6 +25,7 @@ import groovy.util.logging.Slf4j
 import org.springframework.boot.context.event.ApplicationReadyEvent
 import org.springframework.boot.context.properties.bind.Bindable
 import org.springframework.boot.context.properties.bind.Binder
+import org.springframework.context.ApplicationContext
 import org.springframework.context.ApplicationListener
 import org.springframework.core.env.Environment
 
@@ -57,22 +58,42 @@ class RoutesGenerator implements ApplicationListener<ApplicationReadyEvent> {
         this.environment = environment
     }
 
+    /**
+     * Creates a generator for the application of the given context.
+     */
+    static RoutesGenerator forApplicationContext(ApplicationContext context) {
+        new RoutesGenerator(
+                context.getBean('grailsUrlMappingsHolder', UrlMappingsHolder),
+                context.getBean(GrailsApplication.APPLICATION_ID, GrailsApplication),
+                context.environment
+        )
+    }
+
     @Override
     void onApplicationEvent(ApplicationReadyEvent event) {
         generate()
     }
 
     /**
+     * Writes the module to {@code inertia.routes.output}, relative to the working directory.
+     *
      * @return whether the module was written, which it is not when it is already up to date
      */
     boolean generate() {
+        generate(Path.of(environment.getProperty(OUTPUT, DEFAULT_OUTPUT)))
+    }
+
+    /**
+     * @param output the file to write the module to
+     * @return whether the module was written, which it is not when it is already up to date
+     */
+    boolean generate(Path output) {
         final controllerActions = grailsApplication.getArtefacts('Controller').toList().collectEntries { cls ->
             final controller = cls as GrailsControllerClass
             [(controller.logicalPropertyName): controller.actions]
         } as Map<String, Collection<String>>
         final routes = routeFilter(environment).filter(new RouteCollector().collect(urlMappingsHolder, controllerActions))
         final source = new RoutesModuleWriter().write(routes, environment.getProperty('server.servlet.context-path', ''))
-        final output = Path.of(environment.getProperty(OUTPUT, DEFAULT_OUTPUT))
         if (Files.exists(output) && Files.readString(output, StandardCharsets.UTF_8) == source) {
             log.debug('Inertia routes in {} are up to date', output)
             return false
