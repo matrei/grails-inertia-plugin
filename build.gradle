@@ -4,17 +4,17 @@ plugins {
 
 dependencies {
 
+    implementation 'org.apache.grails:grails-gsp'
     implementation 'org.apache.grails:grails-interceptors'
     implementation 'org.apache.grails:grails-views-gson'
-
-    implementation 'org.apache.grails:grails-gsp'
     implementation 'org.apache.grails.views:grails-taglib'
     implementation 'org.apache.grails.views:grails-web-taglib'
 
     compileOnly 'org.slf4j:slf4j-nop' // Get rid of warning about missing slf4j implementation during compileGsonViews task
-    testRuntimeOnly 'org.slf4j:slf4j-nop' // Get rid of warning about missing slf4j implementation during test task
-    testRuntimeOnly 'net.bytebuddy:byte-buddy' // Lets Spock mock and spy on classes
 
-    testImplementation 'org.apache.grails:grails-testing-support-web'
     testImplementation 'org.apache.grails:grails-testing-support-views-gson'
+    testImplementation 'org.apache.grails:grails-testing-support-web'
+
+    testRuntimeOnly 'net.bytebuddy:byte-buddy' // Lets Spock mock and spy on classes
+    testRuntimeOnly 'org.slf4j:slf4j-nop' // Get rid of warning about missing slf4j implementation during test task
 }
