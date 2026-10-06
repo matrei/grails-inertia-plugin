@@ -48,6 +48,8 @@ class RoutesGenerator implements ApplicationListener<ApplicationReadyEvent> {
     static final String EXCEPT = 'inertia.routes.except'
     static final String DEFAULT_OUTPUT = 'src/main/javascript/routes.js'
 
+    private static final String ALLOWED_METHODS = 'allowedMethods'
+
     private final UrlMappingsHolder urlMappingsHolder
     private final GrailsApplication grailsApplication
     private final Environment environment
@@ -88,11 +90,14 @@ class RoutesGenerator implements ApplicationListener<ApplicationReadyEvent> {
      * @return whether the module was written, which it is not when it is already up to date
      */
     boolean generate(Path output) {
-        final controllerActions = grailsApplication.getArtefacts('Controller').toList().collectEntries { cls ->
-            final controller = cls as GrailsControllerClass
-            [(controller.logicalPropertyName): controller.actions]
+        final controllers = grailsApplication.getArtefacts('Controller').toList().collect { it as GrailsControllerClass }
+        final controllerActions = controllers.collectEntries {
+            [(it.logicalPropertyName): it.actions]
         } as Map<String, Collection<String>>
-        final routes = routeFilter(environment).filter(new RouteCollector().collect(urlMappingsHolder, controllerActions))
+        final allowedMethods = controllers.collectEntries {
+            [(it.logicalPropertyName): it.getPropertyValue(ALLOWED_METHODS, Map) ?: [:]]
+        } as Map<String, Map>
+        final routes = routeFilter(environment).filter(new RouteCollector().collect(urlMappingsHolder, controllerActions, allowedMethods))
         final source = new RoutesModuleWriter().write(routes, environment.getProperty('server.servlet.context-path', ''))
         if (Files.exists(output) && Files.readString(output, StandardCharsets.UTF_8) == source) {
             log.debug('Inertia routes in {} are up to date', output)

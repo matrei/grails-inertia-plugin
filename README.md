@@ -302,6 +302,10 @@ name, in which the names that are not part of the URL become the query string. T
 the application. The routes of named URL mappings are also exported by name in `named`. An action that has no URL
 mapping of its own gets its route from a mapping such as `"/$controller/$action?/$id?"`.
 
+An action's methods are those of its URL mapping. When the mapping accepts any method, they are taken from the
+`allowedMethods` of the controller, such as `static allowedMethods = [restore: 'PUT']`, and otherwise default to `get`.
+The first method is the default, and each method has a function of its own, such as `BookController.update.post`.
+
 Inertia accepts the returned objects wherever it takes a URL, and uses their method:
 ```vue
 <Link :href="BookController.show(bookId)">Show</Link>
