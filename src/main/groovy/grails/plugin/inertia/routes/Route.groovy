@@ -25,12 +25,18 @@ import groovy.transform.ToString
  * <p>The template names the URL parameters in braces: {@code {id}} for a required one, {@code {id?}} for an optional
  * one, and {@code {path*}} for one that may span several path segments.</p>
  *
+ * <p>A route of a named URL mapping carries its name, and has a controller and action only when the mapping names
+ * them.</p>
+ *
  * @since 4.1
  */
 @CompileStatic
 @ToString(includeNames = true)
 @EqualsAndHashCode
 class Route {
+
+    /** The name of the URL mapping, such as {@code showBook}, or null for a route of a controller action. */
+    final String name
 
     /** The logical name of the controller, such as {@code organizations}. */
     final String controller
@@ -45,9 +51,21 @@ class Route {
     final List<String> methods
 
     Route(String controller, String action, String template, List<String> methods) {
+        this(null, controller, action, template, methods)
+    }
+
+    Route(String name, String controller, String action, String template, List<String> methods) {
+        this.name = name
         this.controller = controller
         this.action = action
         this.template = template
         this.methods = methods.asImmutable()
+    }
+
+    /**
+     * The name the route is selected by: the name of its URL mapping, or else {@code controller.action}.
+     */
+    String getFilterName() {
+        name ?: "${controller}.${action}" as String
     }
 }

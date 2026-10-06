@@ -61,13 +61,66 @@ class RouteCollectorSpec extends Specification implements UrlMappingsUnitTest<Ro
 
     void 'mappings without a controller action are left out'() {
 
-        expect: 'no routes for views and response codes'
-            routes.every { it.controller in ['organizations', 'dashboard', 'images', 'reports'] }
-            routes.size() == 10
+        expect: 'no controller routes for views and response codes'
+            controllerRoutes.every { it.controller in ['organizations', 'dashboard', 'images', 'reports', 'book', 'contact'] }
+            controllerRoutes.size() == 13
+    }
+
+    void 'a named mapping also gives a route under its name'() {
+
+        expect: 'the named route with its controller, action and template'
+            with(namedRoute('showBook')) {
+                controller == 'book'
+                action == 'show'
+                template == '/books/{id}'
+                methods == ['get']
+            }
+    }
+
+    void 'a named mapping can be reached by name when another mapping maps the same action'() {
+
+        expect: 'the controller route from the first mapping, and the named one from its own'
+            route('book', 'show').template == '/api/books/{id}'
+            namedRoute('showBook').template == '/books/{id}'
+    }
+
+    void 'a named mapping of a view gives a route without a controller'() {
+
+        expect: 'the named route of the view'
+            with(namedRoute('about')) {
+                controller == null
+                action == null
+                template == '/about'
+                methods == ['get']
+            }
+    }
+
+    void 'a named mapping with an action for each method accepts each method'() {
+
+        expect: 'the methods of the mapping, without a single action'
+            with(namedRoute('contact')) {
+                action == null
+                methods == ['get', 'post']
+            }
+    }
+
+    void 'the named routes follow the controller routes, ordered by name'() {
+
+        expect: 'the names in order after the controller routes'
+            routes.findAll { it.name }*.name == ['about', 'contact', 'showBook']
+            routes.findIndexOf { it.name } == controllerRoutes.size()
+    }
+
+    private List<Route> getControllerRoutes() {
+        routes.findAll { !it.name }
+    }
+
+    private Route namedRoute(String name) {
+        routes.find { it.name == name }
     }
 
     private Route route(String controller, String action) {
-        routes.find { it.controller == controller && it.action == action }
+        controllerRoutes.find { it.controller == controller && it.action == action }
     }
 }
 
@@ -82,6 +135,10 @@ class RoutesTestUrlMappings {
         "/img/$path**" (controller: 'images', action: 'thumbnail')
         "/reports/$year(.$format)?" (controller: 'reports', action: 'index')
         '/reports/summary' (controller: 'reports', action: 'summary', method: 'POST')
+        name showBook: "/books/$id" (controller: 'book', action: 'show')
+        "/api/books/$id" (controller: 'book', action: 'show', method: 'GET')
+        name about: '/about' (view: '/about')
+        name contact: '/contact' (controller: 'contact', action: [GET: 'show', POST: 'send'])
         '/error' (view: '/error')
         '404' (controller: 'dashboard', action: 'index')
     }

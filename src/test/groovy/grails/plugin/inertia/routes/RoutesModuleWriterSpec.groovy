@@ -20,6 +20,29 @@ class RoutesModuleWriterSpec extends Specification {
 }''')
     }
 
+    void 'the routes of named mappings are exported by name'() {
+
+        when: 'writing a controller route and a named route'
+            final source = new RoutesModuleWriter().write([
+                    new Route('book', 'show', '/api/books/{id}', ['get']),
+                    new Route('showBook', 'book', 'show', '/books/{id}', ['get'])
+            ], '')
+
+        then: 'the named route only in the named export'
+            source.contains('''export const book = {
+    "show": route("/api/books/{id}", ["get"]),
+}''')
+            source.contains('''export const named = {
+    "showBook": route("/books/{id}", ["get"]),
+}''')
+    }
+
+    void 'without named routes there is no named export'() {
+
+        expect: 'no named export'
+            !new RoutesModuleWriter().write([new Route('book', 'show', '/books/{id}', ['get'])], '').contains('export const named')
+    }
+
     void 'without a context path the urls start at the root'() {
 
         expect: 'an empty context path'

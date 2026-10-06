@@ -33,6 +33,9 @@ import org.grails.web.mapping.ResponseCodeUrlMapping
  * controller and action from the URL, such as {@code "/$controller/$action?/$id?"}, gives a route for each action of
  * each controller that no other mapping maps.</p>
  *
+ * <p>A named mapping, such as {@code name showBook: "/books/$id"(controller: 'book', action: 'show')}, also gives a
+ * route under its name, whatever it maps to.</p>
+ *
  * @since 4.1
  */
 @CompileStatic
@@ -45,14 +48,19 @@ class RouteCollector {
     /**
      * @param holder the URL mappings of the application
      * @param controllerActions the actions of each controller, by the logical name of the controller
-     * @return the routes, ordered by controller and in the order the mappings define them
+     * @return the routes of the controller actions, ordered by controller and in the order the mappings define them,
+     *         followed by the routes of the named mappings, ordered by name
      */
     List<Route> collect(UrlMappingsHolder holder, Map<String, Collection<String>> controllerActions) {
         final routes = new LinkedHashMap<String, Route>()
+        final namedRoutes = new TreeMap<String, Route>()
         final genericMappings = [] as List<UrlMapping>
         for (mapping in holder.urlMappings) {
             if (mapping instanceof ResponseCodeUrlMapping) {
                 continue
+            }
+            if (mapping.mappingName) {
+                namedRoutes.putIfAbsent(mapping.mappingName, namedRoute(mapping))
             }
             if (mapping.controllerName instanceof String) {
                 explicitRoutes(mapping).each { routes.putIfAbsent(key(it), it) }
@@ -68,7 +76,26 @@ class RouteCollector {
                 }
             }
         }
-        routes.values().sort(false) { Route it -> it.controller }
+        routes.values().sort(false) { Route it -> it.controller } + namedRoutes.values()
+    }
+
+    private static Route namedRoute(UrlMapping mapping) {
+        final actionName = mapping.actionName
+        final methods = actionName instanceof Map ?
+                (actionName as Map<String, String>).keySet().collect { it.toLowerCase(Locale.ROOT) } :
+                [mappingMethod(mapping)]
+        new Route(
+                mapping.mappingName,
+                mapping.controllerName instanceof String ? mapping.controllerName as String : null,
+                actionName instanceof String ? actionName as String : null,
+                template(mapping, [:]),
+                methods
+        )
+    }
+
+    private static String mappingMethod(UrlMapping mapping) {
+        final method = mapping.httpMethod
+        method && method != UrlMapping.ANY_HTTP_METHOD ? method.toLowerCase(Locale.ROOT) : DEFAULT_METHOD
     }
 
     private List<Route> explicitRoutes(UrlMapping mapping) {
@@ -81,8 +108,7 @@ class RouteCollector {
                 methodsByAction.computeIfAbsent(action) { [] as List<String> } << method.toLowerCase(Locale.ROOT)
             }
         } else if (actionName instanceof String) {
-            final method = mapping.httpMethod
-            methodsByAction[actionName as String] = [method && method != UrlMapping.ANY_HTTP_METHOD ? method.toLowerCase(Locale.ROOT) : DEFAULT_METHOD]
+            methodsByAction[actionName as String] = [mappingMethod(mapping)]
         }
         methodsByAction.collect { String action, List<String> methods -> new Route(controller, action, template, methods) }
     }

@@ -20,8 +20,9 @@ import java.util.regex.Pattern
 import groovy.transform.CompileStatic
 
 /**
- * Selects the routes to write by the name {@code controller.action}, with patterns in which {@code *} matches any
- * characters, such as {@code organizations.*} or {@code users.update}.
+ * Selects the routes to write by name, with patterns in which {@code *} matches any characters, such as
+ * {@code organizations.*} or {@code users.update}. A route is named {@code controller.action}, or by its URL mapping
+ * when the mapping is named.
  *
  * <p>When patterns to include are given, only the routes matching one of them are kept. The routes matching one of
  * the patterns to exclude are then left out.</p>
@@ -41,7 +42,7 @@ class RouteFilter {
 
     List<Route> filter(List<Route> routes) {
         routes.findAll { Route route ->
-            final name = "${route.controller}.${route.action}" as String
+            final name = route.filterName
             (only.empty || only.any { it.matcher(name).matches() }) && !except.any { it.matcher(name).matches() }
         }
     }

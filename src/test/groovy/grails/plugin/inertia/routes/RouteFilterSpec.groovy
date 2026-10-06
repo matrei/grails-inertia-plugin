@@ -47,6 +47,17 @@ class RouteFilterSpec extends Specification {
             names(new RouteFilter(['users.update'], []).filter(routes)) == ['users.update']
     }
 
+    void 'a named route is selected by its name'() {
+
+        given: 'a named route of the organizations index action'
+            final named = new Route('home', 'organizations', 'index', '/', ['get'])
+
+        expect: 'its name decides, not its controller and action'
+            names(new RouteFilter(['home'], []).filter([named])) == ['home']
+            names(new RouteFilter(['organizations.*'], []).filter([named])) == []
+            names(new RouteFilter([], ['home']).filter([named])) == []
+    }
+
     void 'the patterns are read from #description'(String description, Map<String, Object> properties) {
 
         given: 'the settings'
@@ -67,6 +78,6 @@ class RouteFilterSpec extends Specification {
     }
 
     private static List<String> names(List<Route> routes) {
-        routes.collect { "${it.controller}.${it.action}" as String }
+        routes*.filterName
     }
 }
