@@ -315,12 +315,23 @@ production SSR process. SSR failures fall back to normal client-side rendering.
 
 ## Upgrading to 4.0
 
+- The plugin requires Grails 8 and Java 21. Applications on Grails 7 can keep using version 3.
+- The page requires the Inertia 3 client. The page data is now rendered in a `<script type="application/json">`
+  element, which the Inertia 3 client reads, instead of the `data-page` attribute of the app element. Upgrade the
+  `@inertiajs` packages to version 3 (see [Inertia 3 support](#inertia-3-support)).
 - Outside the `development` environment, the page now loads the built assets by default, including in `test` and in
   custom environments. Before, it loaded the JavaScript from the Vite dev server at `http://localhost:3000` in every
   environment except `production`. The Vite manifest was already required outside `development`, so tests that render
   the page need the built assets, for example by making `processResources` depend on the Vite build, or they can keep
   using the dev server by setting `inertia.vite.devServer.enabled: true` for `test`
   (see [Vite dev server](#vite-dev-server)).
+- The page now has a title until a page component sets its own: the application name, or `inertia.title` when it is
+  configured (see [Title](#title)). Before, the page had no title.
+- The `lang` attribute of the page is now the locale resolved for the request, instead of always `en`. By default,
+  Grails falls back to the language of the browser, so an application in a single language should use a fixed locale
+  (see [Language](#language)).
+- With a context path, the plugin now prefixes it to the URLs of the built JavaScript and CSS files, so a custom
+  template or other workaround for the context path is no longer needed (see [Context path](#context-path)).
 
 ## Inertia 3 support
 
