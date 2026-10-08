@@ -5,6 +5,7 @@ import spock.lang.Specification
 
 import grails.testing.web.interceptor.InterceptorUnitTest
 import grails.web.Controller
+import org.grails.config.PropertySourcesConfig
 import org.grails.web.util.GrailsApplicationAttributes
 
 import static jakarta.servlet.http.HttpServletResponse.SC_CONFLICT
@@ -95,9 +96,36 @@ class InertiaInterceptorSpec extends Specification implements InterceptorUnitTes
         when: 'the interceptor handles the response'
             interceptor.after()
 
-        then: 'the dev server is not used, and the manifest is passed on'
+        then: 'the dev server is not used, and the entry resolved from the manifest is passed on'
             !(modelAndView.model[Inertia.INERTIA_ATTRIBUTE_VITE] as ViteConfig).devServerEnabled
-            modelAndView.model[Inertia.INERTIA_ATTRIBUTE_MANIFEST] == [:]
+            (modelAndView.model[Inertia.INERTIA_ATTRIBUTE_VITE_ENTRY] as ViteEntry).file == 'js/main-test.js'
+    }
+
+    void 'the configured entry is resolved from the manifest'() {
+
+        when: 'the interceptor is configured with a custom entry'
+            final interceptor = new InertiaInterceptor(configuration: new PropertySourcesConfig(
+                    'inertia.manifest.location': 'classpath:location/of/the/manifest.json',
+                    'inertia.vite.entry': 'src/main/js/app.ts'
+            ))
+
+        then: 'the built assets of that entry'
+            interceptor.viteEntry.file == 'js/app-123.js'
+    }
+
+    void 'an entry missing from the manifest fails the configuration with an explanation'() {
+
+        when: 'the interceptor is configured with an entry that is not in the manifest'
+            new InertiaInterceptor(configuration: new PropertySourcesConfig(
+                    'inertia.manifest.location': 'classpath:location/of/the/manifest.json',
+                    'inertia.vite.entry': 'src/main/js/missing.ts'
+            ))
+
+        then: 'the failure says to build the assets or to use the dev server'
+            final e = thrown(IllegalArgumentException)
+            e.message.contains('Entry point [src/main/js/missing.ts] not found in the Vite manifest')
+            e.message.contains("Build the assets, for example with 'vite build'")
+            e.message.contains('inertia.vite.devServer.enabled')
     }
 
     void 'the asset version is the md5 hash of the manifest'() {

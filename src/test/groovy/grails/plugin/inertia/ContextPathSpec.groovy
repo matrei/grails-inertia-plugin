@@ -28,7 +28,7 @@ class ContextPathSpec extends Specification implements GrailsWebUnitTest {
                     view: '/inertia/html',
                     model: [
                             inertiaVite: new ViteConfig(false, ViteConfig.DEFAULT_DEV_SERVER_URL, ViteConfig.DEFAULT_ENTRY),
-                            inertiaManifest: MANIFEST
+                            inertiaViteEntry: ViteEntry.from(MANIFEST, ViteConfig.DEFAULT_ENTRY)
                     ]
             )
 

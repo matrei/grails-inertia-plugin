@@ -26,9 +26,9 @@ class InertiaInterceptorDevServerSpec extends Specification implements Intercept
         when: 'the interceptor handles the response'
             interceptor.after()
 
-        then: 'the dev server is used, without a manifest, which was not loaded either'
+        then: 'the dev server is used, without an entry, as the manifest was not loaded'
             (modelAndView.model[Inertia.INERTIA_ATTRIBUTE_VITE] as ViteConfig).devServerEnabled
-            !modelAndView.model.containsKey(Inertia.INERTIA_ATTRIBUTE_MANIFEST)
+            !modelAndView.model.containsKey(Inertia.INERTIA_ATTRIBUTE_VITE_ENTRY)
     }
 
     void 'the asset version is not checked'() {

@@ -1,5 +1,5 @@
-<%@ page compileStatic="true" grailsLayoutPreprocess="false" model="Map<String, Map<String, Object>> inertiaManifest; grails.plugin.inertia.ViteConfig inertiaVite; grails.core.GrailsApplication grailsApplication" %>
-<%@ page import="org.springframework.web.servlet.support.RequestContextUtils; grails.plugin.inertia.ViteEntry" %>
+<%@ page compileStatic="true" grailsLayoutPreprocess="false" model="grails.plugin.inertia.ViteEntry inertiaViteEntry; grails.plugin.inertia.ViteConfig inertiaVite; grails.core.GrailsApplication grailsApplication" %>
+<%@ page import="org.springframework.web.servlet.support.RequestContextUtils" %>
 <!DOCTYPE html>
 <html lang="${RequestContextUtils.getLocale(request).toLanguageTag()}">
 <head>
@@ -14,12 +14,11 @@
         <script type="module" src="${inertiaVite.devServerUrl}/${inertiaVite.entry}"></script>
     </g:if>
     <g:else>
-        <g:set var="viteEntry" value="${ViteEntry.from(inertiaManifest, inertiaVite.entry)}"/>
-        <g:each in="${viteEntry.css}" var="inertiaCss">
+        <g:each in="${inertiaViteEntry.css}" var="inertiaCss">
             <link rel="stylesheet" href="${request.contextPath}/static/dist/${inertiaCss}">
         </g:each>
-        <script type="module" src="${request.contextPath}/static/dist/${viteEntry.file}"></script>
-        <g:each in="${viteEntry.preloads}" var="inertiaPreload">
+        <script type="module" src="${request.contextPath}/static/dist/${inertiaViteEntry.file}"></script>
+        <g:each in="${inertiaViteEntry.preloads}" var="inertiaPreload">
             <link rel="modulepreload" href="${request.contextPath}/static/dist/${inertiaPreload}">
         </g:each>
     </g:else>

@@ -50,7 +50,7 @@ class Inertia {
     public static final String INERTIA_ATTRIBUTE_CLEAR_HISTORY = 'grails.plugin.inertia.ClearHistory'
     public static final String INERTIA_ATTRIBUTE_ENCRYPT_HISTORY = 'grails.plugin.inertia.EncryptHistory'
     public static final String INERTIA_ATTRIBUTE_PRESERVE_FRAGMENT = 'grails.plugin.inertia.PreserveFragment'
-    public static final String INERTIA_ATTRIBUTE_MANIFEST = 'inertiaManifest'
+    public static final String INERTIA_ATTRIBUTE_VITE_ENTRY = 'inertiaViteEntry'
     public static final String INERTIA_ATTRIBUTE_VITE = 'inertiaVite'
     public static final String INERTIA_HEADER = 'X-Inertia'
     public static final String INERTIA_HEADER_VERSION = 'X-Inertia-Version'

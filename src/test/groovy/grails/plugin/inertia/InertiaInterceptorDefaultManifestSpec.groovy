@@ -8,7 +8,7 @@ class InertiaInterceptorDefaultManifestSpec extends Specification implements Int
 
     void 'the manifest is loaded from the default location when none is configured'() {
 
-        expect: 'the manifest written by Vite to the default output directory is loaded'
-            interceptor.manifest == ['src/main/javascript/main.js': [file: 'js/main-default.js']]
+        expect: 'the entry is resolved from the manifest written by Vite to the default output directory'
+            interceptor.viteEntry.file == 'js/main-default.js'
     }
 }

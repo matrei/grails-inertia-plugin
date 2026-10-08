@@ -58,7 +58,7 @@ class ViteDevServerViewSpec extends Specification implements GrailsWebUnitTest {
                     view: '/inertia/html',
                     model: [
                             inertiaVite: new ViteConfig(false, ViteConfig.DEFAULT_DEV_SERVER_URL, ViteConfig.DEFAULT_ENTRY),
-                            inertiaManifest: MANIFEST
+                            inertiaViteEntry: ViteEntry.from(MANIFEST, ViteConfig.DEFAULT_ENTRY)
                     ]
             )
 
@@ -70,50 +70,9 @@ class ViteDevServerViewSpec extends Specification implements GrailsWebUnitTest {
             ]
     }
 
-    void 'the configured entry is looked up in the manifest'() {
-
-        when: 'rendering the html view with a custom entry'
-            final output = render(
-                    view: '/inertia/html',
-                    model: [
-                            inertiaVite: new ViteConfig(false, ViteConfig.DEFAULT_DEV_SERVER_URL, 'src/main/js/app.ts'),
-                            inertiaManifest: ['src/main/js/app.ts': [file: 'js/app-123.js']]
-                    ]
-            )
-
-        then: 'the module script of that entry'
-            scriptsAndLinks(output) == ['<script type="module" src="/static/dist/js/app-123.js"></script>']
-    }
-
-    void 'a missing entry explains how to provide the JavaScript'() {
-
-        when: 'rendering the html view with built assets that do not contain the entry'
-            render(
-                    view: '/inertia/html',
-                    model: [
-                            inertiaVite: new ViteConfig(false, ViteConfig.DEFAULT_DEV_SERVER_URL, ViteConfig.DEFAULT_ENTRY),
-                            inertiaManifest: [:]
-                    ]
-            )
-
-        then: 'the failure says to build the assets or to use the dev server'
-            final e = thrown(Exception)
-            final message = causes(e)*.message.find { it?.contains('not found in the Vite manifest') }
-            message.contains("Build the assets, for example with 'vite build'")
-            message.contains('inertia.vite.devServer.enabled')
-    }
-
     private static List<String> scriptsAndLinks(String output) {
         output.readLines()*.trim().findAll {
             it.startsWith('<script type="module"') || it.startsWith('<link rel="stylesheet"') || it.startsWith('<link rel="modulepreload"')
         }
-    }
-
-    private static List<Throwable> causes(Throwable throwable) {
-        final causes = [] as List<Throwable>
-        for (var cause = throwable; cause != null && !causes.contains(cause); cause = cause.cause) {
-            causes << cause
-        }
-        causes
     }
 }

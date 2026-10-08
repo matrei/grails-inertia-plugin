@@ -25,9 +25,9 @@ import grails.config.Config
 import grails.core.support.GrailsConfigurationAware
 import grails.util.Holders
 
-import static Inertia.INERTIA_ATTRIBUTE_MANIFEST
 import static Inertia.INERTIA_ATTRIBUTE_VERSION
 import static Inertia.INERTIA_ATTRIBUTE_VITE
+import static Inertia.INERTIA_ATTRIBUTE_VITE_ENTRY
 import static Inertia.INERTIA_HEADER
 import static Inertia.INERTIA_HEADER_LOCATION
 import static Inertia.INERTIA_HEADER_REDIRECT
@@ -48,7 +48,7 @@ class InertiaInterceptor implements GrailsConfigurationAware {
     private ViteConfig viteConfig
     private String manifestLocation
     private volatile String manifestHash = 'not yet calculated'
-    private volatile Object manifestObject
+    private volatile ViteEntry viteEntry
 
     private static final String DEFAULT_MANIFEST_LOCATION = 'classpath:public/dist/.vite/manifest.json'
     private static final String CONTENT_TYPE_JSON = 'application/json;charset=utf-8'
@@ -109,7 +109,7 @@ class InertiaInterceptor implements GrailsConfigurationAware {
             }
         }
 
-        // The page loads the JavaScript from the Vite dev server, or from the built assets listed in the manifest
+        // The page loads the JavaScript from the Vite dev server, or the built assets of the entry in the manifest
         if (isInertiaHtmlView) {
             model.put(
                     INERTIA_ATTRIBUTE_VITE,
@@ -117,8 +117,8 @@ class InertiaInterceptor implements GrailsConfigurationAware {
             )
             if (manifestShouldBeUsed) {
                 model.put(
-                        INERTIA_ATTRIBUTE_MANIFEST,
-                        manifest
+                        INERTIA_ATTRIBUTE_VITE_ENTRY,
+                        loadViteEntry()
                 )
             }
         }
@@ -147,29 +147,33 @@ class InertiaInterceptor implements GrailsConfigurationAware {
         )
     }
 
-    private Object loadManifest() {
+    private ViteEntry loadViteEntry() {
         // The manifest is part of the built application, so it is loaded once. New assets come with a restart,
         // which gives a new asset version, and the clients on the old assets reload the page on their next visit.
-        if (manifestObject == null) {
+        if (viteEntry == null) {
             synchronized (this) {
-                if (manifestObject == null) {
+                if (viteEntry == null) {
                     final manifestBytes = Holders
                             .grailsApplication
                             .mainContext
                             .getResource(manifestLocation)
                             .inputStream
                             .bytes
+                    final manifest = new JsonSlurper().parse(manifestBytes) as Map<String, Map<String, Object>>
                     // The asset version is the MD5 hash of the manifest, which changes with the built assets
                     manifestHash = manifestBytes.md5()
-                    manifestObject = new JsonSlurper().parse(manifestBytes)
+                    viteEntry = ViteEntry.from(manifest, viteConfig.entry)
                 }
             }
         }
-        manifestObject
+        viteEntry
     }
 
-    Object getManifest() {
-        loadManifest()
+    /**
+     * The built assets of the entry point, resolved from the Vite manifest when the dev server is not used.
+     */
+    ViteEntry getViteEntry() {
+        loadViteEntry()
     }
 
     boolean getManifestShouldBeUsed() {
@@ -229,7 +233,8 @@ class InertiaInterceptor implements GrailsConfigurationAware {
 
     @Override
     void setConfiguration(Config co) {
-        // Load the Javascript Manifest unless the JavaScript is served by the Vite dev server (npm run serve)
+        // Resolve the entry from the manifest unless the JavaScript is served by the Vite dev server, so that a
+        // missing manifest or entry fails the startup
         viteConfig = ViteConfig.from(co)
         if (manifestShouldBeUsed) {
             manifestLocation = co.getProperty(
@@ -237,7 +242,7 @@ class InertiaInterceptor implements GrailsConfigurationAware {
                     String,
                     DEFAULT_MANIFEST_LOCATION
             )
-            loadManifest()
+            loadViteEntry()
         }
     }
 }

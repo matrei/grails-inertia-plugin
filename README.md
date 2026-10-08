@@ -332,6 +332,9 @@ production SSR process. SSR failures fall back to normal client-side rendering.
   (see [Language](#language)).
 - With a context path, the plugin now prefixes it to the URLs of the built JavaScript and CSS files, so a custom
   template or other workaround for the context path is no longer needed (see [Context path](#context-path)).
+- A custom `grails-app/views/inertia/html.gsp` now gets the built assets of the entry point as `inertiaViteEntry`,
+  with its `file`, `css` and `preloads`, instead of the whole Vite manifest as `inertiaManifest`. The entry is resolved
+  from the manifest when the application starts, so a manifest without the entry fails the startup.
 
 ## Inertia 3 support
 
