@@ -100,6 +100,15 @@ class InertiaInterceptorSpec extends Specification implements InterceptorUnitTes
             modelAndView.model[Inertia.INERTIA_ATTRIBUTE_MANIFEST] == [:]
     }
 
+    void 'the asset version is the md5 hash of the manifest'() {
+
+        when: 'a request comes in'
+            interceptor.before()
+
+        then: 'the asset version is the hash of the configured manifest file'
+            request.getAttribute(Inertia.INERTIA_ATTRIBUTE_VERSION) == assetVersion
+    }
+
     def 'version mismatch preserves the request query string and current version'() {
         given:
             final controller = mockController(TestController)
@@ -173,7 +182,7 @@ class InertiaInterceptorSpec extends Specification implements InterceptorUnitTes
 
         when: 'a request for json is processed'
             request.addHeader('X-Inertia', true)
-            request.addHeader('X-Inertia-Version', '0')
+            request.addHeader('X-Inertia-Version', assetVersion)
             withInterceptors(controller: 'test', httpMethod: 'GET') {
                 controller.index()
             }
@@ -188,7 +197,7 @@ class InertiaInterceptorSpec extends Specification implements InterceptorUnitTes
         given:
             final controller = mockController(TestController)
             request.addHeader('X-Inertia', true)
-            request.addHeader('X-Inertia-Version', '0')
+            request.addHeader('X-Inertia-Version', assetVersion)
             request.addHeader('X-Inertia-Partial-Component', 'partial')
             request.addHeader('X-Inertia-Partial-Data', 'users')
 
@@ -259,7 +268,7 @@ class InertiaInterceptorSpec extends Specification implements InterceptorUnitTes
 
         when: 'a request for json is processed'
             request.addHeader('X-Inertia', true)
-            request.addHeader('X-Inertia-Version', '0')
+            request.addHeader('X-Inertia-Version', assetVersion)
             withInterceptors(controller: 'test', httpMethod: 'GET') {
                 controller.index()
             }
@@ -277,7 +286,7 @@ class InertiaInterceptorSpec extends Specification implements InterceptorUnitTes
 
         when: 'a request for json is processed'
             request.addHeader('X-Inertia', true)
-            request.addHeader('X-Inertia-Version', '0')
+            request.addHeader('X-Inertia-Version', assetVersion)
             withInterceptors(controller: 'test', httpMethod: 'GET') {
                 controller.cancelInertiaAction()
             }
@@ -292,7 +301,7 @@ class InertiaInterceptorSpec extends Specification implements InterceptorUnitTes
         given:
             final controller = mockController(TestController)
             request.addHeader('X-Inertia', true)
-            request.addHeader('X-Inertia-Version', '0')
+            request.addHeader('X-Inertia-Version', assetVersion)
 
         when:
             withInterceptors(controller: 'test', httpMethod: 'GET') {
@@ -347,6 +356,11 @@ class InertiaInterceptorSpec extends Specification implements InterceptorUnitTes
             response.status == SC_FOUND
             response.getHeader('Location') == '/users#details'
             response.getHeader('X-Inertia-Redirect') == null
+    }
+
+    // The MD5 hash of the manifest configured in doWithConfig, which the interceptor uses as the asset version
+    private static String getAssetVersion() {
+        InertiaInterceptorSpec.getResource('/location/of/the/manifest.json').bytes.md5()
     }
 }
 

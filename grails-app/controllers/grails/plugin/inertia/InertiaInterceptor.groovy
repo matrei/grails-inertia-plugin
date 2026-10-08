@@ -47,7 +47,7 @@ class InertiaInterceptor implements GrailsConfigurationAware {
 
     private ViteConfig viteConfig
     private String manifestLocation
-    private String manifestHash = 'not yet calculated'
+    private volatile String manifestHash = 'not yet calculated'
     private volatile Object manifestObject
 
     private static final String DEFAULT_MANIFEST_LOCATION = 'classpath:public/dist/.vite/manifest.json'
@@ -148,19 +148,20 @@ class InertiaInterceptor implements GrailsConfigurationAware {
     }
 
     private Object loadManifest() {
-        // TODO: should the manifest file be checked for modification
-        //  and reloaded (live reloading of assets in production)?
+        // The manifest is part of the built application, so it is loaded once. New assets come with a restart,
+        // which gives a new asset version, and the clients on the old assets reload the page on their next visit.
         if (manifestObject == null) {
-            synchronized(this) {
+            synchronized (this) {
                 if (manifestObject == null) {
-                    def manifestResource= Holders
+                    final manifestBytes = Holders
                             .grailsApplication
                             .mainContext
                             .getResource(manifestLocation)
-                    manifestObject = new JsonSlurper().parse(
-                            manifestResource.inputStream
-                    )
-                    manifestHash = Objects.hashCode(manifestObject) as String
+                            .inputStream
+                            .bytes
+                    // The asset version is the MD5 hash of the manifest, which changes with the built assets
+                    manifestHash = manifestBytes.md5()
+                    manifestObject = new JsonSlurper().parse(manifestBytes)
                 }
             }
         }
