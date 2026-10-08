@@ -12,8 +12,8 @@ class RoutesModuleWriterSpec extends Specification {
                     new Route('organizations', 'delete', '/organizations/{id}', ['delete'])
             ], '/myapp')
 
-        then: 'the controller object with the template and methods of each action, and the context path'
-            source.contains('const contextPath = "/myapp"')
+        then: 'the controller object with the template and methods of each action, and the exported context path'
+            source.contains('export const contextPath = "/myapp"')
             source.contains('''export const OrganizationsController = {
     "update": route("/organizations/{id}", ["put","post"]),
     "delete": route("/organizations/{id}", ["delete"]),
@@ -53,6 +53,6 @@ class RoutesModuleWriterSpec extends Specification {
     void 'without a context path the urls start at the root'() {
 
         expect: 'an empty context path'
-            new RoutesModuleWriter().write([], null).contains('const contextPath = ""')
+            new RoutesModuleWriter().write([], null).contains('export const contextPath = ""')
     }
 }
