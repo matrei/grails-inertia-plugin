@@ -42,7 +42,7 @@ class InertiaResponseFactory {
         new InertiaPage(
                 component: component,
                 props: resolvedModel,
-                url: Inertia.forwardURI ?: Inertia.requestURI,
+                url: Inertia.pageUrl,
                 version: Inertia.inertiaAssetVersion,
                 flash: flash,
                 clearHistory: requestFlag(Inertia.INERTIA_ATTRIBUTE_CLEAR_HISTORY),

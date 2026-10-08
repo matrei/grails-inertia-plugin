@@ -222,6 +222,37 @@ class InertiaInterceptorSpec extends Specification implements InterceptorUnitTes
             holder.page.props.errors == []
     }
 
+    def 'the page url includes the query string of the request'() {
+        given: 'a request with a query string'
+            mockController(TestController)
+            request.requestURI = '/organizations'
+            request.queryString = 'search=acme&trashed=with'
+            def holder = [:]
+
+        when: 'the page is created'
+            withInterceptors(controller: 'test', action: 'testing', httpMethod: 'GET') {
+                holder.page = InertiaResponseFactory.createPage('Organizations/Index', [:])
+            }
+
+        then: 'the url has the path and the query string, so that the browser history keeps the query'
+            holder.page.url == '/organizations?search=acme&trashed=with'
+    }
+
+    def 'the page url of a request without a query string is its path'() {
+        given: 'a request without a query string'
+            mockController(TestController)
+            request.requestURI = '/organizations'
+            def holder = [:]
+
+        when: 'the page is created'
+            withInterceptors(controller: 'test', action: 'testing', httpMethod: 'GET') {
+                holder.page = InertiaResponseFactory.createPage('Organizations/Index', [:])
+            }
+
+        then: 'the url is the path'
+            holder.page.url == '/organizations'
+    }
+
     def 'canceling Inertia request works'() {
         given: 'a controller'
             def controller = mockController(TestController) as TestController

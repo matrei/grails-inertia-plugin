@@ -289,6 +289,15 @@ class Inertia {
         request.requestURI
     }
 
+    /**
+     * The URL of the current page: the path of the request, with the context path, and its query string.
+     */
+    static String getPageUrl() {
+        var uri = forwardURI ?: requestURI
+        var query = request.queryString
+        query ? "${uri}?${query}" : uri
+    }
+
     static String getInertiaAssetVersion() {
         request.getAttribute(INERTIA_ATTRIBUTE_VERSION)
     }

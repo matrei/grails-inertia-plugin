@@ -210,9 +210,7 @@ class InertiaInterceptor implements GrailsConfigurationAware {
     }
 
     String getVersionMismatchLocation() {
-        def query = request.queryString
-        def uri = request.forwardURI ?: request.requestURI
-        query ? "${uri}?$query" : uri
+        Inertia.pageUrl
     }
 
     private void removeInertiaResponseHeader() {
