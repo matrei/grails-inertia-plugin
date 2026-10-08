@@ -14,7 +14,7 @@ class HtmlLangSpec extends Specification implements GrailsWebUnitTest {
             request.addPreferredLocale(Locale.forLanguageTag('de-CH'))
 
         when: 'rendering the html view'
-            def output = render(
+            final output = render(
                     view: '/inertia/html',
                     model: [inertiaVite: new ViteConfig(true, ViteConfig.DEFAULT_DEV_SERVER_URL, ViteConfig.DEFAULT_ENTRY)]
             )
@@ -30,7 +30,7 @@ class HtmlLangSpec extends Specification implements GrailsWebUnitTest {
             request.setAttribute(DispatcherServlet.LOCALE_RESOLVER_ATTRIBUTE, new FixedLocaleResolver(Locale.forLanguageTag('sv')))
 
         when: 'rendering the html view'
-            def output = render(
+            final output = render(
                     view: '/inertia/html',
                     model: [inertiaVite: new ViteConfig(true, ViteConfig.DEFAULT_DEV_SERVER_URL, ViteConfig.DEFAULT_ENTRY)]
             )

@@ -6,8 +6,8 @@ class InertiaPropResolverSpec extends Specification {
 
     def 'full visits resolve regular and always props and announce deferred props'() {
         given:
-            def evaluated = false
-            def model = [
+            var evaluated = false
+            final model = [
                     title: 'Users',
                     users: { evaluated = true; ['Mattias'] },
                     optional: InertiaProp.optional { throw new AssertionError((Object) 'must not evaluate') },
@@ -17,7 +17,7 @@ class InertiaPropResolverSpec extends Specification {
             ]
 
         when:
-            def result = InertiaPropResolver.resolve(
+            final result = InertiaPropResolver.resolve(
                     'Users/Index',
                     model,
                     new InertiaRequestContext()
@@ -35,12 +35,12 @@ class InertiaPropResolverSpec extends Specification {
 
     def 'partial reload evaluates only selected props and always props'() {
         given:
-            def excludedEvaluated = false
-            def context = new InertiaRequestContext(
+            var excludedEvaluated = false
+            final context = new InertiaRequestContext(
                     partialComponent: 'Users/Index',
                     partialData: ['users']
             )
-            def model = [
+            final model = [
                     users: { ['Mattias'] },
                     companies: { excludedEvaluated = true; ['Acme'] },
                     errors: InertiaProp.always([invalid: 'value']),
@@ -48,7 +48,7 @@ class InertiaPropResolverSpec extends Specification {
             ]
 
         when:
-            def result = InertiaPropResolver.resolve('Users/Index', model, context)
+            final result = InertiaPropResolver.resolve('Users/Index', model, context)
 
         then:
             result.props.users == ['Mattias']
@@ -60,13 +60,13 @@ class InertiaPropResolverSpec extends Specification {
 
     def 'partial except removes selected props'() {
         given:
-            def context = new InertiaRequestContext(
+            final context = new InertiaRequestContext(
                     partialComponent: 'Users/Index',
                     partialExcept: ['companies']
             )
 
         when:
-            def result = InertiaPropResolver.resolve(
+            final result = InertiaPropResolver.resolve(
                     'Users/Index',
                     [users: ['Mattias'], companies: ['Acme']],
                     context
@@ -78,13 +78,13 @@ class InertiaPropResolverSpec extends Specification {
 
     def 'partial headers for another component do not filter props'() {
         given:
-            def context = new InertiaRequestContext(
+            final context = new InertiaRequestContext(
                     partialComponent: 'Dashboard',
                     partialData: ['users']
             )
 
         when:
-            def result = InertiaPropResolver.resolve(
+            final result = InertiaPropResolver.resolve(
                     'Users/Index',
                     [users: ['Mattias'], companies: ['Acme']],
                     context
@@ -96,13 +96,13 @@ class InertiaPropResolverSpec extends Specification {
 
     def 'merge and once props produce protocol metadata'() {
         given:
-            def context = new InertiaRequestContext(
+            final context = new InertiaRequestContext(
                     partialComponent: 'Users/Index',
                     partialData: ['users', 'notifications', 'settings', 'profile']
             )
 
         when:
-            def result = InertiaPropResolver.resolve(
+            final result = InertiaPropResolver.resolve(
                     'Users/Index',
                     [
                             users: InertiaProp.merge(['one']),
@@ -126,12 +126,12 @@ class InertiaPropResolverSpec extends Specification {
 
     def 'once props already loaded by the client are skipped'() {
         given:
-            def context = new InertiaRequestContext(
+            final context = new InertiaRequestContext(
                     exceptOnceProps: ['profile']
             )
 
         when:
-            def result = InertiaPropResolver.resolve(
+            final result = InertiaPropResolver.resolve(
                     'Users/Index',
                     [profile: InertiaProp.once { throw new AssertionError((Object) 'must not evaluate') }],
                     context
@@ -144,14 +144,14 @@ class InertiaPropResolverSpec extends Specification {
 
     def 'nested props support dot notation in partial reloads'() {
         given:
-            def evaluated = false
-            def context = new InertiaRequestContext(
+            var evaluated = false
+            final context = new InertiaRequestContext(
                     partialComponent: 'Dashboard',
                     partialData: ['auth.notifications']
             )
 
         when:
-            def result = InertiaPropResolver.resolve(
+            final result = InertiaPropResolver.resolve(
                     'Dashboard',
                     [auth: [
                             user: { evaluated = true; [name: 'Mattias'] },
@@ -167,14 +167,14 @@ class InertiaPropResolverSpec extends Specification {
 
     def 'reset props are returned without merge metadata'() {
         given:
-            def context = new InertiaRequestContext(
+            final context = new InertiaRequestContext(
                     partialComponent: 'Users/Index',
                     partialData: ['users'],
                     reset: ['users']
             )
 
         when:
-            def result = InertiaPropResolver.resolve(
+            final result = InertiaPropResolver.resolve(
                     'Users/Index',
                     [users: InertiaProp.merge(['fresh'])],
                     context
@@ -187,13 +187,13 @@ class InertiaPropResolverSpec extends Specification {
 
     def 'scroll props emit infinite-scroll metadata'() {
         given:
-            def context = new InertiaRequestContext(
+            final context = new InertiaRequestContext(
                     partialComponent: 'Posts/Index',
                     partialData: ['posts']
             )
 
         when:
-            def result = InertiaPropResolver.resolve(
+            final result = InertiaPropResolver.resolve(
                     'Posts/Index',
                     [posts: InertiaProp.scroll(
                             [data: ['first']],
@@ -213,13 +213,13 @@ class InertiaPropResolverSpec extends Specification {
 
     def 'rescued deferred props are omitted and announced'() {
         given:
-            def context = new InertiaRequestContext(
+            final context = new InertiaRequestContext(
                     partialComponent: 'Users/Index',
                     partialData: ['permissions']
             )
 
         when:
-            def result = InertiaPropResolver.resolve(
+            final result = InertiaPropResolver.resolve(
                     'Users/Index',
                     [permissions: InertiaProp.deferred({
                         throw new IllegalStateException('unavailable')
@@ -234,14 +234,14 @@ class InertiaPropResolverSpec extends Specification {
 
     def 'reset scroll props include reset metadata without a merge instruction'() {
         given:
-            def context = new InertiaRequestContext(
+            final context = new InertiaRequestContext(
                     partialComponent: 'Posts/Index',
                     partialData: ['posts'],
                     reset: ['posts']
             )
 
         when:
-            def result = InertiaPropResolver.resolve(
+            final result = InertiaPropResolver.resolve(
                     'Posts/Index',
                     [posts: InertiaProp.scroll(
                             [data: ['fresh']],
@@ -259,13 +259,13 @@ class InertiaPropResolverSpec extends Specification {
 
     def 'merge variants emit matching paths when configured'() {
         given:
-            def context = new InertiaRequestContext(
+            final context = new InertiaRequestContext(
                     partialComponent: 'Feed',
                     partialData: ['posts', 'notifications', 'conversations']
             )
 
         when:
-            def result = InertiaPropResolver.resolve(
+            final result = InertiaPropResolver.resolve(
                     'Feed',
                     [
                             posts: InertiaProp.merge(['one'], 'id'),
@@ -284,7 +284,7 @@ class InertiaPropResolverSpec extends Specification {
 
     def 'unrescued deferred prop failures are propagated'() {
         given:
-            def context = new InertiaRequestContext(
+            final context = new InertiaRequestContext(
                     partialComponent: 'Users/Index',
                     partialData: ['permissions']
             )
@@ -304,10 +304,10 @@ class InertiaPropResolverSpec extends Specification {
 
     def 'nested described props are resolved on full visits'() {
         given:
-            def evaluated = false
+            var evaluated = false
 
         when:
-            def result = InertiaPropResolver.resolve(
+            final result = InertiaPropResolver.resolve(
                     'Dashboard',
                     [auth: [
                             user: { evaluated = true; [name: 'Mattias'] },
@@ -325,13 +325,13 @@ class InertiaPropResolverSpec extends Specification {
 
     def 'nested merge and once props retain their metadata paths'() {
         given:
-            def context = new InertiaRequestContext(
+            final context = new InertiaRequestContext(
                     partialComponent: 'Dashboard',
                     partialData: ['feed.items', 'auth.profile']
             )
 
         when:
-            def result = InertiaPropResolver.resolve(
+            final result = InertiaPropResolver.resolve(
                     'Dashboard',
                     [
                             feed: [items: InertiaProp.merge(['one'])],

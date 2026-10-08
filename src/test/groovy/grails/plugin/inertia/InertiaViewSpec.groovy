@@ -9,7 +9,7 @@ class InertiaViewSpec extends Specification implements JsonViewTest {
     void 'Test render a raw JSON view'() {
 
         given: 'An Inertia page'
-            def inertiaPage = new InertiaPage(
+            final inertiaPage = new InertiaPage(
                     component: 'HelloWorld',
                     props: [name: 'Mattias'],
                     url: '/helloworld',
@@ -17,7 +17,7 @@ class InertiaViewSpec extends Specification implements JsonViewTest {
             )
 
         when: 'A json view is rendered'
-            def result = render(
+            final result = render(
                     view: '/inertia/json',
                     model: [inertiaPage: inertiaPage]
             )
@@ -32,7 +32,7 @@ class InertiaViewSpec extends Specification implements JsonViewTest {
     void 'optional page metadata is rendered only when present'() {
 
         given:
-            def inertiaPage = new InertiaPage(
+            final inertiaPage = new InertiaPage(
                     component: 'Users/Index',
                     props: [users: []],
                     url: '/users',
@@ -50,7 +50,7 @@ class InertiaViewSpec extends Specification implements JsonViewTest {
             )
 
         when:
-            def result = render(
+            final result = render(
                     view: '/inertia/json',
                     model: [inertiaPage: inertiaPage]
             )
@@ -70,7 +70,7 @@ class InertiaViewSpec extends Specification implements JsonViewTest {
 
     void 'shared prop names are preserved independently from page props'() {
         given:
-            def page = new InertiaPage(
+            final page = new InertiaPage(
                     component: 'Dashboard',
                     props: [auth: [name: 'controller'], notifications: []],
                     url: '/dashboard',
@@ -79,7 +79,7 @@ class InertiaViewSpec extends Specification implements JsonViewTest {
             )
 
         when:
-            def result = render(
+            final result = render(
                     view: '/inertia/json',
                     model: [inertiaPage: page]
             )
@@ -91,7 +91,7 @@ class InertiaViewSpec extends Specification implements JsonViewTest {
 
     void 'the complete v3 page envelope is serialized'() {
         given:
-            def page = new InertiaPage(
+            final page = new InertiaPage(
                     component: 'Feed/Index',
                     props: [posts: [data: [[id: 1]]]],
                     url: '/feed?page=1',
@@ -112,7 +112,7 @@ class InertiaViewSpec extends Specification implements JsonViewTest {
             )
 
         when:
-            def result = render(
+            final result = render(
                     view: '/inertia/json',
                     model: [inertiaPage: page]
             )

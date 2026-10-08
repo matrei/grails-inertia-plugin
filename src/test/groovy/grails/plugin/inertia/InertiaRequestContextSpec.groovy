@@ -8,7 +8,7 @@ class InertiaRequestContextSpec extends Specification {
 
     def 'v3 request headers are normalized into request context'() {
         given:
-            def request = Mock(HttpServletRequest)
+            final request = Mock(HttpServletRequest)
             request.getHeader(Inertia.INERTIA_HEADER_PARTIAL_COMPONENT) >> 'Users/Index'
             request.getHeader(Inertia.INERTIA_HEADER_PARTIAL_DATA) >> ' users, profile.name '
             request.getHeader(Inertia.INERTIA_HEADER_PARTIAL_EXCEPT) >> ' companies, '
@@ -19,7 +19,7 @@ class InertiaRequestContextSpec extends Specification {
             request.getHeader(Inertia.INERTIA_HEADER_PURPOSE) >> 'PREFETCH'
 
         when:
-            def context = InertiaRequestContext.from(request)
+            final context = InertiaRequestContext.from(request)
 
         then:
             context.partialComponent == 'Users/Index'
@@ -35,10 +35,10 @@ class InertiaRequestContextSpec extends Specification {
 
     def 'missing request headers produce an initial visit context'() {
         given:
-            def request = Mock(HttpServletRequest)
+            final request = Mock(HttpServletRequest)
 
         when:
-            def context = InertiaRequestContext.from(request)
+            final context = InertiaRequestContext.from(request)
 
         then:
             !context.partialReload

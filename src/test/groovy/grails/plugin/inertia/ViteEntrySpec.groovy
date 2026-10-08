@@ -7,7 +7,7 @@ class ViteEntrySpec extends Specification {
     void 'the stylesheets and modules of the chunks imported by the entry are included'() {
 
         given: 'an entry importing a shared chunk with css, and a vendor chunk that also imports the shared chunk'
-            def manifest = [
+            final manifest = [
                     'src/main/javascript/main.js': [
                             file: 'js/main.js',
                             isEntry: true,
@@ -19,7 +19,7 @@ class ViteEntrySpec extends Specification {
             ] as Map<String, Map<String, Object>>
 
         when: 'resolving the entry'
-            def entry = ViteEntry.from(manifest, 'src/main/javascript/main.js')
+            final entry = ViteEntry.from(manifest, 'src/main/javascript/main.js')
 
         then: 'the entry file, all stylesheets, and each imported chunk once'
             entry.file == 'js/main.js'
@@ -30,7 +30,7 @@ class ViteEntrySpec extends Specification {
     void 'imported chunks are listed after the chunks they import'() {
 
         given: 'a chain of imports'
-            def manifest = [
+            final manifest = [
                     'main.js': [file: 'main.js', imports: ['_a.js']],
                     '_a.js': [file: 'a.js', imports: ['_b.js'], css: ['a.css']],
                     '_b.js': [file: 'b.js', imports: ['_c.js'], css: ['b.css']],
@@ -38,7 +38,7 @@ class ViteEntrySpec extends Specification {
             ] as Map<String, Map<String, Object>>
 
         when: 'resolving the entry'
-            def entry = ViteEntry.from(manifest, 'main.js')
+            final entry = ViteEntry.from(manifest, 'main.js')
 
         then: 'dependencies come first'
             entry.css == ['c.css', 'b.css', 'a.css']
@@ -48,7 +48,7 @@ class ViteEntrySpec extends Specification {
     void 'an entry without imports or css has nothing more to load'() {
 
         when: 'resolving an entry with only a file'
-            def entry = ViteEntry.from(['main.js': [file: 'main.js']] as Map<String, Map<String, Object>>, 'main.js')
+            final entry = ViteEntry.from(['main.js': [file: 'main.js']] as Map<String, Map<String, Object>>, 'main.js')
 
         then: 'only the entry file'
             entry.file == 'main.js'
@@ -62,7 +62,7 @@ class ViteEntrySpec extends Specification {
             ViteEntry.from([:], 'src/main/javascript/main.js')
 
         then: 'the error names the entry'
-            def e = thrown(IllegalArgumentException)
+            final e = thrown(IllegalArgumentException)
             e.message.contains('src/main/javascript/main.js')
     }
 }

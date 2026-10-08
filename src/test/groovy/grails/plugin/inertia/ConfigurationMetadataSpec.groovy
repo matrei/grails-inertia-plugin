@@ -20,12 +20,12 @@ class ConfigurationMetadataSpec extends Specification {
     void 'every property of the server-side rendering configuration is documented with its type and default'() {
 
         given: 'the defaults of the configuration class'
-            def defaults = new ServerSideRenderConfig()
-            def configProperties = ServerSideRenderConfig.metaClass.properties.findAll { it.name != 'class' && !Modifier.isStatic(it.modifiers) }
+            final defaults = new ServerSideRenderConfig()
+            final configProperties = ServerSideRenderConfig.metaClass.properties.findAll { it.name != 'class' && !Modifier.isStatic(it.modifiers) }
 
         expect: 'each property is documented under its kebab-case name'
             configProperties.each { property ->
-                def documented = documentedProperties["inertia.ssr.${toKebabCase(property.name)}"]
+                final documented = documentedProperties["inertia.ssr.${toKebabCase(property.name)}"]
                 assert documented
                 assert documented.sourceType == ServerSideRenderConfig.name
                 assert documented.type == ClassUtils.resolvePrimitiveIfNecessary(property.type).name
@@ -39,7 +39,7 @@ class ConfigurationMetadataSpec extends Specification {
     void 'the server-side rendering group refers to its configuration class'() {
 
         expect: 'the group has the type and source type of the configuration class'
-            def group = (metadata.get('groups') as List<Map>).find { it.name == 'inertia.ssr' }
+            final group = (metadata.get('groups') as List<Map>).find { it.name == 'inertia.ssr' }
             group.type == ServerSideRenderConfig.name
             group.sourceType == ServerSideRenderConfig.name
     }
@@ -68,7 +68,7 @@ class ConfigurationMetadataSpec extends Specification {
 
     // Grails modules publish metadata under the same resource name, so find the one with the Inertia group.
     private static Map loadMetadata() {
-        def resources = ConfigurationMetadataSpec.classLoader
+        final resources = ConfigurationMetadataSpec.classLoader
                 .getResources('META-INF/spring-configuration-metadata.json')
                 .toList()
                 .collect { new JsonSlurper().parse(it) as Map }

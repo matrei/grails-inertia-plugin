@@ -11,7 +11,7 @@ class FaviconConfiguredSpec extends Specification implements GrailsWebUnitTest {
             config.inertia.favicon = '/static/favicon.svg'
 
         when: 'rendering the html view with a configured favicon'
-            def output = render(
+            final output = render(
                     view: '/inertia/html',
                     model: [inertiaVite: new ViteConfig(true, ViteConfig.DEFAULT_DEV_SERVER_URL, ViteConfig.DEFAULT_ENTRY)]
             )

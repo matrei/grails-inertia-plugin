@@ -20,7 +20,7 @@ class InertiaInterceptorDevServerSpec extends Specification implements Intercept
     void 'the page gets the dev server configuration and no manifest'() {
 
         given: 'the html view is rendered'
-            def modelAndView = new ModelAndView(Inertia.INERTIA_VIEW_HTML, [:])
+            final modelAndView = new ModelAndView(Inertia.INERTIA_VIEW_HTML, [:])
             request.setAttribute(GrailsApplicationAttributes.MODEL_AND_VIEW, modelAndView)
 
         when: 'the interceptor handles the response'
@@ -34,7 +34,7 @@ class InertiaInterceptorDevServerSpec extends Specification implements Intercept
     void 'the asset version is not checked'() {
 
         given: 'an inertia request with a stale asset version'
-            def controller = mockController(TestController) as TestController
+            final controller = mockController(TestController)
             request.addHeader('X-Inertia', true)
             request.addHeader('X-Inertia-Version', 'stale')
             request.method = 'GET'

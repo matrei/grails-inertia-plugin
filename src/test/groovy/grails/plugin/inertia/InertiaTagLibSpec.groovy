@@ -8,11 +8,11 @@ class InertiaTagLibSpec extends Specification implements TagLibUnitTest<InertiaT
     void 'inertia markup is created'() {
 
         given: 'some JSON content in the proper request attribute'
-            def json = '{"msg":"hello"}'
+            final json = '{"msg":"hello"}'
             request.setAttribute(Inertia.INERTIA_ATTRIBUTE_PAGE, json)
 
         when: 'using it with the taglib'
-            def output = applyTemplate('<inertia:app/>')
+            final output = applyTemplate('<inertia:app/>')
 
         then: 'the output is correct'
             output == $/<script data-page="app" type="application/json">{"msg":"hello"}</script><div id="app"></div>/$
@@ -21,12 +21,12 @@ class InertiaTagLibSpec extends Specification implements TagLibUnitTest<InertiaT
     void 'changing the id works'() {
 
         given: 'some JSON content in the proper request attribute and an id'
-            def json = '{"msg":"hello"}'
+            final json = '{"msg":"hello"}'
             request.setAttribute(Inertia.INERTIA_ATTRIBUTE_PAGE, json)
-            def id = 'myId'
+            final id = 'myId'
 
         when: 'using them with the taglib'
-            def output = applyTemplate($/<inertia:app id="$id"/>/$)
+            final output = applyTemplate($/<inertia:app id="$id"/>/$)
 
         then: 'the id is used for both the element and the page data, which the client looks up by id'
             output == $/<script data-page="$id" type="application/json">{"msg":"hello"}</script><div id="$id"></div>/$
@@ -35,12 +35,12 @@ class InertiaTagLibSpec extends Specification implements TagLibUnitTest<InertiaT
     void 'changing the tagName works'() {
 
         given: 'some JSON content in the proper request attribute and a tag name'
-            def json = '{"msg":"hello"}'
+            final json = '{"msg":"hello"}'
             request.setAttribute(Inertia.INERTIA_ATTRIBUTE_PAGE, json)
-            def tagName = 'span'
+            final tagName = 'span'
 
         when: 'using them with the taglib'
-            def output = applyTemplate($/<inertia:app tagName="$tagName"/>/$)
+            final output = applyTemplate($/<inertia:app tagName="$tagName"/>/$)
 
         then: 'the output is correct'
             output == "<script data-page=\"app\" type=\"application/json\">{\"msg\":\"hello\"}</script><$tagName id=\"app\"></$tagName>"
@@ -64,7 +64,7 @@ class InertiaTagLibSpec extends Specification implements TagLibUnitTest<InertiaT
             )
 
         when:
-            def output = applyTemplate('<inertia:app/>')
+            final output = applyTemplate('<inertia:app/>')
 
         then:
             output ==
@@ -80,7 +80,7 @@ class InertiaTagLibSpec extends Specification implements TagLibUnitTest<InertiaT
             request.setAttribute(Inertia.INERTIA_ATTRIBUTE_SSR_RESPONSE, [head: [], body: '<div id="app" data-server-rendered="true">hello</div>'])
 
         when: 'using it with the taglib'
-            def output = applyTemplate('<inertia:app/>')
+            final output = applyTemplate('<inertia:app/>')
 
         then: 'the server-side rendered body is output as is'
             output == '<div id="app" data-server-rendered="true">hello</div>'
@@ -92,7 +92,7 @@ class InertiaTagLibSpec extends Specification implements TagLibUnitTest<InertiaT
             request.setAttribute(Inertia.INERTIA_ATTRIBUTE_SSR_RESPONSE, [head: ['<title>Hello</title>', '<meta name="a" content="b">'], body: ''])
 
         when: 'using it with the taglib'
-            def output = applyTemplate('<inertia:head/>')
+            final output = applyTemplate('<inertia:head/>')
 
         then: 'all head elements are output in order'
             output == '<title>Hello</title><meta name="a" content="b">'

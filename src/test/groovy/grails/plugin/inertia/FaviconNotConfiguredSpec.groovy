@@ -8,7 +8,7 @@ class FaviconNotConfiguredSpec extends Specification implements GrailsWebUnitTes
 
     def 'favicon is omitted when it is not configured'() {
         when: 'rendering the html view without a configured favicon'
-            def output = render(
+            final output = render(
                     view: '/inertia/html',
                     model: [inertiaVite: new ViteConfig(true, ViteConfig.DEFAULT_DEV_SERVER_URL, ViteConfig.DEFAULT_ENTRY)]
             )

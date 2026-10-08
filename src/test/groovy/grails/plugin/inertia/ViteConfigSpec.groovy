@@ -44,7 +44,7 @@ class ViteConfigSpec extends Specification {
     void 'the dev server url and entry have defaults'() {
 
         when: 'nothing is configured'
-            def vite = ViteConfig.from(new PropertySourcesConfig())
+            final vite = ViteConfig.from(new PropertySourcesConfig())
 
         then: 'the defaults are used'
             vite.devServerUrl == 'http://localhost:3000'

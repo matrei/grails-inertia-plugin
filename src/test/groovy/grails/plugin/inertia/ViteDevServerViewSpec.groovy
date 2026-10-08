@@ -18,7 +18,7 @@ class ViteDevServerViewSpec extends Specification implements GrailsWebUnitTest {
     void 'with the dev server enabled, the page loads the vite client and the entry from it'() {
 
         when: 'rendering the html view with the dev server'
-            def output = render(
+            final output = render(
                     view: '/inertia/html',
                     model: [inertiaVite: new ViteConfig(true, ViteConfig.DEFAULT_DEV_SERVER_URL, ViteConfig.DEFAULT_ENTRY)]
             )
@@ -33,7 +33,7 @@ class ViteDevServerViewSpec extends Specification implements GrailsWebUnitTest {
     void 'the configured dev server url #url and entry are used'(String url) {
 
         when: 'rendering the html view with a custom dev server and entry'
-            def output = render(
+            final output = render(
                     view: '/inertia/html',
                     model: [inertiaVite: new ViteConfig(true, url, 'src/main/js/app.ts')]
             )
@@ -54,7 +54,7 @@ class ViteDevServerViewSpec extends Specification implements GrailsWebUnitTest {
             request.contextPath = '/myapp'
 
         when: 'rendering the html view with the built assets'
-            def output = render(
+            final output = render(
                     view: '/inertia/html',
                     model: [
                             inertiaVite: new ViteConfig(false, ViteConfig.DEFAULT_DEV_SERVER_URL, ViteConfig.DEFAULT_ENTRY),
@@ -73,7 +73,7 @@ class ViteDevServerViewSpec extends Specification implements GrailsWebUnitTest {
     void 'the configured entry is looked up in the manifest'() {
 
         when: 'rendering the html view with a custom entry'
-            def output = render(
+            final output = render(
                     view: '/inertia/html',
                     model: [
                             inertiaVite: new ViteConfig(false, ViteConfig.DEFAULT_DEV_SERVER_URL, 'src/main/js/app.ts'),
@@ -97,8 +97,8 @@ class ViteDevServerViewSpec extends Specification implements GrailsWebUnitTest {
             )
 
         then: 'the failure says to build the assets or to use the dev server'
-            def e = thrown(Exception)
-            def message = causes(e)*.message.find { it?.contains('not found in the Vite manifest') }
+            final e = thrown(Exception)
+            final message = causes(e)*.message.find { it?.contains('not found in the Vite manifest') }
             message.contains("Build the assets, for example with 'vite build'")
             message.contains('inertia.vite.devServer.enabled')
     }
@@ -110,8 +110,8 @@ class ViteDevServerViewSpec extends Specification implements GrailsWebUnitTest {
     }
 
     private static List<Throwable> causes(Throwable throwable) {
-        def causes = [] as List<Throwable>
-        for (def cause = throwable; cause != null && !causes.contains(cause); cause = cause.cause) {
+        final causes = [] as List<Throwable>
+        for (var cause = throwable; cause != null && !causes.contains(cause); cause = cause.cause) {
             causes << cause
         }
         causes

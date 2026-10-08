@@ -22,7 +22,7 @@ class ServerSideRenderProcessSpec extends Specification {
     void 'the default url is used when none is configured'() {
 
         given: 'no configured url'
-            var ssr = ssrProcess(bundle: bundle)
+            final ssr = ssrProcess(bundle: bundle)
 
         when: 'starting'
             ssr.start()
@@ -36,7 +36,7 @@ class ServerSideRenderProcessSpec extends Specification {
     void 'the configured url #url is used'(String url, String host, int port) {
 
         given: 'a configured url'
-            var ssr = ssrProcess(bundle: bundle, url: url)
+            final ssr = ssrProcess(bundle: bundle, url: url)
 
         when: 'starting'
             ssr.start()
@@ -54,13 +54,13 @@ class ServerSideRenderProcessSpec extends Specification {
     void 'an invalid url #url fails before a process is started'(String url) {
 
         given: 'an invalid url'
-            var ssr = ssrProcess(bundle: bundle, url: url)
+            final ssr = ssrProcess(bundle: bundle, url: url)
 
         when: 'starting'
             ssr.start()
 
         then: 'the failure names the setting'
-            var e = thrown(IllegalArgumentException)
+            final e = thrown(IllegalArgumentException)
             e.message.contains('inertia.ssr.url')
             e.message.contains(url)
 
@@ -75,7 +75,7 @@ class ServerSideRenderProcessSpec extends Specification {
     void 'the process is stopped when the SSR server does not come up'() {
 
         given: 'an SSR server that does not respond'
-            var ssr = ssrProcess(bundle: bundle)
+            final ssr = ssrProcess(bundle: bundle)
 
         when: 'starting'
             ssr.start()
@@ -97,7 +97,7 @@ class ServerSideRenderProcessSpec extends Specification {
     void 'the process is stopped by #method'(String method) {
 
         given: 'a started SSR server'
-            var ssr = started(ssrProcess(bundle: bundle))
+            final ssr = started(ssrProcess(bundle: bundle))
 
         when: 'the context stops or destroys it'
             ssr."$method"()
@@ -114,7 +114,7 @@ class ServerSideRenderProcessSpec extends Specification {
     void 'a process that does not stop is stopped forcibly'() {
 
         given: 'a started SSR server'
-            var ssr = started(ssrProcess(bundle: bundle))
+            final ssr = started(ssrProcess(bundle: bundle))
 
         when: 'stopping it'
             ssr.stop()
@@ -128,7 +128,7 @@ class ServerSideRenderProcessSpec extends Specification {
     void 'no process is started when the bundle is missing'() {
 
         given: 'a bundle that does not exist'
-            var ssr = ssrProcess(bundle: new File(tempDir, 'missing.mjs').path)
+            final ssr = ssrProcess(bundle: new File(tempDir, 'missing.mjs').path)
 
         when: 'starting'
             ssr.start()
@@ -142,7 +142,7 @@ class ServerSideRenderProcessSpec extends Specification {
     void 'waiting for the SSR server ends as soon as it accepts connections'() {
 
         given: 'a server listening on a free port'
-            var server = new ServerSocket(0)
+            final server = new ServerSocket(0)
 
         when: 'waiting for it'
             new ServerSideRenderProcess(new ServerSideRenderConfig()).waitForSsrServer('localhost', server.localPort, 10, 2)
@@ -157,13 +157,13 @@ class ServerSideRenderProcessSpec extends Specification {
     void 'waiting for an SSR server that does not respond fails after the retries'() {
 
         given: 'a port nothing listens on'
-            var port = new ServerSocket(0).withCloseable { it.localPort }
+            final port = new ServerSocket(0).withCloseable { it.localPort }
 
         when: 'waiting for it'
             new ServerSideRenderProcess(new ServerSideRenderConfig()).waitForSsrServer('localhost', port, 10, 2)
 
         then: 'the failure names the host and port'
-            var e = thrown(IllegalStateException)
+            final e = thrown(IllegalStateException)
             e.message == "SSR server is not responding on localhost:$port"
     }
 

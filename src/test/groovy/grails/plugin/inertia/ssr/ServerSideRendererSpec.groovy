@@ -24,13 +24,13 @@ class ServerSideRendererSpec extends Specification {
                 exchange.responseBody.withCloseable { it.write(body) }
             }
             server.start()
-            def config = new ServerSideRenderConfig(
+            final config = new ServerSideRenderConfig(
                     enabled: true,
                     url: "http://localhost:${server.address.port}/render"
             )
 
         when:
-            def result = new ServerSideRenderer(config).render(page())
+            final result = new ServerSideRenderer(config).render(page())
 
         then:
             result == '{"body":"rendered"}'
@@ -44,7 +44,7 @@ class ServerSideRendererSpec extends Specification {
                 exchange.close()
             }
             server.start()
-            def config = new ServerSideRenderConfig(
+            final config = new ServerSideRenderConfig(
                     enabled: true,
                     url: "http://localhost:${server.address.port}/render"
             )
@@ -55,7 +55,7 @@ class ServerSideRendererSpec extends Specification {
 
     def 'falls back when the SSR service is unavailable'() {
         given:
-            def config = new ServerSideRenderConfig(
+            final config = new ServerSideRenderConfig(
                     enabled: true,
                     url: 'http://localhost:1/render',
                     connectTimeout: 50,

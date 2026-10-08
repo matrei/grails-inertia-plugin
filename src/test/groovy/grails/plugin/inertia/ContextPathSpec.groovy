@@ -24,7 +24,7 @@ class ContextPathSpec extends Specification implements GrailsWebUnitTest {
 
     def 'built assets are prefixed with the context path'() {
         when: 'rendering the html view with the built assets'
-            def output = render(
+            final output = render(
                     view: '/inertia/html',
                     model: [
                             inertiaVite: new ViteConfig(false, ViteConfig.DEFAULT_DEV_SERVER_URL, ViteConfig.DEFAULT_ENTRY),
@@ -46,7 +46,7 @@ class ContextPathSpec extends Specification implements GrailsWebUnitTest {
             config.inertia.favicon = favicon
 
         when: 'rendering the html view'
-            def output = render(
+            final output = render(
                     view: '/inertia/html',
                     model: [inertiaVite: new ViteConfig(true, ViteConfig.DEFAULT_DEV_SERVER_URL, ViteConfig.DEFAULT_ENTRY)]
             )

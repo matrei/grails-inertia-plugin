@@ -38,12 +38,12 @@ class InertiaInterceptorSpec extends Specification implements InterceptorUnitTes
     void 'inertia #method requests from stale assets returns appropriately'(String action, String method, String location, int status) {
 
         given: 'a controller'
-            def controller = mockController(TestController) as TestController
+            final controller = mockController(TestController)
 
         when: 'an inertia request with an outdated asset version is handled'
             request.addHeader('X-Inertia', true)
             request.addHeader('X-Inertia-Version', 'a value that is certain to be deemed as stale')
-            request.setForwardURI(location)
+            request.forwardURI = location
             request.method = method
             withInterceptors(controller: 'test', action: action, httpMethod: method) {
                 controller.index()
@@ -71,7 +71,7 @@ class InertiaInterceptorSpec extends Specification implements InterceptorUnitTes
     void 'inertia requests from stale assets get a plain conflict response'() {
 
         given: 'a controller'
-            def controller = mockController(TestController) as TestController
+            final controller = mockController(TestController)
 
         when: 'an inertia request with an outdated asset version is handled'
             request.addHeader('X-Inertia', true)
@@ -89,7 +89,7 @@ class InertiaInterceptorSpec extends Specification implements InterceptorUnitTes
     void 'outside development the page gets the built assets by default'() {
 
         given: 'the html view is rendered'
-            def modelAndView = new ModelAndView(Inertia.INERTIA_VIEW_HTML, [:])
+            final modelAndView = new ModelAndView(Inertia.INERTIA_VIEW_HTML, [:])
             request.setAttribute(GrailsApplicationAttributes.MODEL_AND_VIEW, modelAndView)
 
         when: 'the interceptor handles the response'
@@ -102,11 +102,11 @@ class InertiaInterceptorSpec extends Specification implements InterceptorUnitTes
 
     def 'version mismatch preserves the request query string and current version'() {
         given:
-            def controller = mockController(TestController) as TestController
+            final controller = mockController(TestController)
             request.addHeader('X-Inertia', true)
             request.addHeader('X-Inertia-Version', 'stale')
-            request.setRequestURI('/users')
-            request.setQueryString('page=2&active=true')
+            request.requestURI = '/users'
+            request.queryString = 'page=2&active=true'
             request.method = 'GET'
             interceptor.before()
             withInterceptors(controller: 'test', action: 'testing', httpMethod: 'GET') {
@@ -125,7 +125,7 @@ class InertiaInterceptorSpec extends Specification implements InterceptorUnitTes
 
     def 'version mismatch reflashes data for the follow-up request'() {
         given:
-            def controller = mockController(TestController) as TestController
+            final controller = mockController(TestController)
             Inertia.flash.put('notice', 'Saved')
             request.addHeader('X-Inertia', true)
             request.addHeader('X-Inertia-Version', 'stale')
@@ -154,7 +154,7 @@ class InertiaInterceptorSpec extends Specification implements InterceptorUnitTes
     void 'the http headers are correct for html responses'() {
 
         given: 'a controller'
-            def controller = mockController(TestController) as TestController
+            final controller = mockController(TestController)
 
         when: 'a request for html is processed'
             withInterceptors(controller: 'test', httpMethod: 'GET') {
@@ -169,7 +169,7 @@ class InertiaInterceptorSpec extends Specification implements InterceptorUnitTes
 
     def 'the http headers are correct for json responses'() {
         given: 'a controller'
-            def controller = mockController(TestController) as TestController
+            final controller = mockController(TestController)
 
         when: 'a request for json is processed'
             request.addHeader('X-Inertia', true)
@@ -186,7 +186,7 @@ class InertiaInterceptorSpec extends Specification implements InterceptorUnitTes
 
     def 'an Inertia partial request produces a filtered page response'() {
         given:
-            def controller = mockController(TestController) as TestController
+            final controller = mockController(TestController)
             request.addHeader('X-Inertia', true)
             request.addHeader('X-Inertia-Version', '0')
             request.addHeader('X-Inertia-Partial-Component', 'partial')
@@ -206,8 +206,8 @@ class InertiaInterceptorSpec extends Specification implements InterceptorUnitTes
 
     def 'page factory accepts immutable resolved props when adding defaults'() {
         given:
-            def controller = mockController(TestController) as TestController
-            def holder = [:]
+            mockController(TestController)
+            final holder = [:]
 
         when:
             withInterceptors(controller: 'test', action: 'testing', httpMethod: 'GET') {
@@ -227,7 +227,7 @@ class InertiaInterceptorSpec extends Specification implements InterceptorUnitTes
             mockController(TestController)
             request.requestURI = '/organizations'
             request.queryString = 'search=acme&trashed=with'
-            def holder = [:]
+            final holder = [:]
 
         when: 'the page is created'
             withInterceptors(controller: 'test', action: 'testing', httpMethod: 'GET') {
@@ -242,7 +242,7 @@ class InertiaInterceptorSpec extends Specification implements InterceptorUnitTes
         given: 'a request without a query string'
             mockController(TestController)
             request.requestURI = '/organizations'
-            def holder = [:]
+            final holder = [:]
 
         when: 'the page is created'
             withInterceptors(controller: 'test', action: 'testing', httpMethod: 'GET') {
@@ -255,7 +255,7 @@ class InertiaInterceptorSpec extends Specification implements InterceptorUnitTes
 
     def 'canceling Inertia request works'() {
         given: 'a controller'
-            def controller = mockController(TestController) as TestController
+            final controller = mockController(TestController)
 
         when: 'a request for json is processed'
             request.addHeader('X-Inertia', true)
@@ -273,7 +273,7 @@ class InertiaInterceptorSpec extends Specification implements InterceptorUnitTes
 
     def 'canceling Inertia request with Inertia.cancel() works'() {
         given: 'a controller'
-            def controller = (TestController) mockController(TestController)
+            final controller = mockController(TestController)
 
         when: 'a request for json is processed'
             request.addHeader('X-Inertia', true)
@@ -290,7 +290,7 @@ class InertiaInterceptorSpec extends Specification implements InterceptorUnitTes
 
     def 'page history controls are exposed through the Inertia facade'() {
         given:
-            def controller = (TestController) mockController(TestController)
+            final controller = mockController(TestController)
             request.addHeader('X-Inertia', true)
             request.addHeader('X-Inertia-Version', '0')
 
@@ -307,7 +307,7 @@ class InertiaInterceptorSpec extends Specification implements InterceptorUnitTes
 
     def 'redirects with fragments use the Inertia redirect header'() {
         given:
-            def controller = mockController(TestController) as TestController
+            final controller = mockController(TestController)
             request.addHeader('X-Inertia', true)
             request.method = 'GET'
             interceptor.before()
@@ -328,7 +328,7 @@ class InertiaInterceptorSpec extends Specification implements InterceptorUnitTes
 
     def 'prefetch redirects with fragments are not converted'() {
         given:
-            def controller = mockController(TestController) as TestController
+            final controller = mockController(TestController)
             request.addHeader('X-Inertia', true)
             request.addHeader('Purpose', 'prefetch')
             request.method = 'GET'
