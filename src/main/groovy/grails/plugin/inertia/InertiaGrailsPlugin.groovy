@@ -43,13 +43,13 @@ class InertiaGrailsPlugin extends Plugin {
     def author = 'Mattias Reichel'
     def authorEmail = 'matrei@apache.org'
     def description = 'Inertia server-side adapter for Grails'
-    def documentation = 'https://github.com/matrei/inertia-grails-plugin#readme'
+    def documentation = 'https://github.com/matrei/grails-inertia-plugin#readme'
     def license = 'Apache 2.0 License'
     def issueManagement = [
             system: 'GitHub Issues',
-            url: 'https://github.com/matrei/inertia-grails-plugin/issues'
+            url: 'https://github.com/matrei/grails-inertia-plugin/issues'
     ]
-    def scm = [url: 'https://github.com/matrei/inertia-grails-plugin']
+    def scm = [url: 'https://github.com/matrei/grails-inertia-plugin']
 
     def beans = {
         group('serverSideRendering').conditionalOnProperty('inertia.ssr.enabled', havingValue: 'true') {
