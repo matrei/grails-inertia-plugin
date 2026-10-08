@@ -277,6 +277,78 @@ grails:
 The `lang` attribute is set when the page is loaded. When the language is switched with an Inertia visit, the
 application needs to update `document.documentElement.lang` itself, or switch the language with a full page load.
 
+### Routes
+
+Instead of writing the URLs of your controller actions in the page components, you can generate them from the URL
+mappings of the application as a JavaScript module, with an object for each controller, named after its class, and a
+function for each action:
+```groovy
+// myapp/grails-app/controllers/myapp/UrlMappings.groovy
+"/books/$id" (controller: 'book', action: [GET: 'show', PUT: 'update', POST: 'update', DELETE: 'delete'])
+name bookList: '/books' (controller: 'book', action: 'index')
+```
+```javascript
+import { BookController, named } from '@/routes'
+
+BookController.show(1)              // { url: '/books/1', method: 'get' }
+BookController.update(1)            // { url: '/books/1', method: 'put' }
+BookController.update.post(1)       // { url: '/books/1', method: 'post' }
+BookController.show.url(1)          // '/books/1'
+BookController.index({ page: 2 })   // { url: '/books?page=2', method: 'get' }
+named.bookList()                    // { url: '/books', method: 'get' }
+```
+An action function takes the URL parameters as a single value, as an array in the order of the URL, or as an object by
+name, in which the names that are not part of the URL become the query string. The URLs include the context path of
+the application. The routes of named URL mappings are also exported by name in `named`. An action that has no URL
+mapping of its own gets its route from a mapping such as `"/$controller/$action?/$id?"`.
+
+The context path is exported as `contextPath`, for the URLs that are not controller actions, such as those handled by
+Spring Security:
+```javascript
+import { contextPath } from '@/routes'
+
+form.post(`${contextPath}/login/authenticate`)
+```
+
+An action's methods are those of its URL mapping. When the mapping accepts any method, they are taken from the
+`allowedMethods` of the controller, such as `static allowedMethods = [restore: 'PUT']`, and otherwise default to `get`.
+The first method is the default, and each method has a function of its own, such as `BookController.update.post`.
+
+Inertia accepts the returned objects wherever it takes a URL, and uses their method:
+```vue
+<Link :href="BookController.show(bookId)">Show</Link>
+<Form :action="BookController.update(bookId)">...</Form>
+```
+```javascript
+router.visit(BookController.delete(bookId))
+form.submit(BookController.update(bookId))
+```
+
+Generate the module with the `inertiaRoutes` task, which starts the application to read its URL mappings:
+```shell
+./gradlew inertiaRoutes
+./gradlew inertiaRoutes -Pargs="--output=src/main/javascript/generated/routes.js"
+```
+With Grails 8.0.0 and the Gradle configuration cache enabled, run it with `--no-configuration-cache`.
+
+The module can also be written each time the application starts, which is useful in development:
+```yaml
+# myapp/grails-app/conf/application.yml
+inertia:
+  routes:
+    generate: true # Defaults to false
+    output: 'src/main/javascript/routes.js' # Optional, this is the default value, also used by the inertiaRoutes task
+    only: # Optional, write only the matching routes
+      - 'book.*'
+      - 'bookList'
+    except: # Optional, leave out the matching routes
+      - 'errorHandling.*'
+```
+`only` and `except` take patterns of route names, in which `*` matches any characters. A route is named
+`controller.action` by the logical name of the controller, as in the URL mappings, such as `book.update`, or by its URL
+mapping when the mapping is named. When `only` is set, only the matching routes are
+written, and the routes matching `except` are then left out. Both also take a comma-separated string.
+
 ### Context path
 
 When the application is deployed with a context path (`server.servlet.context-path`), the plugin prefixes it to

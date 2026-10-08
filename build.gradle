@@ -1,5 +1,6 @@
 plugins {
     id 'build.config.grails-plugin'
+    id 'org.apache.grails.gradle.grails-plugin-cli'
 }
 
 dependencies {
@@ -11,6 +12,8 @@ dependencies {
     implementation 'org.apache.grails.views:grails-web-taglib'
 
     compileOnly 'org.slf4j:slf4j-nop' // Get rid of warning about missing slf4j implementation during compileGsonViews task
+
+    cliCompileOnly 'org.apache.grails.web:grails-web-url-mappings' // Referenced by RoutesGenerator, provided by the application at runtime
 
     testImplementation 'org.apache.grails:grails-testing-support-views-gson'
     testImplementation 'org.apache.grails:grails-testing-support-web'

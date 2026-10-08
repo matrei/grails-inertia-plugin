@@ -26,5 +26,11 @@ trait GrailsProject {
                 project.dependencies.platform("org.apache.grails:grails-bom:$grailsVersion")
             )
         }
+        project.pluginManager.withPlugin('org.apache.grails.gradle.grails-plugin-cli') {
+            project.dependencies.add(
+                'cliImplementation',
+                project.dependencies.platform("org.apache.grails:grails-bom:$grailsVersion")
+            )
+        }
     }
 }
